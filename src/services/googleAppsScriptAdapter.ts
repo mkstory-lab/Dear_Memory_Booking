@@ -16,12 +16,23 @@ export class GoogleAppsScriptAdapter implements IBackendAdapter {
 
   async submitContract(req: SubmitContractRequest): Promise<SubmitContractResponse> {
     try {
+      const contractId = `cnt_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+      const { createApprovalToken } = await import('@/lib/token');
+      const token = createApprovalToken(contractId, req.formData);
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://dear-memory-booking.vercel.app';
+      const reviewUrl = `${appUrl}/review?token=${token}`;
+
       const response = await fetch(this.webAppUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           action: 'submit_contract',
-          payload: req,
+          payload: {
+            ...req,
+            contractId,
+            approvalToken: token,
+            reviewUrl,
+          },
         }),
       });
 
@@ -29,7 +40,13 @@ export class GoogleAppsScriptAdapter implements IBackendAdapter {
         throw new Error(`Google Apps Script 서버 응답 오류: ${response.statusText}`);
       }
 
-      return await response.json();
+      const resData = await response.json();
+      return {
+        ...resData,
+        contractId,
+        approvalToken: token,
+        reviewUrl,
+      };
     } catch (err: any) {
       return {
         success: false,

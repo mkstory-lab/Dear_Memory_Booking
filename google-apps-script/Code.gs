@@ -33,25 +33,40 @@ function doPost(e) {
  */
 function handleSubmitContract(payload) {
   const formData = payload.formData;
+  const reviewUrl = payload.reviewUrl || "";
   
-  // HTML 이메일 본문 생성
-  const subject = `[DEAR MEMORY] 신규 계약정보 | ${formData.groomName} · ${formData.brideName} | ${formData.weddingDate}`;
+  const subject = `[DEAR MEMORY] 신규 계약 접수 | ${formData.groomName} · ${formData.brideName} 고객님 (${formData.weddingDate})`;
   const htmlBody = `
-    <div style="font-family: sans-serif; padding: 20px; color: #322A1B; background: #FAF8F5;">
-      <h2>[DEAR MEMORY] 신규 본식스냅 계약정보 접수</h2>
-      <p><strong>고객:</strong> ${formData.groomName} ♥ ${formData.brideName}</p>
-      <p><strong>예식일시:</strong> ${formData.weddingDate} ${formData.weddingTime}</p>
-      <p><strong>웨딩홀:</strong> ${formData.weddingVenue} ${formData.weddingHall}</p>
-      <p><strong>연락처:</strong> 신랑(${formData.groomPhone}), 신부(${formData.bridePhone})</p>
-      <p><strong>이메일:</strong> ${formData.email}</p>
-      <br/>
-      <p>대표 확인 링크를 통해 계약서를 확인 및 발송해 주세요.</p>
+    <div style="font-family: 'Apple SD Gothic Neo', Pretendard, sans-serif; max-width: 600px; margin: 0 auto; padding: 30px; color: #322A1B; background: #FAF8F5; border: 1px solid #EBE3D5; border-radius: 16px;">
+      <div style="border-bottom: 2px solid #322A1B; padding-bottom: 12px; margin-bottom: 20px;">
+        <span style="font-size: 11px; font-weight: bold; color: #8F7A56; letter-spacing: 0.2em; text-transform: uppercase;">DEAR MEMORY FOR BOOKING</span>
+        <h2 style="font-size: 20px; font-weight: bold; color: #322A1B; margin: 6px 0 0 0;">신규 본식스냅 계약정보가 접수되었습니다</h2>
+      </div>
+      
+      <div style="background: #FFFFFF; border: 1px solid #EBE3D5; border-radius: 12px; padding: 20px; margin-bottom: 24px; font-size: 13px; line-height: 1.8;">
+        <p style="margin: 0;"><strong>신랑·신부:</strong> ${formData.groomName} ♥ ${formData.brideName}</p>
+        <p style="margin: 0;"><strong>예식일시:</strong> ${formData.weddingDate} ${formData.weddingTime}</p>
+        <p style="margin: 0;"><strong>예식장소:</strong> ${formData.weddingVenue} ${formData.weddingHall}</p>
+        <p style="margin: 0;"><strong>연락처:</strong> 신랑 ${formData.groomPhone} / 신부 ${formData.bridePhone}</p>
+        <p style="margin: 0;"><strong>고객 이메일:</strong> ${formData.email}</p>
+        <p style="margin: 0;"><strong>선택 상품:</strong> ${formData.productId === 'album_plus' ? '화보형 (대표 추천)' : '실속형'}</p>
+      </div>
+
+      <div style="text-align: center; margin: 30px 0;">
+        <a href="${reviewUrl}" style="display: inline-block; padding: 14px 32px; background: #322A1B; color: #FAF8F5; text-decoration: none; font-size: 14px; font-weight: bold; border-radius: 10px;">
+          계약서 검토 및 최종 발송하기 →
+        </a>
+      </div>
+
+      <p style="font-size: 11px; color: #8F7A56; text-align: center; margin: 0;">
+        위 버튼을 클릭하시면 대표 검토 화면에서 특약 수정 및 PDF 계약서를 확인 후 즉시 발송하실 수 있습니다.
+      </p>
     </div>
   `;
 
   GmailApp.sendEmail(REP_EMAIL, subject, "", {
     htmlBody: htmlBody,
-    name: "DEAR MEMORY CONTRACT",
+    name: "DEAR MEMORY",
   });
 
   return createJsonResponse({
@@ -74,18 +89,44 @@ function handleApproveAndSend(payload) {
   if (pdfBase64) {
     const base64Data = pdfBase64.replace(/^data:application\/pdf;base64,/, "");
     const decodedBytes = Utilities.base64Decode(base64Data);
-    pdfBlob = Utilities.newBlob(decodedBytes, "application/pdf", `${contractNumber}_계약서.pdf`);
+    pdfBlob = Utilities.newBlob(decodedBytes, "application/pdf", `${contractNumber}_촬영계약서.pdf`);
   }
 
   // 고객 메일 발송 (PDF 첨부)
   const customerHtml = `
-    <div style="font-family: sans-serif; padding: 20px; color: #322A1B;">
-      <h2>DEAR MEMORY</h2>
-      <p>안녕하세요, ${data.groomName} ♥ ${data.brideName} 고객님.</p>
-      <p>두 분의 소중한 본식스냅 촬영 계약서를 첨부하여 전달드립니다.</p>
-      <p>첨부된 계약서 PDF 파일을 확인해 주시기 바랍니다.</p>
-      <br/>
-      <p>감사합니다.<br/>DEAR MEMORY 한민규 대표 배상</p>
+    <div style="font-family: 'Apple SD Gothic Neo', Pretendard, sans-serif; max-width: 600px; margin: 0 auto; padding: 30px; color: #322A1B; background: #FAF8F5; border: 1px solid #EBE3D5; border-radius: 16px;">
+      <div style="border-bottom: 2px solid #322A1B; padding-bottom: 12px; margin-bottom: 20px;">
+        <span style="font-size: 11px; font-weight: bold; color: #8F7A56; letter-spacing: 0.2em; text-transform: uppercase;">DEAR MEMORY</span>
+        <h2 style="font-size: 20px; font-weight: bold; color: #322A1B; margin: 6px 0 0 0;">본식스냅 촬영 계약서 안내</h2>
+      </div>
+
+      <p style="font-size: 14px; line-height: 1.7; margin-bottom: 16px;">
+        안녕하세요, <strong>${data.groomName} · ${data.brideName}</strong> 고객님.<br/>
+        디어메모리와 함께 소중한 첫걸음을 맺어주셔서 진심으로 감사드립니다.
+      </p>
+
+      <div style="background: #FFFFFF; border: 1px solid #EBE3D5; border-radius: 12px; padding: 20px; margin-bottom: 20px; font-size: 13px; line-height: 1.8;">
+        <p style="margin: 0;"><strong>계약번호:</strong> ${contractNumber}</p>
+        <p style="margin: 0;"><strong>예식일시:</strong> ${data.weddingDate} ${data.weddingTime}</p>
+        <p style="margin: 0;"><strong>예식장소:</strong> ${data.weddingVenue} ${data.weddingHall}</p>
+        <p style="margin: 0;"><strong>선택상품:</strong> ${data.productId === 'album_plus' ? '화보형 (대표 추천)' : '실속형'}</p>
+      </div>
+
+      <div style="background: #F5F1EA; border-radius: 12px; padding: 18px; margin-bottom: 24px; font-size: 12px; line-height: 1.7; color: #6E5C3D;">
+        <p style="margin: 0; font-weight: bold; color: #322A1B; font-size: 13px; margin-bottom: 6px;">[계약금 입금 및 일정 확정 안내]</p>
+        <p style="margin: 0;">• 첨부된 공식 PDF 계약서 내용을 확인해 주시기 바랍니다.</p>
+        <p style="margin: 0;">• 계약금(300,000원) 입금 확인 시 스케줄이 최종 마감/확정됩니다.</p>
+        <p style="margin: 0;">• 72시간 이내 취소 시 계약금 100% 전액 안심 환불 보장됩니다.</p>
+      </div>
+
+      <p style="font-size: 13px; line-height: 1.7; text-align: center; color: #322A1B; font-weight: bold; margin: 24px 0 10px 0;">
+        두 분의 가장 찬란한 순간을 정성껏 담아내겠습니다.<br/>
+        감사합니다.
+      </p>
+
+      <div style="text-align: center; border-top: 1px solid #EBE3D5; pt: 16px; margin-top: 20px; font-size: 11px; color: #8F7A56;">
+        <p style="margin: 0;">DEAR MEMORY • 웨딩 본식스냅 전문 스튜디오</p>
+      </div>
     </div>
   `;
 
