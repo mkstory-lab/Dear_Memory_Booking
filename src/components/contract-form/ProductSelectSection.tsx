@@ -85,21 +85,21 @@ export const ProductSelectSection: React.FC<ProductSelectSectionProps> = ({
                 </div>
 
                 {/* 앨범 사양 요약 박스 (2줄 높이 완전 통일) */}
-                <div className="p-2 sm:p-3 bg-[#FAF8F5] rounded-xl border border-[#EBE3D5] space-y-1 text-[9.5px] sm:text-xs min-h-[58px] sm:min-h-[64px] flex flex-col justify-center">
+                <div className="p-2 sm:p-3 bg-[#FAF8F5] rounded-xl border border-[#EBE3D5] space-y-1 text-[9px] sm:text-xs min-h-[58px] sm:min-h-[64px] flex flex-col justify-center">
                   <div className="flex items-center gap-1 text-[#8F7A56] font-medium">
                     <BookOpen className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                     <span>앨범 사양</span>
                   </div>
-                  <div className="font-semibold text-[#322A1B] space-y-0.5 pl-4 text-[9px] sm:text-xs leading-tight">
+                  <div className="font-semibold text-[#322A1B] space-y-0.5 pl-4 text-[8.5px] sm:text-xs leading-tight whitespace-nowrap">
                     {!isPlus ? (
                       <>
-                        <div>부부앨범 15x12 70p 1권</div>
-                        <div className="text-[#A8987E] font-normal text-[8.5px] sm:text-[10.5px]">(부모님앨범 미포함)</div>
+                        <div className="truncate">부부 15×12 70p (1권)</div>
+                        <div className="text-[#A8987E] font-normal text-[8px] sm:text-[10.5px] truncate">(부모님앨범 미포함)</div>
                       </>
                     ) : (
                       <>
-                        <div>부부앨범 15x12 80p 1권</div>
-                        <div className="text-[#8F7A56] font-semibold text-[8.5px] sm:text-[10.5px]">부모님앨범 12x8 40p 2권</div>
+                        <div className="truncate">부부 15×12 80p (1권)</div>
+                        <div className="text-[#8F7A56] font-semibold text-[8px] sm:text-[10.5px] truncate">부모님 12×8 40p (2권)</div>
                       </>
                     )}
                   </div>
@@ -108,66 +108,100 @@ export const ProductSelectSection: React.FC<ProductSelectSectionProps> = ({
                 {/* 상품 구성 */}
                 {!isPlus ? (
                   /* 실속형: 기본 포함 구성 목록 */
-                  <div className="space-y-1.5 sm:space-y-2 text-[10px] sm:text-xs text-[#6E5C3D]">
-                    <div className="flex items-start gap-1 font-medium text-[#322A1B] mb-1.5">
-                      <BookOpen className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#8F7A56] mt-0.5 shrink-0" />
-                      <div className="space-y-0.5 text-[9.5px] sm:text-xs leading-tight">
-                        {product.albumSpec.split('\n').map((line, idx) => (
-                          <div key={idx}>{line}</div>
-                        ))}
-                      </div>
+                  <div className="space-y-1.5 sm:space-y-2 text-[9.5px] sm:text-xs text-[#6E5C3D]">
+                    <div className="font-semibold text-[9.5px] sm:text-[11px] uppercase tracking-wider text-[#8F7A56] h-5 flex items-center">
+                      기본 포함 구성
                     </div>
-                    {product.includedItems.map((item, idx) => (
-                      <div key={idx} className="flex items-start gap-1 text-[9.5px] sm:text-xs leading-tight">
-                        <span className="text-[#B09A74] shrink-0">•</span>
-                        <span className="break-keep">{item}</span>
-                      </div>
-                    ))}
+                    <div className="space-y-1 sm:space-y-1.5">
+                      {product.includedItems.map((item, idx) => (
+                        <div key={idx} className="flex items-center gap-1 sm:gap-2 p-1.5 sm:p-2 bg-[#FAF8F5]/60 rounded-lg sm:rounded-xl border border-[#EBE3D5]/60 text-[8.5px] sm:text-xs leading-tight h-[28px] sm:h-[34px]">
+                          <Check className="w-3 h-3 text-[#B09A74] shrink-0" />
+                          <span className="truncate">{item}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 ) : (
                   /* 화보형: 실속형 기본 포함 + 추가 혜택 */
-                  <div className="space-y-1.5 sm:space-y-2.5 text-[10px] sm:text-xs text-[#4E412A]">
-                    <div className="p-1.5 sm:p-2.5 bg-[#FAF8F5] border border-[#DDD1BD] rounded-lg sm:rounded-xl space-y-1">
-                      <div className="flex items-center gap-1 text-[9.5px] sm:text-xs font-semibold text-[#322A1B]">
-                        <Check className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#8F7A56] shrink-0" />
-                        <span className="break-keep leading-tight">{product.baseIncludedNotice || '실속형 기본 구성 100% 포함'}</span>
+                  <div className="space-y-1.5 sm:space-y-2 text-[9.5px] sm:text-xs text-[#4E412A]">
+                    {/* 모바일 전용: 실속형과 1:1 대칭을 이루는 6개 정렬 알약 리스트 */}
+                    <div className="sm:hidden space-y-1.5">
+                      <div className="font-semibold text-[9.5px] uppercase tracking-wider text-[#8F7A56] h-5 flex items-center gap-1">
+                        <Sparkles className="w-3 h-3 text-[#B09A74]" />
+                        <span>화보형 프리미엄 구성</span>
                       </div>
-                      <div className="pl-4 text-[9px] sm:text-[11px] text-[#6E5C3D] space-y-0.5 font-medium border-t border-[#EBE3D5] pt-1">
-                        <div className="text-[#8F7A56] font-semibold">화보형 업그레이드:</div>
-                        {product.albumSpec.split('\n').map((line, idx) => (
-                          <div key={idx} className="flex items-center gap-1">
-                            <span className="text-[#B09A74]">•</span>
-                            <span className="text-[#322A1B]">{line}</span>
-                          </div>
-                        ))}
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-1 p-1.5 bg-[#FAF8F5] rounded-lg border border-[#DDD1BD] text-[8.5px] leading-tight h-[28px]">
+                          <Check className="w-3 h-3 text-[#8F7A56] shrink-0" />
+                          <span className="font-semibold text-[#322A1B] truncate">실속형 전 구성 100% 포함</span>
+                        </div>
+                        <div className="flex items-center gap-1 p-1.5 bg-[#FAF8F5] rounded-lg border border-[#B09A74]/40 text-[8.5px] leading-tight h-[28px]">
+                          <Sparkles className="w-3 h-3 text-[#B09A74] shrink-0" />
+                          <span className="font-semibold text-[#322A1B] truncate">부모님 앨범 2권 증정 (40p)</span>
+                        </div>
+                        <div className="flex items-center gap-1 p-1.5 bg-[#FAF8F5] rounded-lg border border-[#EBE3D5] text-[8.5px] leading-tight h-[28px]">
+                          <Sparkles className="w-3 h-3 text-[#B09A74] shrink-0" />
+                          <span className="truncate">부부앨범 80p (+10p 증면)</span>
+                        </div>
+                        <div className="flex items-center gap-1 p-1.5 bg-[#FAF8F5] rounded-lg border border-[#EBE3D5] text-[8.5px] leading-tight h-[28px]">
+                          <Sparkles className="w-3 h-3 text-[#B09A74] shrink-0" />
+                          <span className="truncate">세부 보정본 80장 (+10장)</span>
+                        </div>
+                        <div className="flex items-center gap-1 p-1.5 bg-[#FAF8F5] rounded-lg border border-[#EBE3D5] text-[8.5px] leading-tight h-[28px]">
+                          <Sparkles className="w-3 h-3 text-[#B09A74] shrink-0" />
+                          <span className="truncate">고화질 원본 2,500장 이상</span>
+                        </div>
+                        <div className="flex items-center gap-1 p-1.5 bg-[#FAF8F5] rounded-lg border border-[#EBE3D5] text-[8.5px] leading-tight h-[28px]">
+                          <Check className="w-3 h-3 text-[#B09A74] shrink-0" />
+                          <span className="truncate">대표 1인 전 과정 단독 촬영</span>
+                        </div>
                       </div>
                     </div>
 
-                    <div className="space-y-1.5 pt-1">
-                      <div className="flex items-center gap-1 text-[11px] font-bold text-[#8F7A56]">
-                        <Sparkles className="w-3 h-3 text-[#B09A74]" />
-                        <span>화보형 추가 혜택 (+20만원)</span>
-                      </div>
-                      {product.plusBenefits?.map((benefit, idx) => (
-                        <div
-                          key={idx}
-                          className="p-2 bg-[#FAF8F5] rounded-lg border border-[#EBE3D5] space-y-0.5"
-                        >
-                          <div className="flex items-center justify-between">
-                            <span className="font-bold text-xs text-[#322A1B] break-keep">
-                              {benefit.title}
-                            </span>
-                            {benefit.badge && (
-                              <span className="text-[10px] font-semibold px-1.5 py-0.2 bg-[#EBE3D5] text-[#6E5C3D] rounded shrink-0">
-                                {benefit.badge}
-                              </span>
-                            )}
-                          </div>
-                          <p className="text-[11px] text-[#6E5C3D] leading-snug break-keep">
-                            {benefit.detail}
-                          </p>
+                    {/* 데스크톱(PC/태블릿) 전용: 상세 설명 혜택 카드 */}
+                    <div className="hidden sm:block space-y-2.5">
+                      <div className="p-2.5 bg-[#FAF8F5] border border-[#DDD1BD] rounded-xl space-y-1">
+                        <div className="flex items-center gap-1 text-xs font-semibold text-[#322A1B]">
+                          <Check className="w-3.5 h-3.5 text-[#8F7A56] shrink-0" />
+                          <span className="break-keep leading-tight">{product.baseIncludedNotice || '실속형 기본 구성 100% 포함'}</span>
                         </div>
-                      ))}
+                        <div className="pl-4 text-[11px] text-[#6E5C3D] space-y-0.5 font-medium border-t border-[#EBE3D5] pt-1">
+                          <div className="text-[#8F7A56] font-semibold">화보형 업그레이드:</div>
+                          {product.albumSpec.split('\n').map((line, idx) => (
+                            <div key={idx} className="flex items-center gap-1">
+                              <span className="text-[#B09A74]">•</span>
+                              <span className="text-[#322A1B]">{line}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="space-y-1.5 pt-1">
+                        <div className="flex items-center gap-1 text-[11px] font-bold text-[#8F7A56]">
+                          <Sparkles className="w-3 h-3 text-[#B09A74]" />
+                          <span>화보형 추가 혜택 (+20만원)</span>
+                        </div>
+                        {product.plusBenefits?.map((benefit, idx) => (
+                          <div
+                            key={idx}
+                            className="p-2 bg-[#FAF8F5] rounded-lg border border-[#EBE3D5] space-y-0.5"
+                          >
+                            <div className="flex items-center justify-between">
+                              <span className="font-bold text-xs text-[#322A1B] break-keep">
+                                {benefit.title}
+                              </span>
+                              {benefit.badge && (
+                                <span className="text-[10px] font-semibold px-1.5 py-0.2 bg-[#EBE3D5] text-[#6E5C3D] rounded shrink-0">
+                                  {benefit.badge}
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-[11px] text-[#6E5C3D] leading-snug break-keep">
+                              {benefit.detail}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 )}

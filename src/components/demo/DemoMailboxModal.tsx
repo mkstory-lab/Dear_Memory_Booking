@@ -35,13 +35,13 @@ export const DemoMailboxModal: React.FC = () => {
       <button
         type="button"
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-20 sm:bottom-6 right-5 z-40 bg-[#322A1B] text-[#FAF8F5] p-3 rounded-full shadow-lg hover:scale-105 transition-all flex items-center gap-2 text-xs font-medium border border-[#EBE3D5]"
+        className="fixed bottom-3 right-3 sm:bottom-6 sm:right-6 z-40 bg-[#322A1B] text-[#FAF8F5] p-2 sm:p-3 rounded-full shadow-lg hover:scale-105 transition-all flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs font-medium border border-[#EBE3D5] opacity-90 hover:opacity-100"
         title="데모 메일 수신함 확인"
       >
-        <Mail className="w-4 h-4 text-[#C7B698]" />
+        <Mail className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#C7B698]" />
         <span className="hidden sm:inline">데모 메일함</span>
         {emails.length > 0 && (
-          <span className="bg-[#B09A74] text-[#FAF8F5] text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold">
+          <span className="bg-[#B09A74] text-[#FAF8F5] text-[9px] sm:text-[10px] w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full flex items-center justify-center font-bold">
             {emails.length}
           </span>
         )}

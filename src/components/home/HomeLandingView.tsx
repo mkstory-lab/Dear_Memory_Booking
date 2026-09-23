@@ -110,15 +110,20 @@ export const HomeLandingView: React.FC<HomeLandingViewProps> = ({
               </p>
             </div>
 
-            {/* 안내 배지 박스 (높이 완벽 일치) */}
-            <div className="p-2 sm:p-3.5 bg-[#FAF8F5] border border-[#EBE3D5] rounded-xl text-[9.5px] sm:text-xs text-[#8F7A56] space-y-1 sm:space-y-1.5 h-[78px] sm:h-[98px] flex flex-col justify-center">
-              <div className="flex items-center gap-1 font-semibold text-[#322A1B] truncate">
-                <ShieldCheck className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#8F7A56] shrink-0" />
-                <span className="truncate">약관 사전 확인 후 안전 작성</span>
+            {/* 안내 배지 박스 (높이 완벽 일치 & 3줄 정렬) */}
+            <div className="p-2 sm:p-3.5 bg-[#FAF8F5] border border-[#EBE3D5] rounded-xl space-y-1 sm:space-y-1.5 text-[9.5px] sm:text-xs text-[#8F7A56] h-[78px] sm:h-[98px] flex flex-col justify-center">
+              <div className="flex items-center gap-1 sm:gap-1.5 truncate">
+                <span className="text-[#B09A74] shrink-0">•</span>
+                <span className="font-semibold text-[#322A1B] truncate">1. 약관 사전 확인 및 동의</span>
               </div>
-              <p className="text-[9px] sm:text-[11px] text-[#6E5C3D] leading-tight break-keep">
-                약관 동의 &rarr; 계약정보 입력 &rarr; 대표 확인 후 이메일 발송
-              </p>
+              <div className="flex items-center gap-1 sm:gap-1.5 truncate">
+                <span className="text-[#B09A74] shrink-0">•</span>
+                <span className="truncate">2. 예식 및 계약정보 입력</span>
+              </div>
+              <div className="flex items-center gap-1 sm:gap-1.5 truncate">
+                <span className="text-[#B09A74] shrink-0">•</span>
+                <span className="truncate">3. 대표 확인 후 메일 발송</span>
+              </div>
             </div>
           </div>
 
