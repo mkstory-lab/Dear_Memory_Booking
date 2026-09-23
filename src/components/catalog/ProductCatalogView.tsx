@@ -42,8 +42,8 @@ export const ProductCatalogView: React.FC<ProductCatalogViewProps> = ({
         </p>
       </div>
 
-      {/* 1. 상품 비교 카드 (실속형 vs 화보형) */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
+      {/* 1. 상품 비교 카드 (실속형 vs 화보형): 모바일에서도 한 화면에 좌우 2열(grid-cols-2)로 나란히 표시 */}
+      <div className="grid grid-cols-2 gap-2.5 sm:gap-6 items-stretch">
         {PRODUCTS_CONFIG.map((product) => {
           const isPlus = product.isPlusPackage;
 
@@ -52,12 +52,12 @@ export const ProductCatalogView: React.FC<ProductCatalogViewProps> = ({
               key={product.id}
               className={`bg-white border ${
                 isPlus ? 'border-[#B09A74] shadow-md ring-1 ring-[#B09A74]/30' : 'border-[#EBE3D5] shadow-sm'
-              } rounded-3xl p-6 sm:p-8 flex flex-col justify-between relative overflow-hidden`}
+              } rounded-2xl sm:rounded-3xl p-3 sm:p-8 flex flex-col justify-between relative overflow-hidden`}
             >
               {/* 상단 뱃지 */}
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center justify-between mb-2.5 sm:mb-4">
                 <span
-                  className={`px-3 py-1 rounded-full text-xs font-semibold border ${
+                  className={`px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-semibold border ${
                     isPlus
                       ? 'bg-[#322A1B] text-[#FAF8F5] border-[#322A1B]'
                       : 'bg-[#FAF8F5] text-[#8F7A56] border-[#DDD1BD]'
@@ -65,57 +65,56 @@ export const ProductCatalogView: React.FC<ProductCatalogViewProps> = ({
                 >
                   {product.badge || '스냅 구성'}
                 </span>
-                <span className="text-xs text-[#8F7A56]">VAT 포함</span>
+                <span className="text-[10px] sm:text-xs text-[#8F7A56]">VAT 포함</span>
               </div>
 
-              <div className="space-y-4 flex-1 flex flex-col">
+              <div className="space-y-2.5 sm:space-y-4 flex-1 flex flex-col">
                 <div>
-                  <div className="h-7 sm:h-8 flex items-center gap-2">
-                    <h3 className="text-xl font-serif font-bold text-[#322A1B]">
+                  <div className="flex flex-wrap items-center gap-1 sm:gap-2">
+                    <h3 className="text-sm sm:text-xl font-serif font-bold text-[#322A1B]">
                       {product.name}
                     </h3>
                     {isPlus && (
-                      <span className="text-[11px] font-sans font-medium text-[#8F7A56] bg-[#FAF8F5] px-2.5 py-0.5 rounded-full border border-[#DDD1BD]">
-                        부모님 앨범 포함
+                      <span className="text-[9px] sm:text-[11px] font-sans font-medium text-[#8F7A56] bg-[#FAF8F5] px-1.5 sm:px-2.5 py-0.5 rounded-full border border-[#DDD1BD]">
+                        부모님 앨범
                       </span>
                     )}
                   </div>
-                  <p className="text-xs text-[#8F7A56] mt-1.5 leading-relaxed min-h-[36px] sm:min-h-[32px] flex items-center break-keep">
+                  <p className="text-[10px] sm:text-xs text-[#8F7A56] mt-1 sm:mt-1.5 leading-tight sm:leading-relaxed min-h-[26px] sm:min-h-[32px] flex items-center break-keep">
                     {product.subtitle}
                   </p>
                 </div>
 
-                <div className="text-2xl sm:text-3xl font-serif font-bold text-[#322A1B] pb-4 border-b border-[#F5F1EA] tabular-nums">
+                <div className="text-base sm:text-3xl font-serif font-bold text-[#322A1B] pb-2 sm:pb-4 border-b border-[#F5F1EA] tabular-nums">
                   {formatKRW(product.basePrice)}
                 </div>
 
                 {/* 스펙 하이라이트 박스 (좌우 양끝 칼정렬) */}
-                <div className="p-3.5 bg-[#FAF8F5] rounded-2xl space-y-2 text-xs border border-[#EBE3D5] min-h-[110px] flex flex-col justify-between">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex items-center gap-1.5 text-[#8F7A56] shrink-0 font-medium pt-0.5">
-                      <BookOpen className="w-3.5 h-3.5" />
-                      <span>앨범 사양</span>
+                <div className="p-2 sm:p-3.5 bg-[#FAF8F5] rounded-xl sm:rounded-2xl space-y-1.5 sm:space-y-2 text-[10px] sm:text-xs border border-[#EBE3D5] min-h-[90px] sm:min-h-[110px] flex flex-col justify-between">
+                  <div className="flex items-start justify-between gap-1.5 sm:gap-3">
+                    <div className="flex items-center gap-1 text-[#8F7A56] shrink-0 font-medium pt-0.5">
+                      <BookOpen className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                      <span className="text-[10px] sm:text-xs">앨범 사양</span>
                     </div>
-                    <div className="font-semibold text-[#322A1B] text-right space-y-0.5">
+                    <div className="font-semibold text-[#322A1B] text-right space-y-0.5 text-[9.5px] sm:text-xs">
                       {product.albumSpec.split('\n').map((line, idx) => (
                         <div key={idx}>{line}</div>
                       ))}
                     </div>
                   </div>
 
-                  <div className="flex justify-between items-center text-[#6E5C3D] pt-1.5 border-t border-[#EBE3D5]">
-                    <span className="text-[#8F7A56]">정밀 세부 보정본</span>
+                  <div className="flex justify-between items-center text-[#6E5C3D] pt-1 border-t border-[#EBE3D5] text-[9.5px] sm:text-xs">
+                    <span className="text-[#8F7A56]">세부 보정본</span>
                     <span className="font-semibold text-[#322A1B] tabular-nums text-right">
                       {product.retouchedCount}장
-                      {isPlus && <span className="text-[#B09A74] ml-1 font-normal">(+10장 증정)</span>}
+                      {isPlus && <span className="text-[#B09A74] ml-0.5 sm:ml-1 font-normal">(+10장)</span>}
                     </span>
                   </div>
 
-                  <div className="flex justify-between items-center text-[#6E5C3D]">
-                    <span className="text-[#8F7A56]">웹용 고화질 원본</span>
+                  <div className="flex justify-between items-center text-[#6E5C3D] text-[9.5px] sm:text-xs">
+                    <span className="text-[#8F7A56]">고화질 원본</span>
                     <span className="font-semibold text-[#322A1B] text-right">
-                      {product.originalCount} 전체 제공
-                      {isPlus && <span className="text-[#B09A74] ml-1 font-normal">(+500장 증정)</span>}
+                      {product.originalCount}
                     </span>
                   </div>
                 </div>
@@ -123,14 +122,14 @@ export const ProductCatalogView: React.FC<ProductCatalogViewProps> = ({
                 {/* 상품 세부 구성 안내 */}
                 {!isPlus ? (
                   /* 실속형: 기본 포함 구성 목록 */
-                  <div className="space-y-2 text-xs text-[#4E412A] pt-2 flex-1">
-                    <div className="font-semibold text-[11px] uppercase tracking-wider text-[#8F7A56]">
+                  <div className="space-y-1.5 sm:space-y-2 text-[10px] sm:text-xs text-[#4E412A] pt-1 sm:pt-2 flex-1">
+                    <div className="font-semibold text-[9.5px] sm:text-[11px] uppercase tracking-wider text-[#8F7A56]">
                       기본 포함 구성
                     </div>
-                    <div className="space-y-1.5">
+                    <div className="space-y-1 sm:space-y-1.5">
                       {product.includedItems.map((item, idx) => (
-                        <div key={idx} className="flex items-start gap-2 p-2 bg-[#FAF8F5]/60 rounded-xl border border-[#EBE3D5]/60">
-                          <Check className="w-3.5 h-3.5 text-[#B09A74] mt-0.5 shrink-0" />
+                        <div key={idx} className="flex items-start gap-1 sm:gap-2 p-1.5 sm:p-2 bg-[#FAF8F5]/60 rounded-lg sm:rounded-xl border border-[#EBE3D5]/60 text-[9.5px] sm:text-xs leading-tight">
+                          <Check className="w-3 h-3 text-[#B09A74] mt-0.5 shrink-0" />
                           <span className="break-keep">{item}</span>
                         </div>
                       ))}
@@ -138,37 +137,37 @@ export const ProductCatalogView: React.FC<ProductCatalogViewProps> = ({
                   </div>
                 ) : (
                   /* 화보형: 실속형 기본 포함 + 화보형만의 추가 혜택 하이라이트 */
-                  <div className="space-y-2.5 text-xs text-[#4E412A] pt-2 flex-1">
+                  <div className="space-y-1.5 sm:space-y-2.5 text-[10px] sm:text-xs text-[#4E412A] pt-1 sm:pt-2 flex-1">
                     {/* 실속형 포함 확인 배너 */}
-                    <div className="p-2.5 bg-[#FAF8F5] border border-[#DDD1BD] rounded-xl flex items-center gap-2">
-                      <Check className="w-4 h-4 text-[#8F7A56] shrink-0" />
-                      <span className="text-xs font-semibold text-[#322A1B] break-keep">
-                        {product.baseIncludedNotice || '실속형의 모든 촬영 및 원본 제공 혜택 기본 포함'}
+                    <div className="p-1.5 sm:p-2.5 bg-[#FAF8F5] border border-[#DDD1BD] rounded-lg sm:rounded-xl flex items-center gap-1 sm:gap-2">
+                      <Check className="w-3 h-3 sm:w-4 sm:h-4 text-[#8F7A56] shrink-0" />
+                      <span className="text-[9.5px] sm:text-xs font-semibold text-[#322A1B] break-keep leading-tight">
+                        실속형 모든 혜택 기본 포함
                       </span>
                     </div>
 
-                    {/* 추가 제공 혜택 3가지 */}
-                    <div className="space-y-2 pt-0.5">
-                      <div className="flex items-center gap-1.5 text-[11px] font-bold text-[#8F7A56] uppercase tracking-wider">
-                        <Sparkles className="w-3.5 h-3.5 text-[#B09A74]" />
-                        <span>화보형 특별 추가 & 업그레이드 혜택 (+20만원)</span>
+                    {/* 추가 제공 혜택 */}
+                    <div className="space-y-1 sm:space-y-2 pt-0.5">
+                      <div className="flex items-center gap-1 text-[9.5px] sm:text-[11px] font-bold text-[#8F7A56] uppercase tracking-wider">
+                        <Sparkles className="w-3 h-3 text-[#B09A74]" />
+                        <span>화보형 추가 혜택</span>
                       </div>
                       {product.plusBenefits?.map((benefit, idx) => (
                         <div
                           key={idx}
-                          className="p-2.5 bg-[#FAF8F5] rounded-xl border border-[#EBE3D5] space-y-0.5"
+                          className="p-1.5 sm:p-2.5 bg-[#FAF8F5] rounded-lg sm:rounded-xl border border-[#EBE3D5] space-y-0.5"
                         >
-                          <div className="flex items-center justify-between">
-                            <span className="font-bold text-xs text-[#322A1B] break-keep">
+                          <div className="flex items-center justify-between gap-1">
+                            <span className="font-bold text-[10px] sm:text-xs text-[#322A1B] break-keep leading-tight">
                               {benefit.title}
                             </span>
                             {benefit.badge && (
-                              <span className="text-[10px] font-semibold px-2 py-0.5 bg-[#EBE3D5] text-[#6E5C3D] rounded-full shrink-0">
+                              <span className="text-[8.5px] sm:text-[10px] font-semibold px-1 sm:px-2 py-0.5 bg-[#EBE3D5] text-[#6E5C3D] rounded-full shrink-0">
                                 {benefit.badge}
                               </span>
                             )}
                           </div>
-                          <p className="text-[11px] text-[#6E5C3D] leading-relaxed break-keep">
+                          <p className="text-[9px] sm:text-[11px] text-[#6E5C3D] leading-tight break-keep">
                             {benefit.detail}
                           </p>
                         </div>
@@ -179,18 +178,19 @@ export const ProductCatalogView: React.FC<ProductCatalogViewProps> = ({
               </div>
 
               {/* CTA 버튼 */}
-              <div className="mt-6 pt-4 border-t border-[#F5F1EA]">
+              <div className="mt-3 sm:mt-6 pt-2.5 sm:pt-4 border-t border-[#F5F1EA]">
                 <button
                   type="button"
                   onClick={() => onSelectProductAndApply(product.id)}
-                  className={`w-full h-12 rounded-xl text-xs sm:text-sm font-semibold transition-colors flex items-center justify-center gap-2 shadow-sm ${
+                  className={`w-full h-9 sm:h-12 rounded-xl text-[10.5px] sm:text-sm font-semibold transition-colors flex items-center justify-center gap-1 sm:gap-2 shadow-sm ${
                     isPlus
                       ? 'bg-[#322A1B] text-[#FAF8F5] hover:bg-[#1E1910]'
                       : 'bg-[#FAF8F5] text-[#322A1B] border border-[#DDD1BD] hover:bg-[#F0EBE1]'
                   }`}
                 >
-                  <span>{product.name}으로 계약정보 작성하기</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
+                  <span className="sm:hidden">{product.name} 선택</span>
+                  <span className="hidden sm:inline">{product.name}으로 계약정보 작성하기</span>
+                  <ArrowRight className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                 </button>
               </div>
             </div>

@@ -24,7 +24,7 @@ export const ProductSelectSection: React.FC<ProductSelectSectionProps> = ({
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-stretch">
+      <div className="grid grid-cols-2 gap-2.5 sm:gap-4 items-stretch">
         {PRODUCTS_CONFIG.map((product) => {
           const isSelected = selectedProductId === product.id;
           const isPlus = product.isPlusPackage;
@@ -33,7 +33,7 @@ export const ProductSelectSection: React.FC<ProductSelectSectionProps> = ({
             <div
               key={product.id}
               onClick={() => onSelect(product.id)}
-              className={`cursor-pointer rounded-2xl p-5 sm:p-6 transition-all relative border flex flex-col justify-between ${
+              className={`cursor-pointer rounded-xl sm:rounded-2xl p-3 sm:p-6 transition-all relative border flex flex-col justify-between ${
                 isSelected
                   ? 'border-[#322A1B] bg-[#FFFFFF] shadow-md ring-2 ring-[#322A1B]/10'
                   : 'border-[#EBE3D5] bg-[#FFFFFF]/70 hover:border-[#C7B698] hover:bg-[#FFFFFF]'
@@ -41,9 +41,9 @@ export const ProductSelectSection: React.FC<ProductSelectSectionProps> = ({
             >
               <div>
                 {/* 상단 뱃지 & 선택 상태 */}
-                <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center justify-between mb-2 sm:mb-3">
                   <span
-                    className={`text-[11px] font-medium px-2.5 py-0.5 rounded-full ${
+                    className={`text-[9.5px] sm:text-[11px] font-medium px-2 py-0.5 rounded-full ${
                       isSelected
                         ? 'bg-[#322A1B] text-[#FAF8F5]'
                         : isPlus
@@ -54,60 +54,60 @@ export const ProductSelectSection: React.FC<ProductSelectSectionProps> = ({
                     {product.badge || '기본'}
                   </span>
                   <CheckCircle2
-                    className={`w-5 h-5 transition-colors ${
+                    className={`w-4 h-4 sm:w-5 sm:h-5 transition-colors ${
                       isSelected ? 'text-[#322A1B]' : 'text-[#DDD1BD]'
                     }`}
                   />
                 </div>
 
                 {/* 상품명 & 가격 */}
-                <div className="h-7 sm:h-8 flex items-center gap-2 mb-1">
-                  <h4 className="text-lg font-serif font-bold text-[#322A1B]">
+                <div className="flex flex-wrap items-center gap-1 sm:gap-2 mb-1">
+                  <h4 className="text-sm sm:text-lg font-serif font-bold text-[#322A1B]">
                     {product.name}
                   </h4>
                   {isPlus && (
-                    <span className="text-[11px] font-sans font-normal text-[#8F7A56] bg-[#FAF8F5] px-2 py-0.5 rounded-full border border-[#DDD1BD]">
-                      부모님 앨범 포함
+                    <span className="text-[9px] sm:text-[11px] font-sans font-normal text-[#8F7A56] bg-[#FAF8F5] px-1.5 py-0.5 rounded-full border border-[#DDD1BD]">
+                      부모님 앨범
                     </span>
                   )}
                 </div>
-                <p className="text-xs text-[#8F7A56] mb-4 min-h-[36px] sm:min-h-[32px] flex items-center leading-relaxed break-keep">
+                <p className="text-[10px] sm:text-xs text-[#8F7A56] mb-2 sm:mb-4 min-h-[26px] sm:min-h-[32px] flex items-center leading-tight sm:leading-relaxed break-keep">
                   {product.subtitle}
                 </p>
 
-                <div className="text-xl sm:text-2xl font-bold text-[#322A1B] mb-4 pb-4 border-b border-[#F5F1EA] tabular-nums">
+                <div className="text-base sm:text-2xl font-bold text-[#322A1B] mb-2.5 sm:mb-4 pb-2.5 sm:pb-4 border-b border-[#F5F1EA] tabular-nums">
                   {formatKRW(product.basePrice)}
                 </div>
 
                 {/* 상품 구성 */}
                 {!isPlus ? (
                   /* 실속형: 기본 포함 구성 목록 */
-                  <div className="space-y-2 text-xs text-[#6E5C3D]">
-                    <div className="flex items-start gap-1.5 font-medium text-[#322A1B] mb-2">
-                      <BookOpen className="w-3.5 h-3.5 text-[#8F7A56] mt-0.5 shrink-0" />
-                      <div className="space-y-0.5">
+                  <div className="space-y-1.5 sm:space-y-2 text-[10px] sm:text-xs text-[#6E5C3D]">
+                    <div className="flex items-start gap-1 font-medium text-[#322A1B] mb-1.5">
+                      <BookOpen className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#8F7A56] mt-0.5 shrink-0" />
+                      <div className="space-y-0.5 text-[9.5px] sm:text-xs leading-tight">
                         {product.albumSpec.split('\n').map((line, idx) => (
                           <div key={idx}>{line}</div>
                         ))}
                       </div>
                     </div>
                     {product.includedItems.map((item, idx) => (
-                      <div key={idx} className="flex items-start gap-1.5">
-                        <span className="text-[#B09A74] mt-0.5 shrink-0">•</span>
+                      <div key={idx} className="flex items-start gap-1 text-[9.5px] sm:text-xs leading-tight">
+                        <span className="text-[#B09A74] shrink-0">•</span>
                         <span className="break-keep">{item}</span>
                       </div>
                     ))}
                   </div>
                 ) : (
                   /* 화보형: 실속형 기본 포함 + 추가 혜택 */
-                  <div className="space-y-2.5 text-xs text-[#4E412A]">
-                    <div className="p-2.5 bg-[#FAF8F5] border border-[#DDD1BD] rounded-xl space-y-1.5">
-                      <div className="flex items-center gap-1.5 text-xs font-semibold text-[#322A1B]">
-                        <Check className="w-3.5 h-3.5 text-[#8F7A56] shrink-0" />
-                        <span className="break-keep">{product.baseIncludedNotice || '실속형 기본 구성 100% 포함'}</span>
+                  <div className="space-y-1.5 sm:space-y-2.5 text-[10px] sm:text-xs text-[#4E412A]">
+                    <div className="p-1.5 sm:p-2.5 bg-[#FAF8F5] border border-[#DDD1BD] rounded-lg sm:rounded-xl space-y-1">
+                      <div className="flex items-center gap-1 text-[9.5px] sm:text-xs font-semibold text-[#322A1B]">
+                        <Check className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#8F7A56] shrink-0" />
+                        <span className="break-keep leading-tight">{product.baseIncludedNotice || '실속형 기본 구성 100% 포함'}</span>
                       </div>
-                      <div className="pl-5 text-[11px] text-[#6E5C3D] space-y-0.5 font-medium border-t border-[#EBE3D5] pt-1.5">
-                        <div className="text-[#8F7A56] font-semibold mb-0.5">화보형 업그레이드 앨범:</div>
+                      <div className="pl-4 text-[9px] sm:text-[11px] text-[#6E5C3D] space-y-0.5 font-medium border-t border-[#EBE3D5] pt-1">
+                        <div className="text-[#8F7A56] font-semibold">화보형 업그레이드:</div>
                         {product.albumSpec.split('\n').map((line, idx) => (
                           <div key={idx} className="flex items-center gap-1">
                             <span className="text-[#B09A74]">•</span>
