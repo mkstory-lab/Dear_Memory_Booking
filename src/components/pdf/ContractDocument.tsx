@@ -14,13 +14,12 @@ interface ContractDocumentProps {
 }
 
 /**
- * Dear Memory for Booking — 공식 A4 본식스냅 계약서 컴포넌트 (2페이지 정밀 분리)
+ * Dear Memory for Booking — 공식 A4 본식스냅 계약서 컴포넌트 (3페이지 정밀 분리)
  * 
- * [A4 정밀 레이아웃 설계 원칙]
- * 1. Page 1: 정식 계약서 본문 (고객 및 예식 정보, 상품 구성, 영수증형 정산 명세서, 서명란 줄맞춤)
- * 2. Page 2: 공식 약관 및 운영 정책 전문 (제1조 ~ 제13조 독립 2단 컬럼 수납으로 13조 잘림 방지)
- * 3. 추가 옵션 및 할인 옵션 개별 행(Row) 명세서 분리
- * 4. 한글 폰트(Pretendard) 무결성 및 word-break: keep-all 유지
+ * [A4 정밀 3페이지 레이아웃 설계]
+ * 1. Page 1: 본식스냅 표준 계약서 본문 (고객/예식 정보, 상품 구성, 영수증형 정산 명세서, 서명란)
+ * 2. Page 2: [별첨 1] 본식스냅 촬영 및 리터칭 상세 의뢰서 (고객 장문 요청사항 수용 + 현장 체크포인트)
+ * 3. Page 3: [별첨 2] 본식스냅 촬영 표준 약관 및 운영 정책 전문 (제1조 ~ 제13조 전체 수록)
  */
 export const ContractDocument: React.FC<ContractDocumentProps> = ({
   contractNumber,
@@ -59,7 +58,7 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
           width: '210mm',
           height: '297mm',
           maxHeight: '297mm',
-          padding: '13mm 16mm',
+          padding: '14mm 16mm',
           boxSizing: 'border-box',
           backgroundColor: '#FFFFFF',
           color: '#22201D',
@@ -195,8 +194,8 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
         </div>
 
         {/* 4. 계약 금액 정산 내역 (영수증 / 명세서 스타일) */}
-        <div className="border border-[#322A1B] rounded-lg p-3.5 bg-[#FAF8F5] my-1 text-xs">
-          <div className="flex justify-between items-center border-b border-[#DDD1BD] pb-1.5 mb-2">
+        <div className="border border-[#322A1B] rounded-lg p-4 bg-[#FAF8F5] my-1 text-xs">
+          <div className="flex justify-between items-center border-b border-[#DDD1BD] pb-1.5 mb-2.5">
             <h3 className="font-bold text-[#322A1B] text-[12px]">4. 계약 금액 정산 내역 (명세서)</h3>
             <span className="text-[10px] text-[#8F7A56]">단위: 원 (VAT 포함)</span>
           </div>
@@ -212,11 +211,11 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
             <tbody className="divide-y divide-[#F5F1EA]">
               {/* 기본 상품 행 */}
               <tr>
-                <td className="py-1.5 font-semibold text-[#322A1B]">기본 상품</td>
-                <td className="py-1.5 text-[#4E412A]">
+                <td className="py-2 font-semibold text-[#322A1B]">기본 상품</td>
+                <td className="py-2 text-[#4E412A]">
                   {product.name} ({product.description || '본식스냅 기본 상품'})
                 </td>
-                <td className="py-1.5 text-right font-semibold tabular-nums text-[#322A1B]">
+                <td className="py-2 text-right font-semibold tabular-nums text-[#322A1B]">
                   {formatKRW(pricing.basePrice)}
                 </td>
               </tr>
@@ -236,9 +235,9 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
                 ))
               ) : (
                 <tr>
-                  <td className="py-1 text-[#8F7A56]">추가 옵션</td>
-                  <td className="py-1 text-[#8F7A56] italic">선택된 추가 촬영 옵션 없음</td>
-                  <td className="py-1 text-right text-[#8F7A56] tabular-nums">-</td>
+                  <td className="py-1.5 text-[#8F7A56]">추가 옵션</td>
+                  <td className="py-1.5 text-[#8F7A56] italic">선택된 추가 촬영 옵션 없음</td>
+                  <td className="py-1.5 text-right text-[#8F7A56] tabular-nums">-</td>
                 </tr>
               )}
 
@@ -291,10 +290,10 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
 
               {/* 최종 확정 계약 금액 행 */}
               <tr className="border-t-2 border-[#322A1B] bg-white/70">
-                <td colSpan={2} className="py-2.5 font-bold text-sm text-[#322A1B]">
+                <td colSpan={2} className="py-3 font-bold text-sm text-[#322A1B]">
                   최종 확정 계약금액 (VAT 포함)
                 </td>
-                <td className="py-2.5 text-right text-lg font-serif font-bold text-[#322A1B] tabular-nums">
+                <td className="py-3 text-right text-xl font-serif font-bold text-[#322A1B] tabular-nums">
                   {formatKRW(pricing.contractTotal)}
                 </td>
               </tr>
@@ -302,26 +301,26 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
           </table>
 
           {/* 결제 일정 카드 (계약금 & 잔금 2열 분할) */}
-          <div className="grid grid-cols-2 gap-2.5 mt-2.5 pt-2 border-t border-[#DDD1BD] text-xs">
-            <div className="p-2 bg-white rounded border border-[#EBE3D5] flex justify-between items-center">
+          <div className="grid grid-cols-2 gap-3 mt-3 pt-2.5 border-t border-[#DDD1BD] text-xs">
+            <div className="p-2.5 bg-white rounded border border-[#EBE3D5] flex justify-between items-center">
               <div>
                 <span className="text-[#8F7A56] block text-[10px]">계약금 (신청 후 24시간 내)</span>
                 <span className="font-bold text-[#322A1B] text-sm tabular-nums">
                   {formatKRW(pricing.depositAmount)}
                 </span>
               </div>
-              <span className="text-[10px] text-[#8F7A56] bg-[#FAF8F5] px-2 py-0.5 rounded">
+              <span className="text-[10px] text-[#8F7A56] bg-[#FAF8F5] px-2 py-0.5 rounded font-medium">
                 스케줄 확정
               </span>
             </div>
-            <div className="p-2 bg-white rounded border border-[#EBE3D5] flex justify-between items-center">
+            <div className="p-2.5 bg-white rounded border border-[#EBE3D5] flex justify-between items-center">
               <div>
                 <span className="text-[#8F7A56] block text-[10px]">잔금 (예식 1주 전 입금)</span>
                 <span className="font-bold text-[#322A1B] text-sm tabular-nums">
                   {formatKRW(pricing.balanceAmount)}
                 </span>
               </div>
-              <span className="text-[10px] text-[#8F7A56] bg-[#FAF8F5] px-2 py-0.5 rounded">
+              <span className="text-[10px] text-[#8F7A56] bg-[#FAF8F5] px-2 py-0.5 rounded font-medium">
                 최종 정산
               </span>
             </div>
@@ -329,7 +328,7 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
 
           {/* 후기 페이백 별도 안내 */}
           {pricing.futureCashbackTotal > 0 && (
-            <div className="mt-2 p-1.5 bg-[#F5F1EA]/80 rounded border border-[#DDD1BD] text-[10.5px] flex justify-between items-center text-[#6E5C3D]">
+            <div className="mt-2.5 p-2 bg-[#F5F1EA]/80 rounded border border-[#DDD1BD] text-[11px] flex justify-between items-center text-[#6E5C3D]">
               <span>* 후기 작성 혜택: 계약 후기 및 본식 후기 작성 확인 시 대표 계좌 입금</span>
               <span className="font-bold text-[#322A1B] tabular-nums">
                 최대 {formatKRW(pricing.futureCashbackTotal)} 페이백
@@ -338,39 +337,20 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
           )}
         </div>
 
-        {/* 5. 특이사항 및 고객 요청사항 */}
-        {(data.shootRequestNotes || data.retouchRequestNotes || data.requestNotes) && (
-          <div className="border border-[#EBE3D5] rounded-lg p-2.5 my-1 text-[10.5px] text-[#4E412A] bg-[#FAF8F5]/40 space-y-1">
-            <div className="font-bold text-[#322A1B] text-[11px] border-b border-[#EBE3D5] pb-0.5">
-              5. 촬영 및 보정 고객 요청사항
-            </div>
-            {data.shootRequestNotes && (
-              <p>
-                <strong className="text-[#8F7A56]">촬영 스타일 요청:</strong> {data.shootRequestNotes}
-              </p>
-            )}
-            {data.retouchRequestNotes && (
-              <p>
-                <strong className="text-[#8F7A56]">정밀보정 요청:</strong> {data.retouchRequestNotes}
-              </p>
-            )}
-            {data.requestNotes && (
-              <p>
-                <strong className="text-[#8F7A56]">기타 문의/요청:</strong> {data.requestNotes}
-              </p>
-            )}
-          </div>
-        )}
+        {/* 별첨 안내 문구 */}
+        <div className="p-2 bg-[#FAF8F5] rounded border border-[#EBE3D5] text-[10px] text-[#8F7A56] text-center my-0.5">
+          * 신랑·신부님의 상세 촬영/보정 요청사항은 <strong>[별첨 1. 상세 의뢰서]</strong>에, 촬영 표준 규정은 <strong>[별첨 2. 약관 전문]</strong>에 수록되어 있습니다.
+        </div>
 
-        {/* 6. 서명 및 날인 영역 (줄맞춤 완벽 정렬) */}
-        <div className="border-t border-[#DDD1BD] pt-3 mt-auto">
-          <p className="text-[10.5px] text-center text-[#6E5C3D] mb-2 font-medium">
+        {/* 5. 서명 및 날인 영역 (줄맞춤 완벽 정렬) */}
+        <div className="border-t border-[#DDD1BD] pt-3.5 mt-auto">
+          <p className="text-[10.5px] text-center text-[#6E5C3D] mb-2.5 font-medium">
             위와 같이 본식스냅 촬영 계약을 체결하며, 상호 신뢰와 성실로 본 계약 내용을 확약합니다.
           </p>
 
           <div className="grid grid-cols-2 gap-4 text-xs">
             {/* 고객 온라인 동의란 */}
-            <div className="p-3 bg-[#FAF8F5] rounded-lg border border-[#EBE3D5] flex flex-col justify-between h-[72px]">
+            <div className="p-3 bg-[#FAF8F5] rounded-lg border border-[#EBE3D5] flex flex-col justify-between h-[74px]">
               <span className="text-[10.5px] text-[#8F7A56] font-medium">의뢰인 (신랑 · 신부)</span>
               <div className="flex justify-between items-center">
                 <span className="font-bold text-[#322A1B] text-sm">
@@ -381,7 +361,7 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
             </div>
 
             {/* 대표 서명 및 날인 (줄맞춤: DEAR MEMORY 옆에 대표 한민규) */}
-            <div className="p-3 bg-[#FAF8F5] rounded-lg border border-[#EBE3D5] flex flex-col justify-between h-[72px] relative">
+            <div className="p-3 bg-[#FAF8F5] rounded-lg border border-[#EBE3D5] flex flex-col justify-between h-[74px] relative">
               <span className="text-[10.5px] text-[#8F7A56] font-medium">촬영 대행사</span>
               <div className="flex justify-between items-center">
                 <div className="flex items-center gap-2.5">
@@ -400,18 +380,18 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
           </div>
 
           {/* 1페이지 하단 페이지 마크 */}
-          <div className="flex justify-between items-center text-[9.5px] text-[#8F7A56] mt-2 pt-1.5 border-t border-[#F5F1EA]">
+          <div className="flex justify-between items-center text-[9.5px] text-[#8F7A56] mt-2.5 pt-2 border-t border-[#F5F1EA]">
             <span>DEAR MEMORY FOR BOOKING &bull; OFFICIAL CONTRACT</span>
             <span className="font-medium text-[#322A1B]">
-              1 / 2 Page &bull; 다음 페이지의 표준 약관 전문을 확인해 주시기 바랍니다.
+              1 / 3 Page &bull; 본식스냅 표준 계약서 본문
             </span>
           </div>
         </div>
       </div>
 
       {/* =========================================================================
-          PAGE 2 : 본식스냅 촬영 표준 약관 및 운영 정책 전문 (A4 규격 210mm x 297mm)
-          [핵심 최적화: 독립 2단 수직 스택으로 제13조 하단 잘림 원천 차단]
+          PAGE 2 : [별첨 1] 본식스냅 촬영 및 리터칭 상세 의뢰서 (A4 규격 210mm x 297mm)
+          [핵심 기능: 장문의 신부 촬영/보정 요청사항 완벽 수용 + 현장 작가 지시서]
       ========================================================================= */}
       <div
         id={`${id}-page-2`}
@@ -421,7 +401,7 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
           width: '210mm',
           height: '297mm',
           maxHeight: '297mm',
-          padding: '10mm 15mm',
+          padding: '14mm 16mm',
           boxSizing: 'border-box',
           backgroundColor: '#FFFFFF',
           color: '#22201D',
@@ -435,17 +415,171 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
           overflowWrap: 'break-word',
         }}
       >
-        {/* 상단 약관 헤더 */}
-        <div className="border-b-2 border-[#322A1B] pb-2 flex justify-between items-end">
+        {/* 상단 별첨 1 헤더 */}
+        <div className="border-b-2 border-[#322A1B] pb-3 flex justify-between items-end">
           <div>
             <p className="text-[10px] tracking-[0.25em] text-[#8F7A56] font-semibold uppercase">
-              DEAR MEMORY &bull; TERMS & CONDITIONS
+              DEAR MEMORY &bull; ATTACHMENT 1
             </p>
             <h2 className="text-xl font-serif font-bold text-[#322A1B] tracking-wider mt-0.5">
-              본식스냅 촬영 표준 약관 및 운영 정책 전문
+              [별첨 1] 본식스냅 촬영 및 리터칭 상세 의뢰서
             </h2>
-            <p className="text-[10.5px] text-[#6E5C3D] mt-0.5">
-              본 약관은 고객님과 디어메모리 간의 권리와 의무, 신뢰를 규정하는 법적 표준 조항입니다.
+            <p className="text-xs text-[#6E5C3D] mt-0.5 font-medium">
+              신랑·신부님의 소중한 요청사항을 촬영 작가 및 전문 리터쳐에게 전달하는 공식 작업 지시서입니다.
+            </p>
+          </div>
+
+          <div className="text-right text-xs">
+            <div className="text-[10px] text-[#8F7A56] font-semibold">계약 식별 번호</div>
+            <div className="text-sm font-bold text-[#322A1B] tracking-wider font-mono mt-0.5">
+              {effectiveContractNumber}
+            </div>
+            <div className="text-[10px] text-[#8F7A56] mt-0.5">
+              {data.groomName} · {data.brideName} 고객님
+            </div>
+          </div>
+        </div>
+
+        {/* 1. 고객 신청 세부 정보 요약 카드 (가족, 메이크업, SNS) */}
+        <div className="border border-[#EBE3D5] rounded-xl p-3.5 bg-[#FAF8F5]/60 my-2 text-xs">
+          <h3 className="font-bold text-[#322A1B] text-[12px] border-b border-[#EBE3D5] pb-1.5 mb-2 flex items-center justify-between">
+            <span>1. 예식 현장 참고 정보</span>
+            <span className="text-[10px] font-normal text-[#8F7A56]">작가 현장 숙지 사항</span>
+          </h3>
+
+          <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-[11px]">
+            <div>
+              <span className="text-[#8F7A56] font-medium">신랑측 직계가족: </span>
+              <span className="font-semibold text-[#322A1B]">{data.groomFamilyMembers || '기본 직계가족 구성'}</span>
+            </div>
+            <div>
+              <span className="text-[#8F7A56] font-medium">신부측 직계가족: </span>
+              <span className="font-semibold text-[#322A1B]">{data.brideFamilyMembers || '기본 직계가족 구성'}</span>
+            </div>
+            <div>
+              <span className="text-[#8F7A56] font-medium">메이크업 장소: </span>
+              <span className="font-semibold text-[#322A1B]">{data.makeupLocation || '미정 / 해당 없음'}</span>
+            </div>
+            <div>
+              <span className="text-[#8F7A56] font-medium">신부 SNS / 인스타: </span>
+              <span className="font-semibold text-[#322A1B]">{data.instagramId || data.blogUrl || '미입력'}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* 2. 촬영 시 세부 요청사항 (장문 수용 박스) */}
+        <div className="border border-[#EBE3D5] rounded-xl p-4 bg-[#FFFFFF] my-2 text-xs space-y-2">
+          <div className="flex justify-between items-center border-b border-[#EBE3D5] pb-1.5">
+            <h3 className="font-bold text-[#322A1B] text-[12px] flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#B09A74]" />
+              <span>2. 본식스냅 촬영 시 세부 요청사항</span>
+            </h3>
+            <span className="text-[10px] text-[#8F7A56]">구도, 동선, 표정, 중요 인물 등</span>
+          </div>
+
+          <div className="text-[11.5px] text-[#322A1B] leading-relaxed whitespace-pre-wrap min-h-[90px] p-3 bg-[#FAF8F5]/80 rounded-lg border border-[#F0EAE1]">
+            {data.shootRequestNotes ? (
+              data.shootRequestNotes
+            ) : (
+              <span className="text-[#8F7A56] italic">
+                * 별도 특이 요청사항 없음 (디어메모리 고유의 따뜻하고 감성적인 본식 연출과 현장 스냅 가이드라인에 맞추어 성심껏 촬영을 진행합니다.)
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* 3. 정밀 보정(리터칭) 시 세부 요청사항 (장문 수용 박스) */}
+        <div className="border border-[#EBE3D5] rounded-xl p-4 bg-[#FFFFFF] my-2 text-xs space-y-2">
+          <div className="flex justify-between items-center border-b border-[#EBE3D5] pb-1.5">
+            <h3 className="font-bold text-[#322A1B] text-[12px] flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#B09A74]" />
+              <span>3. 정밀 세부 보정(리터칭) 요청사항</span>
+            </h3>
+            <span className="text-[10px] text-[#8F7A56]">피부톤, 윤곽, 체형, 색감 등</span>
+          </div>
+
+          <div className="text-[11.5px] text-[#322A1B] leading-relaxed whitespace-pre-wrap min-h-[90px] p-3 bg-[#FAF8F5]/80 rounded-lg border border-[#F0EAE1]">
+            {data.retouchRequestNotes ? (
+              data.retouchRequestNotes
+            ) : (
+              <span className="text-[#8F7A56] italic">
+                * 별도 특이 요청사항 없음 (과도한 성형 왜곡을 지양하고, 신랑·신부 본연의 가장 아름다운 표정과 자연스러운 피부 질감을 살려 디어메모리 시그니처 정밀 리터칭을 적용합니다.)
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* 4. 기타 요청 및 전달사항 (있을 경우 표시) */}
+        {data.requestNotes && (
+          <div className="border border-[#EBE3D5] rounded-xl p-3 bg-[#FAF8F5]/60 my-1 text-xs">
+            <h4 className="font-bold text-[#322A1B] text-[11px] mb-1">4. 기타 전달사항</h4>
+            <p className="text-[11px] text-[#4E412A] leading-relaxed whitespace-pre-wrap">{data.requestNotes}</p>
+          </div>
+        )}
+
+        {/* 5. 디어메모리 본식스냅 현장 작가 체크포인트 가이드 (품격 있는 공식 가이드) */}
+        <div className="border border-[#DDD1BD] rounded-xl p-3.5 bg-[#FAF8F5] my-2 text-[10.5px] text-[#4E412A] space-y-1.5">
+          <div className="font-bold text-[#322A1B] text-[11px] border-b border-[#DDD1BD] pb-1 flex items-center justify-between">
+            <span>5. 디어메모리 현장 촬영 체크포인트</span>
+            <span className="text-[9.5px] text-[#8F7A56]">안내 사항</span>
+          </div>
+          <p className="leading-snug">
+            &bull; <strong>식전 도착 및 사전 점검:</strong> 담당 작가는 예식 1시간~1시간 30분 전 현장에 도착하여 신부대기실 연출 및 로비 하객맞이 촬영을 준비합니다.
+          </p>
+          <p className="leading-snug">
+            &bull; <strong>원판 기념 촬영:</strong> 본식 직후 주례/양가 부모님/친인척/직계가족/지인 원판 촬영이 차례로 안전하게 진행됩니다.
+          </p>
+          <p className="leading-snug">
+            &bull; <strong>3중 백업 및 보관:</strong> 촬영 당일 현장 수거된 메모리는 3중 안전 백업 시스템에 즉시 이관 보관됩니다.
+          </p>
+        </div>
+
+        {/* 2페이지 하단 페이지 마크 */}
+        <div className="flex justify-between items-center text-[9.5px] text-[#8F7A56] mt-auto pt-2 border-t border-[#DDD1BD]">
+          <span>DEAR MEMORY FOR BOOKING &bull; OFFICIAL CONTRACT</span>
+          <span className="font-medium text-[#322A1B]">
+            2 / 3 Page &bull; [별첨 1] 촬영 및 리터칭 상세 의뢰서
+          </span>
+        </div>
+      </div>
+
+      {/* =========================================================================
+          PAGE 3 : [별첨 2] 본식스냅 촬영 표준 약관 및 운영 정책 전문 (A4 규격 210mm x 297mm)
+          [핵심 기능: 3페이지 전체를 온전한 표준 약관 전문으로 구성하여 13개 조항 완벽 수납]
+      ========================================================================= */}
+      <div
+        id={`${id}-page-3`}
+        data-pdf-page="3"
+        className="contract-page bg-white text-[#22201D] mx-auto border border-[#EBE3D5] shadow-none"
+        style={{
+          width: '210mm',
+          height: '297mm',
+          maxHeight: '297mm',
+          padding: '12mm 16mm',
+          boxSizing: 'border-box',
+          backgroundColor: '#FFFFFF',
+          color: '#22201D',
+          position: 'relative',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-between',
+          fontFamily:
+            "'Pretendard', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif",
+          wordBreak: 'keep-all',
+          overflowWrap: 'break-word',
+        }}
+      >
+        {/* 상단 별첨 2 약관 헤더 */}
+        <div className="border-b-2 border-[#322A1B] pb-2.5 flex justify-between items-end">
+          <div>
+            <p className="text-[10px] tracking-[0.25em] text-[#8F7A56] font-semibold uppercase">
+              DEAR MEMORY &bull; ATTACHMENT 2
+            </p>
+            <h2 className="text-xl font-serif font-bold text-[#322A1B] tracking-wider mt-0.5">
+              [별첨 2] 본식스냅 촬영 표준 약관 및 운영 정책 전문
+            </h2>
+            <p className="text-[11px] text-[#6E5C3D] mt-0.5">
+              본 약관은 고객님과 디어메모리 간의 권리와 의무, 상호 신뢰를 규정하는 법적 표준 조항입니다.
             </p>
           </div>
 
@@ -460,16 +594,16 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
           </div>
         </div>
 
-        {/* 제1조 ~ 제13조 전체 약관 전문 (독립 2단 컬럼 배치로 13조 잘림 원천 차단) */}
-        <div className="grid grid-cols-2 gap-x-3.5 my-2 flex-1 items-start">
-          {/* 좌측 컬럼: 제1조 ~ 제7조 (균형 배분) */}
-          <div className="space-y-1.5">
+        {/* 제1조 ~ 제13조 전체 약관 전문 (독립 2단 컬럼 완벽 수납) */}
+        <div className="grid grid-cols-2 gap-x-4 my-2 flex-1 items-start">
+          {/* 좌측 컬럼: 제1조 ~ 제7조 */}
+          <div className="space-y-2">
             {CONTRACT_POLICY_CONFIG.sections.slice(0, 7).map((section) => (
               <div
                 key={section.id}
-                className="border border-[#EBE3D5] rounded p-1.5 bg-[#FAF8F5]/40 text-[7.5px] leading-snug"
+                className="border border-[#EBE3D5] rounded p-2 bg-[#FAF8F5]/40 text-[8px] leading-snug"
               >
-                <h4 className="font-bold text-[#322A1B] text-[8.5px] border-b border-[#EBE3D5] pb-0.5 mb-0.5">
+                <h4 className="font-bold text-[#322A1B] text-[9px] border-b border-[#EBE3D5] pb-0.5 mb-1">
                   {section.title}
                 </h4>
                 <p className="text-[#4E412A] whitespace-pre-line text-justify">
@@ -479,14 +613,14 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
             ))}
           </div>
 
-          {/* 우측 컬럼: 제8조 ~ 제13조 (긴 조항들 모음) */}
-          <div className="space-y-1.5">
+          {/* 우측 컬럼: 제8조 ~ 제13조 */}
+          <div className="space-y-2">
             {CONTRACT_POLICY_CONFIG.sections.slice(7).map((section) => (
               <div
                 key={section.id}
-                className="border border-[#EBE3D5] rounded p-1.5 bg-[#FAF8F5]/40 text-[7.5px] leading-snug"
+                className="border border-[#EBE3D5] rounded p-2 bg-[#FAF8F5]/40 text-[8px] leading-snug"
               >
-                <h4 className="font-bold text-[#322A1B] text-[8.5px] border-b border-[#EBE3D5] pb-0.5 mb-0.5">
+                <h4 className="font-bold text-[#322A1B] text-[9px] border-b border-[#EBE3D5] pb-0.5 mb-1">
                   {section.title}
                 </h4>
                 <p className="text-[#4E412A] whitespace-pre-line text-justify">
@@ -498,14 +632,14 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
         </div>
 
         {/* 하단 개인정보 고지 및 푸터 */}
-        <div className="border-t border-[#DDD1BD] pt-1.5 mt-auto">
-          <div className="p-1.5 bg-[#FAF8F5] rounded border border-[#EBE3D5] text-[7.5px] text-[#6E5C3D] leading-normal mb-1">
+        <div className="border-t border-[#DDD1BD] pt-2 mt-auto">
+          <div className="p-2 bg-[#FAF8F5] rounded border border-[#EBE3D5] text-[8px] text-[#6E5C3D] leading-normal mb-1.5">
             {CONTRACT_POLICY_CONFIG.privacyNotice}
           </div>
 
-          <div className="flex justify-between items-center text-[9px] text-[#8F7A56]">
+          <div className="flex justify-between items-center text-[9.5px] text-[#8F7A56]">
             <span>DEAR MEMORY FOR BOOKING &bull; OFFICIAL CONTRACT POLICY</span>
-            <span className="font-semibold text-[#322A1B]">2 / 2 Page &bull; 표준 약관 전문 수록 완료</span>
+            <span className="font-semibold text-[#322A1B]">3 / 3 Page &bull; 표준 약관 전문 수록 완료</span>
           </div>
         </div>
       </div>
