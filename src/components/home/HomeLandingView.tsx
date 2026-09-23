@@ -32,43 +32,46 @@ export const HomeLandingView: React.FC<HomeLandingViewProps> = ({
         {/* 카드 1: 계약상품 구경하기 */}
         <div
           onClick={onSelectCatalog}
-          className="group cursor-pointer bg-[#FFFFFF] border border-[#EBE3D5] hover:border-[#322A1B] rounded-2xl sm:rounded-3xl p-3.5 sm:p-8 transition-all duration-300 shadow-sm hover:shadow-md flex flex-col justify-between h-full relative overflow-hidden"
+          className="group cursor-pointer bg-[#FFFFFF] border border-[#EBE3D5] hover:border-[#322A1B] rounded-2xl sm:rounded-3xl p-3 sm:p-7 transition-all duration-300 shadow-sm hover:shadow-md flex flex-col justify-between h-full relative overflow-hidden"
         >
-          <div className="space-y-2.5 sm:space-y-4">
-            <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-[#FAF8F5] border border-[#EBE3D5] flex items-center justify-center text-[#8F7A56] group-hover:bg-[#322A1B] group-hover:text-[#FAF8F5] transition-colors">
-              <Camera className="w-4.5 h-4.5 sm:w-6 sm:h-6" />
+          <div className="space-y-2 sm:space-y-3.5 flex-1 flex flex-col">
+            {/* 아이콘 */}
+            <div className="w-8 h-8 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-[#FAF8F5] border border-[#EBE3D5] flex items-center justify-center text-[#8F7A56] group-hover:bg-[#322A1B] group-hover:text-[#FAF8F5] transition-colors shrink-0">
+              <Camera className="w-4 h-4 sm:w-6 sm:h-6" />
             </div>
 
+            {/* 헤더 & 제목 */}
             <div>
-              <span className="text-[9px] sm:text-[11px] font-semibold text-[#8F7A56] tracking-wider uppercase">
+              <span className="text-[9px] sm:text-[11px] font-semibold text-[#8F7A56] tracking-wider uppercase h-4 flex items-center">
                 PRODUCTS
               </span>
-              <h3 className="text-sm sm:text-xl font-serif font-bold text-[#322A1B] mt-0.5 leading-snug">
+              <h3 className="text-xs sm:text-xl font-serif font-bold text-[#322A1B] h-6 sm:h-8 flex items-center leading-tight">
                 계약상품 구경하기
               </h3>
-              <p className="text-[11px] sm:text-xs text-[#6E5C3D] mt-1 sm:mt-2 leading-relaxed break-keep">
+              <p className="text-[10px] sm:text-xs text-[#6E5C3D] leading-tight break-keep h-7 sm:h-9 flex items-center">
                 실속형·화보형 구성과 혜택을 한눈에 살펴봅니다.
               </p>
             </div>
 
-            {/* 주요 하이라이트 박스 */}
-            <div className="p-2 sm:p-3.5 bg-[#FAF8F5] rounded-xl border border-[#EBE3D5] space-y-1 sm:space-y-1.5 text-[10px] sm:text-xs text-[#8F7A56]">
-              <div className="flex items-center gap-1 sm:gap-1.5">
-                <span className="text-[#B09A74]">•</span>
-                <span className="break-keep font-medium text-[#322A1B]">실속 125만 / 화보 145만</span>
+            {/* 주요 하이라이트 박스 (높이 완벽 일치) */}
+            <div className="p-2 sm:p-3.5 bg-[#FAF8F5] rounded-xl border border-[#EBE3D5] space-y-1 sm:space-y-1.5 text-[9.5px] sm:text-xs text-[#8F7A56] h-[78px] sm:h-[98px] flex flex-col justify-center">
+              <div className="flex items-center gap-1 sm:gap-1.5 truncate">
+                <span className="text-[#B09A74] shrink-0">•</span>
+                <span className="font-semibold text-[#322A1B] truncate">실속 125만 / 화보 145만</span>
               </div>
-              <div className="flex items-center gap-1 sm:gap-1.5">
-                <span className="text-[#B09A74]">•</span>
-                <span className="break-keep">2인촬영 · 폐백 옵션</span>
+              <div className="flex items-center gap-1 sm:gap-1.5 truncate">
+                <span className="text-[#B09A74] shrink-0">•</span>
+                <span className="truncate">2인촬영 · 폐백 옵션</span>
               </div>
-              <div className="flex items-center gap-1 sm:gap-1.5">
-                <span className="text-[#B09A74]">•</span>
-                <span className="break-keep">일요일·짝꿍 할인</span>
+              <div className="flex items-center gap-1 sm:gap-1.5 truncate">
+                <span className="text-[#B09A74] shrink-0">•</span>
+                <span className="truncate">일요일·짝꿍 할인</span>
               </div>
             </div>
           </div>
 
-          <div className="mt-4 sm:mt-8 pt-3 sm:pt-4 border-t border-[#F5F1EA] flex items-center justify-between text-[11px] sm:text-xs font-semibold text-[#322A1B] group-hover:text-[#8F7A56] transition-colors">
+          {/* 하단 액션 버튼 */}
+          <div className="mt-3 sm:mt-6 pt-2.5 sm:pt-4 border-t border-[#F5F1EA] flex items-center justify-between text-[10.5px] sm:text-xs font-semibold text-[#322A1B] group-hover:text-[#8F7A56] transition-colors h-7 sm:h-8">
             <span>상품 보기</span>
             <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 transform group-hover:translate-x-1 transition-transform" />
           </div>
@@ -77,49 +80,52 @@ export const HomeLandingView: React.FC<HomeLandingViewProps> = ({
         {/* 카드 2: 계약정보 작성하기 */}
         <div
           onClick={onSelectApply}
-          className="group cursor-pointer bg-[#FFFFFF] border-2 border-[#322A1B]/80 hover:border-[#322A1B] rounded-2xl sm:rounded-3xl p-3.5 sm:p-8 transition-all duration-300 shadow-sm hover:shadow-md flex flex-col justify-between h-full relative overflow-hidden bg-gradient-to-br from-[#FFFFFF] to-[#FAF8F5]"
+          className="group cursor-pointer bg-[#FFFFFF] border-2 border-[#322A1B]/80 hover:border-[#322A1B] rounded-2xl sm:rounded-3xl p-3 sm:p-7 transition-all duration-300 shadow-sm hover:shadow-md flex flex-col justify-between h-full relative overflow-hidden bg-gradient-to-br from-[#FFFFFF] to-[#FAF8F5]"
         >
           {/* 상단 추천 뱃지 */}
           <div className="absolute top-2.5 right-2.5 sm:top-4 sm:right-4">
-            <span className="px-1.5 sm:px-2.5 py-0.5 sm:py-1 bg-[#322A1B] text-[#FAF8F5] rounded-full text-[9px] sm:text-[10px] font-semibold tracking-wider flex items-center gap-0.5 sm:gap-1">
+            <span className="px-1.5 sm:px-2.5 py-0.5 sm:py-1 bg-[#322A1B] text-[#FAF8F5] rounded-full text-[8.5px] sm:text-[10px] font-semibold tracking-wider flex items-center gap-0.5 sm:gap-1">
               <Sparkles className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-[#C7B698]" />
               <span className="hidden sm:inline">상담 완료 고객</span>
               <span className="sm:hidden">추천</span>
             </span>
           </div>
 
-          <div className="space-y-2.5 sm:space-y-4">
-            <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-[#322A1B] text-[#FAF8F5] flex items-center justify-center">
-              <FileEdit className="w-4.5 h-4.5 sm:w-6 sm:h-6 text-[#C7B698]" />
+          <div className="space-y-2 sm:space-y-3.5 flex-1 flex flex-col">
+            {/* 아이콘 */}
+            <div className="w-8 h-8 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-[#322A1B] text-[#FAF8F5] flex items-center justify-center shrink-0">
+              <FileEdit className="w-4 h-4 sm:w-6 sm:h-6 text-[#C7B698]" />
             </div>
 
+            {/* 헤더 & 제목 */}
             <div>
-              <span className="text-[9px] sm:text-[11px] font-semibold text-[#8F7A56] tracking-wider uppercase">
+              <span className="text-[9px] sm:text-[11px] font-semibold text-[#8F7A56] tracking-wider uppercase h-4 flex items-center">
                 APPLICATION
               </span>
-              <h3 className="text-sm sm:text-xl font-serif font-bold text-[#322A1B] mt-0.5 leading-snug">
+              <h3 className="text-xs sm:text-xl font-serif font-bold text-[#322A1B] h-6 sm:h-8 flex items-center leading-tight">
                 계약정보 작성하기
               </h3>
-              <p className="text-[11px] sm:text-xs text-[#6E5C3D] mt-1 sm:mt-2 leading-relaxed break-keep">
-                약관을 확인하시고 예식 일정 및 고객 정보를 작성합니다.
+              <p className="text-[10px] sm:text-xs text-[#6E5C3D] leading-tight break-keep h-7 sm:h-9 flex items-center">
+                약관을 확인하시고 예식 정보 및 일정을 작성합니다.
               </p>
             </div>
 
-            {/* 안내 배지 박스 */}
-            <div className="p-2 sm:p-3.5 bg-[#FAF8F5] border border-[#EBE3D5] rounded-xl text-[10px] sm:text-xs text-[#8F7A56] space-y-1 sm:space-y-1.5">
-              <div className="flex items-center gap-1 font-semibold text-[#322A1B]">
+            {/* 안내 배지 박스 (높이 완벽 일치) */}
+            <div className="p-2 sm:p-3.5 bg-[#FAF8F5] border border-[#EBE3D5] rounded-xl text-[9.5px] sm:text-xs text-[#8F7A56] space-y-1 sm:space-y-1.5 h-[78px] sm:h-[98px] flex flex-col justify-center">
+              <div className="flex items-center gap-1 font-semibold text-[#322A1B] truncate">
                 <ShieldCheck className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#8F7A56] shrink-0" />
-                <span>약관 사전 확인</span>
+                <span className="truncate">약관 사전 확인 후 안전 작성</span>
               </div>
-              <p className="text-[9.5px] sm:text-[11px] text-[#6E5C3D] leading-tight break-keep">
-                약관 동의 &rarr; 정보 입력 &rarr; 대표 확인 후 이메일 발송
+              <p className="text-[9px] sm:text-[11px] text-[#6E5C3D] leading-tight break-keep">
+                약관 동의 &rarr; 계약정보 입력 &rarr; 대표 확인 후 이메일 발송
               </p>
             </div>
           </div>
 
-          <div className="mt-4 sm:mt-8 pt-3 sm:pt-4 border-t border-[#F5F1EA] flex items-center justify-between text-[11px] sm:text-xs font-semibold text-[#322A1B]">
+          {/* 하단 액션 버튼 */}
+          <div className="mt-3 sm:mt-6 pt-2.5 sm:pt-4 border-t border-[#F5F1EA] flex items-center justify-between text-[10.5px] sm:text-xs font-semibold text-[#322A1B] h-7 sm:h-8">
             <span>작성 시작</span>
-            <div className="w-5 h-5 sm:w-7 sm:h-7 rounded-full bg-[#322A1B] text-[#FAF8F5] flex items-center justify-center group-hover:bg-[#1E1910] transition-colors">
+            <div className="w-4.5 h-4.5 sm:w-6 sm:h-6 rounded-full bg-[#322A1B] text-[#FAF8F5] flex items-center justify-center group-hover:bg-[#1E1910] transition-colors">
               <ArrowRight className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
             </div>
           </div>

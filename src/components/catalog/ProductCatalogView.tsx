@@ -52,58 +52,76 @@ export const ProductCatalogView: React.FC<ProductCatalogViewProps> = ({
               key={product.id}
               className={`bg-white border ${
                 isPlus ? 'border-[#B09A74] shadow-md ring-1 ring-[#B09A74]/30' : 'border-[#EBE3D5] shadow-sm'
-              } rounded-2xl sm:rounded-3xl p-3 sm:p-8 flex flex-col justify-between relative overflow-hidden`}
+              } rounded-2xl sm:rounded-3xl p-3 sm:p-7 flex flex-col justify-between h-full relative overflow-hidden`}
             >
-              {/* 상단 뱃지 */}
-              <div className="flex items-center justify-between mb-2.5 sm:mb-4">
+              {/* 상단 뱃지 라인 (높이 완벽 일치) */}
+              <div className="h-6 sm:h-7 flex items-center justify-between mb-2 sm:mb-3">
                 <span
-                  className={`px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-semibold border ${
+                  className={`px-2 sm:px-2.5 py-0.5 rounded-full text-[9.5px] sm:text-xs font-semibold border ${
                     isPlus
                       ? 'bg-[#322A1B] text-[#FAF8F5] border-[#322A1B]'
                       : 'bg-[#FAF8F5] text-[#8F7A56] border-[#DDD1BD]'
                   }`}
                 >
-                  {product.badge || '스냅 구성'}
+                  {isPlus ? '대표 추천' : (product.badge || '실속 추천')}
                 </span>
-                <span className="text-[10px] sm:text-xs text-[#8F7A56]">VAT 포함</span>
+                <span className="text-[9.5px] sm:text-xs text-[#8F7A56]">VAT 포함</span>
               </div>
 
-              <div className="space-y-2.5 sm:space-y-4 flex-1 flex flex-col">
-                <div>
-                  <div className="flex flex-wrap items-center gap-1 sm:gap-2">
-                    <h3 className="text-sm sm:text-xl font-serif font-bold text-[#322A1B]">
-                      {product.name}
-                    </h3>
-                    {isPlus && (
-                      <span className="text-[9px] sm:text-[11px] font-sans font-medium text-[#8F7A56] bg-[#FAF8F5] px-1.5 sm:px-2.5 py-0.5 rounded-full border border-[#DDD1BD]">
-                        부모님 앨범
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-[10px] sm:text-xs text-[#8F7A56] mt-1 sm:mt-1.5 leading-tight sm:leading-relaxed min-h-[26px] sm:min-h-[32px] flex items-center break-keep">
+              <div className="space-y-2 sm:space-y-3.5 flex-1 flex flex-col">
+                {/* 상품명 및 부모님 앨범 태그 라인 (높이 완벽 일치) */}
+                <div className="h-7 sm:h-8 flex items-center gap-1 sm:gap-2">
+                  <h3 className="text-sm sm:text-xl font-serif font-bold text-[#322A1B]">
+                    {product.name}
+                  </h3>
+                  {isPlus ? (
+                    <span className="text-[9px] sm:text-[11px] font-sans font-medium text-[#8F7A56] bg-[#FAF8F5] px-1.5 sm:px-2 py-0.5 rounded-full border border-[#DDD1BD]">
+                      부모님 앨범
+                    </span>
+                  ) : (
+                    <span className="text-[9px] sm:text-[11px] font-sans font-medium text-transparent px-1.5 py-0.5 select-none hidden sm:inline">
+                      기본형
+                    </span>
+                  )}
+                </div>
+
+                {/* 부제 (높이 완벽 일치) */}
+                <div className="h-7 sm:h-9 flex items-center">
+                  <p className="text-[9.5px] sm:text-xs text-[#8F7A56] leading-tight break-keep line-clamp-2">
                     {product.subtitle}
                   </p>
                 </div>
 
-                <div className="text-base sm:text-3xl font-serif font-bold text-[#322A1B] pb-2 sm:pb-4 border-b border-[#F5F1EA] tabular-nums">
+                {/* 가격 (높이 완벽 일치) */}
+                <div className="h-8 sm:h-11 flex items-center text-base sm:text-3xl font-serif font-bold text-[#322A1B] pb-2 sm:pb-3 border-b border-[#F5F1EA] tabular-nums">
                   {formatKRW(product.basePrice)}
                 </div>
 
-                {/* 스펙 하이라이트 박스 (좌우 양끝 칼정렬) */}
-                <div className="p-2 sm:p-3.5 bg-[#FAF8F5] rounded-xl sm:rounded-2xl space-y-1.5 sm:space-y-2 text-[10px] sm:text-xs border border-[#EBE3D5] min-h-[90px] sm:min-h-[110px] flex flex-col justify-between">
-                  <div className="flex items-start justify-between gap-1.5 sm:gap-3">
+                {/* 스펙 하이라이트 박스 (좌우 양끝 칼정렬 & 높이 완벽 일치) */}
+                <div className="p-2 sm:p-3.5 bg-[#FAF8F5] rounded-xl sm:rounded-2xl border border-[#EBE3D5] h-[120px] sm:h-[136px] flex flex-col justify-between">
+                  {/* 앨범 사양 2줄 높이 완전 통일 */}
+                  <div className="flex items-start justify-between gap-1 sm:gap-3 h-10 sm:h-11">
                     <div className="flex items-center gap-1 text-[#8F7A56] shrink-0 font-medium pt-0.5">
                       <BookOpen className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-                      <span className="text-[10px] sm:text-xs">앨범 사양</span>
+                      <span className="text-[9.5px] sm:text-xs">앨범 사양</span>
                     </div>
-                    <div className="font-semibold text-[#322A1B] text-right space-y-0.5 text-[9.5px] sm:text-xs">
-                      {product.albumSpec.split('\n').map((line, idx) => (
-                        <div key={idx}>{line}</div>
-                      ))}
+                    <div className="font-semibold text-[#322A1B] text-right space-y-0.5 text-[9px] sm:text-xs leading-tight">
+                      {!isPlus ? (
+                        <>
+                          <div>부부앨범 15x12 70p 1권</div>
+                          <div className="text-[#A8987E] font-normal text-[8.5px] sm:text-[11px]">(부모님앨범 미포함)</div>
+                        </>
+                      ) : (
+                        <>
+                          <div>부부앨범 15x12 80p 1권</div>
+                          <div className="text-[#8F7A56] font-semibold text-[8.5px] sm:text-[11px]">부모님앨범 12x8 40p 2권</div>
+                        </>
+                      )}
                     </div>
                   </div>
 
-                  <div className="flex justify-between items-center text-[#6E5C3D] pt-1 border-t border-[#EBE3D5] text-[9.5px] sm:text-xs">
+                  {/* 세부 보정본 */}
+                  <div className="flex justify-between items-center text-[#6E5C3D] pt-1.5 border-t border-[#EBE3D5] text-[9.5px] sm:text-xs h-6">
                     <span className="text-[#8F7A56]">세부 보정본</span>
                     <span className="font-semibold text-[#322A1B] tabular-nums text-right">
                       {product.retouchedCount}장
@@ -111,7 +129,8 @@ export const ProductCatalogView: React.FC<ProductCatalogViewProps> = ({
                     </span>
                   </div>
 
-                  <div className="flex justify-between items-center text-[#6E5C3D] text-[9.5px] sm:text-xs">
+                  {/* 고화질 원본 */}
+                  <div className="flex justify-between items-center text-[#6E5C3D] text-[9.5px] sm:text-xs h-6">
                     <span className="text-[#8F7A56]">고화질 원본</span>
                     <span className="font-semibold text-[#322A1B] text-right">
                       {product.originalCount}
@@ -119,70 +138,72 @@ export const ProductCatalogView: React.FC<ProductCatalogViewProps> = ({
                   </div>
                 </div>
 
-                {/* 상품 세부 구성 안내 */}
-                {!isPlus ? (
-                  /* 실속형: 기본 포함 구성 목록 */
-                  <div className="space-y-1.5 sm:space-y-2 text-[10px] sm:text-xs text-[#4E412A] pt-1 sm:pt-2 flex-1">
-                    <div className="font-semibold text-[9.5px] sm:text-[11px] uppercase tracking-wider text-[#8F7A56]">
-                      기본 포함 구성
-                    </div>
-                    <div className="space-y-1 sm:space-y-1.5">
-                      {product.includedItems.map((item, idx) => (
-                        <div key={idx} className="flex items-start gap-1 sm:gap-2 p-1.5 sm:p-2 bg-[#FAF8F5]/60 rounded-lg sm:rounded-xl border border-[#EBE3D5]/60 text-[9.5px] sm:text-xs leading-tight">
-                          <Check className="w-3 h-3 text-[#B09A74] mt-0.5 shrink-0" />
-                          <span className="break-keep">{item}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ) : (
-                  /* 화보형: 실속형 기본 포함 + 화보형만의 추가 혜택 하이라이트 */
-                  <div className="space-y-1.5 sm:space-y-2.5 text-[10px] sm:text-xs text-[#4E412A] pt-1 sm:pt-2 flex-1">
-                    {/* 실속형 포함 확인 배너 */}
-                    <div className="p-1.5 sm:p-2.5 bg-[#FAF8F5] border border-[#DDD1BD] rounded-lg sm:rounded-xl flex items-center gap-1 sm:gap-2">
-                      <Check className="w-3 h-3 sm:w-4 sm:h-4 text-[#8F7A56] shrink-0" />
-                      <span className="text-[9.5px] sm:text-xs font-semibold text-[#322A1B] break-keep leading-tight">
-                        실속형 모든 혜택 기본 포함
-                      </span>
-                    </div>
-
-                    {/* 추가 제공 혜택 */}
-                    <div className="space-y-1 sm:space-y-2 pt-0.5">
-                      <div className="flex items-center gap-1 text-[9.5px] sm:text-[11px] font-bold text-[#8F7A56] uppercase tracking-wider">
-                        <Sparkles className="w-3 h-3 text-[#B09A74]" />
-                        <span>화보형 추가 혜택</span>
+                {/* 상품 세부 구성 안내 (동일한 최소 높이로 바닥 맞춤) */}
+                <div className="flex-1 flex flex-col justify-start min-h-[180px] sm:min-h-[240px] pt-1 sm:pt-2">
+                  {!isPlus ? (
+                    /* 실속형: 기본 포함 구성 목록 */
+                    <div className="space-y-1.5 sm:space-y-2 text-[10px] sm:text-xs text-[#4E412A]">
+                      <div className="font-semibold text-[9.5px] sm:text-[11px] uppercase tracking-wider text-[#8F7A56] h-5 flex items-center">
+                        기본 포함 구성
                       </div>
-                      {product.plusBenefits?.map((benefit, idx) => (
-                        <div
-                          key={idx}
-                          className="p-1.5 sm:p-2.5 bg-[#FAF8F5] rounded-lg sm:rounded-xl border border-[#EBE3D5] space-y-0.5"
-                        >
-                          <div className="flex items-center justify-between gap-1">
-                            <span className="font-bold text-[10px] sm:text-xs text-[#322A1B] break-keep leading-tight">
-                              {benefit.title}
-                            </span>
-                            {benefit.badge && (
-                              <span className="text-[8.5px] sm:text-[10px] font-semibold px-1 sm:px-2 py-0.5 bg-[#EBE3D5] text-[#6E5C3D] rounded-full shrink-0">
-                                {benefit.badge}
-                              </span>
-                            )}
+                      <div className="space-y-1 sm:space-y-1.5">
+                        {product.includedItems.map((item, idx) => (
+                          <div key={idx} className="flex items-start gap-1 sm:gap-2 p-1.5 sm:p-2 bg-[#FAF8F5]/60 rounded-lg sm:rounded-xl border border-[#EBE3D5]/60 text-[9px] sm:text-xs leading-tight">
+                            <Check className="w-3 h-3 text-[#B09A74] mt-0.5 shrink-0" />
+                            <span className="break-keep">{item}</span>
                           </div>
-                          <p className="text-[9px] sm:text-[11px] text-[#6E5C3D] leading-tight break-keep">
-                            {benefit.detail}
-                          </p>
-                        </div>
-                      ))}
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  ) : (
+                    /* 화보형: 실속형 기본 포함 + 화보형만의 추가 혜택 */
+                    <div className="space-y-1.5 sm:space-y-2.5 text-[10px] sm:text-xs text-[#4E412A]">
+                      {/* 실속형 포함 확인 배너 */}
+                      <div className="p-1.5 sm:p-2 bg-[#FAF8F5] border border-[#DDD1BD] rounded-lg sm:rounded-xl flex items-center gap-1 sm:gap-2">
+                        <Check className="w-3 h-3 sm:w-4 sm:h-4 text-[#8F7A56] shrink-0" />
+                        <span className="text-[9px] sm:text-xs font-semibold text-[#322A1B] break-keep leading-tight">
+                          실속형 모든 혜택 기본 포함
+                        </span>
+                      </div>
+
+                      {/* 추가 제공 혜택 */}
+                      <div className="space-y-1 sm:space-y-1.5">
+                        <div className="flex items-center gap-1 text-[9.5px] sm:text-[11px] font-bold text-[#8F7A56] uppercase tracking-wider h-5">
+                          <Sparkles className="w-3 h-3 text-[#B09A74]" />
+                          <span>화보형 특별 혜택</span>
+                        </div>
+                        {product.plusBenefits?.map((benefit, idx) => (
+                          <div
+                            key={idx}
+                            className="p-1.5 sm:p-2 bg-[#FAF8F5] rounded-lg sm:rounded-xl border border-[#EBE3D5] space-y-0.5"
+                          >
+                            <div className="flex items-center justify-between gap-1">
+                              <span className="font-bold text-[9.5px] sm:text-xs text-[#322A1B] break-keep leading-tight">
+                                {benefit.title}
+                              </span>
+                              {benefit.badge && (
+                                <span className="text-[8.5px] sm:text-[10px] font-semibold px-1 sm:px-1.5 py-0.5 bg-[#EBE3D5] text-[#6E5C3D] rounded-full shrink-0">
+                                  {benefit.badge}
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-[8.5px] sm:text-[11px] text-[#6E5C3D] leading-tight break-keep">
+                              {benefit.detail}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
 
-              {/* CTA 버튼 */}
+              {/* 하단 CTA 버튼 (맨 아래 바닥에 수평 칼정렬) */}
               <div className="mt-3 sm:mt-6 pt-2.5 sm:pt-4 border-t border-[#F5F1EA]">
                 <button
                   type="button"
                   onClick={() => onSelectProductAndApply(product.id)}
-                  className={`w-full h-9 sm:h-12 rounded-xl text-[10.5px] sm:text-sm font-semibold transition-colors flex items-center justify-center gap-1 sm:gap-2 shadow-sm ${
+                  className={`w-full h-8 sm:h-12 rounded-xl text-[10px] sm:text-sm font-semibold transition-colors flex items-center justify-center gap-1 sm:gap-2 shadow-sm ${
                     isPlus
                       ? 'bg-[#322A1B] text-[#FAF8F5] hover:bg-[#1E1910]'
                       : 'bg-[#FAF8F5] text-[#322A1B] border border-[#DDD1BD] hover:bg-[#F0EBE1]'

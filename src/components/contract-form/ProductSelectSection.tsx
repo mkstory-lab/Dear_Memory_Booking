@@ -33,15 +33,15 @@ export const ProductSelectSection: React.FC<ProductSelectSectionProps> = ({
             <div
               key={product.id}
               onClick={() => onSelect(product.id)}
-              className={`cursor-pointer rounded-xl sm:rounded-2xl p-3 sm:p-6 transition-all relative border flex flex-col justify-between ${
+              className={`cursor-pointer rounded-xl sm:rounded-2xl p-3 sm:p-6 transition-all relative border flex flex-col justify-between h-full ${
                 isSelected
                   ? 'border-[#322A1B] bg-[#FFFFFF] shadow-md ring-2 ring-[#322A1B]/10'
                   : 'border-[#EBE3D5] bg-[#FFFFFF]/70 hover:border-[#C7B698] hover:bg-[#FFFFFF]'
               }`}
             >
-              <div>
-                {/* 상단 뱃지 & 선택 상태 */}
-                <div className="flex items-center justify-between mb-2 sm:mb-3">
+              <div className="space-y-2 sm:space-y-3.5">
+                {/* 상단 뱃지 & 선택 상태 (높이 일치) */}
+                <div className="h-6 sm:h-7 flex items-center justify-between">
                   <span
                     className={`text-[9.5px] sm:text-[11px] font-medium px-2 py-0.5 rounded-full ${
                       isSelected
@@ -51,7 +51,7 @@ export const ProductSelectSection: React.FC<ProductSelectSectionProps> = ({
                         : 'bg-[#F5F1EA] text-[#8F7A56]'
                     }`}
                   >
-                    {product.badge || '기본'}
+                    {isPlus ? '대표 추천' : (product.badge || '기본')}
                   </span>
                   <CheckCircle2
                     className={`w-4 h-4 sm:w-5 sm:h-5 transition-colors ${
@@ -60,8 +60,8 @@ export const ProductSelectSection: React.FC<ProductSelectSectionProps> = ({
                   />
                 </div>
 
-                {/* 상품명 & 가격 */}
-                <div className="flex flex-wrap items-center gap-1 sm:gap-2 mb-1">
+                {/* 상품명 (높이 일치) */}
+                <div className="h-6 sm:h-7 flex items-center gap-1 sm:gap-2">
                   <h4 className="text-sm sm:text-lg font-serif font-bold text-[#322A1B]">
                     {product.name}
                   </h4>
@@ -71,12 +71,38 @@ export const ProductSelectSection: React.FC<ProductSelectSectionProps> = ({
                     </span>
                   )}
                 </div>
-                <p className="text-[10px] sm:text-xs text-[#8F7A56] mb-2 sm:mb-4 min-h-[26px] sm:min-h-[32px] flex items-center leading-tight sm:leading-relaxed break-keep">
-                  {product.subtitle}
-                </p>
 
-                <div className="text-base sm:text-2xl font-bold text-[#322A1B] mb-2.5 sm:mb-4 pb-2.5 sm:pb-4 border-b border-[#F5F1EA] tabular-nums">
+                {/* 부제 (높이 일치) */}
+                <div className="h-7 sm:h-9 flex items-center">
+                  <p className="text-[9.5px] sm:text-xs text-[#8F7A56] leading-tight break-keep line-clamp-2">
+                    {product.subtitle}
+                  </p>
+                </div>
+
+                {/* 가격 (높이 일치) */}
+                <div className="h-8 sm:h-10 flex items-center text-base sm:text-2xl font-bold text-[#322A1B] pb-2 sm:pb-3 border-b border-[#F5F1EA] tabular-nums">
                   {formatKRW(product.basePrice)}
+                </div>
+
+                {/* 앨범 사양 요약 박스 (2줄 높이 완전 통일) */}
+                <div className="p-2 sm:p-3 bg-[#FAF8F5] rounded-xl border border-[#EBE3D5] space-y-1 text-[9.5px] sm:text-xs min-h-[58px] sm:min-h-[64px] flex flex-col justify-center">
+                  <div className="flex items-center gap-1 text-[#8F7A56] font-medium">
+                    <BookOpen className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                    <span>앨범 사양</span>
+                  </div>
+                  <div className="font-semibold text-[#322A1B] space-y-0.5 pl-4 text-[9px] sm:text-xs leading-tight">
+                    {!isPlus ? (
+                      <>
+                        <div>부부앨범 15x12 70p 1권</div>
+                        <div className="text-[#A8987E] font-normal text-[8.5px] sm:text-[10.5px]">(부모님앨범 미포함)</div>
+                      </>
+                    ) : (
+                      <>
+                        <div>부부앨범 15x12 80p 1권</div>
+                        <div className="text-[#8F7A56] font-semibold text-[8.5px] sm:text-[10.5px]">부모님앨범 12x8 40p 2권</div>
+                      </>
+                    )}
+                  </div>
                 </div>
 
                 {/* 상품 구성 */}
