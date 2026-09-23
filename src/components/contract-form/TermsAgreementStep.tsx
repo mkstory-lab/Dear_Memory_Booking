@@ -99,7 +99,7 @@ export const TermsAgreementStep: React.FC<TermsAgreementStepProps> = ({
           {/* 환불/취소 */}
           <div className="p-4 bg-[#FAF8F5] rounded-2xl border border-[#EBE3D5] space-y-1.5 flex flex-col justify-start">
             <span className="font-bold text-[#322A1B] text-sm sm:text-base block">
-              2. 환불 규정 (72시간 안심)
+              2. 환불 규정
             </span>
             <p className="text-[#6E5C3D] leading-relaxed break-keep">
               계약금 입금 후 <strong>72시간 이내</strong> 취소 요청 시 계약금 전액을 환불해 드립니다. 단, 72시간 경과 후에는 일정 마감에 따라 환불이 불가합니다.
@@ -112,17 +112,17 @@ export const TermsAgreementStep: React.FC<TermsAgreementStepProps> = ({
               3. 원본 3중 백업 및 보관
             </span>
             <p className="text-[#6E5C3D] leading-relaxed break-keep">
-              촬영 데이터는 3중 백업으로 안전하게 관리되며, 원본은 완성본 전달일 기준 <strong>1개월간 보관</strong>되므로 수령 즉시 개인 백업을 권장합니다.
+              원본 데이터는 3중 백업으로 안전하게 관리되며, 원본 전달 후 <strong>3개월간 보관</strong>되므로 수령 즉시 개인 백업을 권장드립니다.
             </p>
           </div>
 
           {/* 제공 사양 */}
           <div className="p-4 bg-[#FAF8F5] rounded-2xl border border-[#EBE3D5] space-y-1.5 flex flex-col justify-start">
             <span className="font-bold text-[#322A1B] text-sm sm:text-base block">
-              4. 결과물 사양 및 납품
+              4. 원본 사진
             </span>
             <p className="text-[#6E5C3D] leading-relaxed break-keep">
-              웹용 고화질 원본 전체 및 정밀 보정본은 JPG 파일(장축 3,000픽셀)로 이메일 제공되며, 앨범 수령 후 1주일 이내 수정 요청이 가능합니다.
+              사진은 JPG 파일(장축 3,000픽셀)로 이메일을 통해 제공되며, 추후 최종 보정본 전달 후 <strong>1주일 이내</strong>로 수정 요청이 가능합니다.
             </p>
           </div>
         </div>
