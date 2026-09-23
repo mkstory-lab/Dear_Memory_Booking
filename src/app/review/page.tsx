@@ -20,19 +20,15 @@ function ReviewPageContent() {
     isAlreadySent: boolean;
     sentAt?: string;
     contractNumber?: string;
+    isPreviewMode?: boolean;
   } | null>(null);
 
   useEffect(() => {
-    if (!token) {
-      setError('보안 승인 토큰이 전달되지 않았습니다. 이메일 링크를 다시 확인해 주세요.');
-      setLoading(false);
-      return;
-    }
-
     // 서버로 GET 요청하여 토큰 복호화 및 데이터 조회 (주의: 절대 발송 처리 안 됨!)
     const fetchContractDetails = async () => {
       try {
-        const res = await fetch(`/api/review-contract?token=${encodeURIComponent(token)}`);
+        const url = token ? `/api/review-contract?token=${encodeURIComponent(token)}` : '/api/review-contract';
+        const res = await fetch(url);
         const result = await res.json();
 
         if (!res.ok || !result.success) {
@@ -46,6 +42,7 @@ function ReviewPageContent() {
           isAlreadySent: result.isAlreadySent,
           sentAt: result.sentAt,
           contractNumber: result.contractNumber,
+          isPreviewMode: result.isPreviewMode,
         });
       } catch (err: any) {
         setError(err.message || '데이터를 불러오는 중 오류가 발생했습니다.');
@@ -80,15 +77,29 @@ function ReviewPageContent() {
             <p className="text-xs text-[#6E5C3D] leading-relaxed">{error}</p>
           </div>
         ) : contractData ? (
-          <RepresentativeReviewView
-            token={token!}
-            contractId={contractData.contractId}
-            initialData={contractData.data}
-            initialPricing={contractData.pricing}
-            isAlreadySent={contractData.isAlreadySent}
-            sentAt={contractData.sentAt}
-            contractNumber={contractData.contractNumber}
-          />
+          <>
+            {contractData.isPreviewMode && (
+              <div className="mb-6 p-4 bg-[#F5F1EA] border border-[#DDD1BD] rounded-xl flex items-center justify-between text-xs text-[#6E5C3D]">
+                <div className="flex items-center gap-2.5">
+                  <span className="px-2 py-0.5 bg-[#322A1B] text-[#FAF8F5] font-bold rounded text-[11px] shrink-0">
+                    화면 테스트 모드
+                  </span>
+                  <span>
+                    이메일 승인 링크 없이 <strong>/review</strong> 주소로 직접 접속하셨습니다. 화면 기능 점검 및 PDF 계약서 다운로드 테스트를 위해 <strong>강태양 · 이지은</strong> 고객님의 계약 데이터로 표시됩니다.
+                  </span>
+                </div>
+              </div>
+            )}
+            <RepresentativeReviewView
+              token={token || 'preview-mode-token'}
+              contractId={contractData.contractId}
+              initialData={contractData.data}
+              initialPricing={contractData.pricing}
+              isAlreadySent={contractData.isAlreadySent}
+              sentAt={contractData.sentAt}
+              contractNumber={contractData.contractNumber}
+            />
+          </>
         ) : null}
       </main>
 
