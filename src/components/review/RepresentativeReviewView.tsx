@@ -13,6 +13,8 @@ import {
   SlidersHorizontal,
   FileCheck,
   Download,
+  Tag,
+  Calculator,
 } from 'lucide-react';
 import { ContractDocument } from '@/components/pdf/ContractDocument';
 import { exportContractToPdfAndJpg, triggerFileDownload } from '@/lib/pdfGenerator';
@@ -26,6 +28,149 @@ interface RepresentativeReviewViewProps {
   sentAt?: string;
   contractNumber?: string;
 }
+
+interface ManualAdjustmentControlProps {
+  manualAmount: number;
+  manualReason: string;
+  targetTotalInput: string;
+  basePlusOptionsMinusDiscounts: number;
+  contractTotal: number;
+  onAmountChange: (amount: number) => void;
+  onReasonChange: (reason: string) => void;
+  onTargetTotalChange: (target: string) => void;
+  onReset: () => void;
+}
+
+const ManualAdjustmentControl: React.FC<ManualAdjustmentControlProps> = ({
+  manualAmount,
+  manualReason,
+  targetTotalInput,
+  basePlusOptionsMinusDiscounts,
+  contractTotal,
+  onAmountChange,
+  onReasonChange,
+  onTargetTotalChange,
+  onReset,
+}) => {
+  return (
+    <div className="p-4 bg-[#FAF8F5] border border-[#DDD1BD] rounded-2xl space-y-3.5 text-xs shadow-sm">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Tag className="w-4 h-4 text-[#8F7A56]" />
+          <span className="font-bold text-[#322A1B] text-xs sm:text-sm">
+            대표 특별 할인 및 금액 직접 조정
+          </span>
+        </div>
+        {manualAmount !== 0 && (
+          <button
+            type="button"
+            onClick={onReset}
+            className="text-xs text-red-600 hover:text-red-700 font-semibold underline cursor-pointer"
+          >
+            조정 초기화
+          </button>
+        )}
+      </div>
+
+      <p className="text-[11.5px] text-[#8F7A56] leading-relaxed">
+        대체공휴일 할인, 지인 할인 등 대표 재량으로 계약 총액을 직접 할인하거나 변경할 수 있습니다.
+      </p>
+
+      {/* 추천 사유 빠른 선택 */}
+      <div className="flex items-center gap-1.5 flex-wrap">
+        <span className="text-[11px] text-[#8F7A56] font-medium mr-1">빠른 사유:</span>
+        {['지인 특별 할인', '대체공휴일 할인', '프로모션 추가 할인', '일정 조정 감사'].map((reason) => (
+          <button
+            key={reason}
+            type="button"
+            onClick={() => onReasonChange(reason)}
+            className={`px-2.5 py-1 rounded-lg text-[11px] border transition-all cursor-pointer ${
+              manualReason === reason
+                ? 'bg-[#322A1B] text-[#FAF8F5] border-[#322A1B] font-semibold'
+                : 'bg-white text-[#6E5C3D] border-[#DDD1BD] hover:bg-[#F5F1EA]'
+            }`}
+          >
+            {reason}
+          </button>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+        {/* 사유 직접 입력 */}
+        <div>
+          <label className="block text-[11px] font-semibold text-[#6E5C3D] mb-1">
+            할인 / 조정 사유 (계약서 표기)
+          </label>
+          <input
+            type="text"
+            placeholder="예: 지인 특별 할인, 대체공휴일 등"
+            value={manualReason}
+            onChange={(e) => onReasonChange(e.target.value)}
+            className="w-full h-10 px-3 bg-white border border-[#DDD1BD] focus:border-[#322A1B] rounded-xl text-xs text-[#322A1B] font-medium"
+          />
+        </div>
+
+        {/* 조정 금액 직접 입력 */}
+        <div>
+          <label className="block text-[11px] font-semibold text-[#6E5C3D] mb-1">
+            할인 / 조정 금액 (원, 할인은 마이너스)
+          </label>
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="예: -50000, -100000"
+              value={manualAmount ? String(manualAmount) : ''}
+              onChange={(e) => {
+                const raw = e.target.value.replace(/[^0-9-]/g, '');
+                const val = parseInt(raw, 10) || 0;
+                onAmountChange(val);
+                if (!manualReason) onReasonChange('대표 특별 할인');
+              }}
+              className="w-full h-10 px-3 bg-white border border-[#DDD1BD] focus:border-[#322A1B] rounded-xl text-xs text-[#322A1B] font-bold tabular-nums"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* 최종 계약금액 직접 지정으로 맞추기 */}
+      <div className="pt-2 border-t border-[#EBE3D5] flex items-center justify-between gap-3 flex-wrap sm:flex-nowrap">
+        <div className="flex items-center gap-1.5 text-[11px] text-[#6E5C3D]">
+          <Calculator className="w-3.5 h-3.5 text-[#8F7A56]" />
+          <span>또는 <strong>최종 계약금액을 직접 입력</strong>하여 맞추기:</span>
+        </div>
+        <div className="flex items-center gap-1.5 shrink-0">
+          <input
+            type="text"
+            placeholder="예: 1100000"
+            value={targetTotalInput}
+            onChange={(e) => {
+              const raw = e.target.value.replace(/[^0-9]/g, '');
+              onTargetTotalChange(raw);
+              if (raw) {
+                const targetNum = parseInt(raw, 10);
+                const diff = targetNum - basePlusOptionsMinusDiscounts;
+                onAmountChange(diff);
+                if (!manualReason) onReasonChange('대표 특별 금액 조정');
+              }
+            }}
+            className="w-36 h-9 px-2.5 bg-white border border-[#DDD1BD] focus:border-[#322A1B] rounded-lg text-xs font-bold text-right tabular-nums text-[#322A1B]"
+          />
+          <span className="text-xs font-semibold text-[#322A1B]">원</span>
+        </div>
+      </div>
+
+      {/* 현재 적용 상태 피드백 */}
+      {manualAmount !== 0 && (
+        <div className="p-2.5 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-800 flex items-center justify-between font-medium animate-fade-in">
+          <span>
+            ✓ {manualReason || '특별 조정'}: <strong>{manualAmount > 0 ? `+${formatKRW(manualAmount)}` : formatKRW(manualAmount)}</strong> 적용 중
+          </span>
+          <span className="text-emerald-700 font-bold">최종 {formatKRW(contractTotal)}</span>
+        </div>
+      )}
+    </div>
+  );
+};
 
 export const RepresentativeReviewView: React.FC<RepresentativeReviewViewProps> = ({
   token,
@@ -48,6 +193,7 @@ export const RepresentativeReviewView: React.FC<RepresentativeReviewViewProps> =
   );
   const [manualAmount, setManualAmount] = useState<number>(initialData.manualAdjustment?.amount || 0);
   const [manualReason, setManualReason] = useState<string>(initialData.manualAdjustment?.reason || '');
+  const [targetTotalInput, setTargetTotalInput] = useState<string>('');
 
   // 실시간 재계산
   const [pricing, setPricing] = useState<PriceCalculationResult>(initialPricing);
@@ -134,6 +280,7 @@ export const RepresentativeReviewView: React.FC<RepresentativeReviewViewProps> =
     .map((id) => getOptionById(id))
     .filter(Boolean);
   const selectedOptions = selectedOptionObjects.map((opt) => opt!.name);
+  const basePlusOptionsMinusDiscounts = (pricing.basePrice || 0) + (pricing.optionTotal || 0) - (pricing.immediateDiscountTotal || 0);
 
   return (
     <>
@@ -469,6 +616,25 @@ export const RepresentativeReviewView: React.FC<RepresentativeReviewViewProps> =
               </label>
             </div>
 
+            {/* 대표 특별 할인 및 금액 직접 조정 */}
+            <div className="pt-2 border-t border-[#DDD1BD]">
+              <ManualAdjustmentControl
+                manualAmount={manualAmount}
+                manualReason={manualReason}
+                targetTotalInput={targetTotalInput}
+                basePlusOptionsMinusDiscounts={basePlusOptionsMinusDiscounts}
+                contractTotal={pricing.contractTotal}
+                onAmountChange={(amt) => setManualAmount(amt)}
+                onReasonChange={(rsn) => setManualReason(rsn)}
+                onTargetTotalChange={(tgt) => setTargetTotalInput(tgt)}
+                onReset={() => {
+                  setManualAmount(0);
+                  setManualReason('');
+                  setTargetTotalInput('');
+                }}
+              />
+            </div>
+
             {/* 요청사항 및 SNS */}
             <div className="pt-2 border-t border-[#DDD1BD] space-y-3">
               <label className="block text-[#8F7A56] font-medium">세부 요청사항 및 참고정보</label>
@@ -613,6 +779,25 @@ export const RepresentativeReviewView: React.FC<RepresentativeReviewViewProps> =
             </div>
           )}
 
+          {/* 대표 수동 특약 금액 조정 카드 (상시 노출) */}
+          {!isEditing && (
+            <ManualAdjustmentControl
+              manualAmount={manualAmount}
+              manualReason={manualReason}
+              targetTotalInput={targetTotalInput}
+              basePlusOptionsMinusDiscounts={basePlusOptionsMinusDiscounts}
+              contractTotal={pricing.contractTotal}
+              onAmountChange={(amt) => setManualAmount(amt)}
+              onReasonChange={(rsn) => setManualReason(rsn)}
+              onTargetTotalChange={(tgt) => setTargetTotalInput(tgt)}
+              onReset={() => {
+                setManualAmount(0);
+                setManualReason('');
+                setTargetTotalInput('');
+              }}
+            />
+          )}
+
           {/* 고객 입력 상세 정보 카드 (메이크업, 가족구성, 세부 요청사항, SNS) */}
           <div className="p-4 bg-[#FFFFFF] border border-[#EBE3D5] rounded-2xl text-xs space-y-3 text-[#6E5C3D]">
             <h4 className="font-semibold text-[#322A1B] border-b border-[#F5F1EA] pb-2">고객 신청 세부 정보</h4>
@@ -673,60 +858,7 @@ export const RepresentativeReviewView: React.FC<RepresentativeReviewViewProps> =
           </div>
         </div>
 
-        {/* 3. [TODO: V1.2] 대표 수동 금액 조정 및 사유 기록 기능 (V1에서는 비활성화) */}
-        {/*
-        <div className="pt-2 border-t border-[#F5F1EA]">
-          {!showManualAdjustment ? (
-            <button
-              type="button"
-              onClick={() => setShowManualAdjustment(true)}
-              className="text-xs text-[#8F7A56] hover:text-[#322A1B] underline underline-offset-4 transition-colors"
-            >
-              + 대표 특약 금액 수동 조정 추가 (V1.2)
-            </button>
-          ) : (
-            <div className="p-4 bg-[#FAF8F5] border border-[#EBE3D5] rounded-2xl space-y-3 text-xs">
-              <div className="flex items-center justify-between">
-                <span className="font-semibold text-[#322A1B]">금액 수동 조정</span>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setManualAmount(0);
-                    setManualReason('');
-                    setShowManualAdjustment(false);
-                  }}
-                  className="text-[#8F7A56] hover:text-red-500"
-                >
-                  취소
-                </button>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-[#8F7A56] mb-1">조정 금액 (원, 음수/양수 가능)</label>
-                  <input
-                    type="number"
-                    step={10000}
-                    placeholder="-50000 또는 50000"
-                    value={manualAmount || ''}
-                    onChange={(e) => setManualAmount(parseInt(e.target.value, 10) || 0)}
-                    className="w-full h-9 px-2.5 bg-white border border-[#DDD1BD] rounded-lg text-xs"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[#8F7A56] mb-1">조정 사유 (계약서 명시)</label>
-                  <input
-                    type="text"
-                    placeholder="예: 지인 특별 할인, 프로모션 조정"
-                    value={manualReason}
-                    onChange={(e) => setManualReason(e.target.value)}
-                    className="w-full h-9 px-2.5 bg-white border border-[#DDD1BD] rounded-lg text-xs"
-                  />
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-        */}
+
 
       </div>
 
