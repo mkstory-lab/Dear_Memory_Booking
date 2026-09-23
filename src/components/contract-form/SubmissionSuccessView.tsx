@@ -1,5 +1,5 @@
-import React from 'react';
-import { Mail, Check, Home } from 'lucide-react';
+import React, { useState } from 'react';
+import { Mail, Check, X } from 'lucide-react';
 
 interface SubmissionSuccessViewProps {
   email: string;
@@ -8,12 +8,19 @@ interface SubmissionSuccessViewProps {
 
 export const SubmissionSuccessView: React.FC<SubmissionSuccessViewProps> = ({
   email,
-  onHome = () => {
-    if (typeof window !== 'undefined') {
-      window.location.href = '/';
-    }
-  },
 }) => {
+  const [closedNotice, setClosedNotice] = useState(false);
+
+  const handleCloseWindow = () => {
+    if (typeof window !== 'undefined') {
+      window.close();
+      // 브라우저 탭 보안 정책상 직접 닫히지 않는 경우(새 창이 아닌 직접 접속 탭 등)를 위한 안내
+      setTimeout(() => {
+        setClosedNotice(true);
+      }, 200);
+    }
+  };
+
   return (
     <div className="bg-[#FFFFFF] border border-[#EBE3D5] rounded-3xl p-7 sm:p-10 text-center shadow-sm max-w-lg mx-auto space-y-6 animate-fade-in my-8">
       {/* 체크 아이콘 */}
@@ -46,16 +53,21 @@ export const SubmissionSuccessView: React.FC<SubmissionSuccessViewProps> = ({
         </p>
       </div>
 
-      {/* 공식 홈으로 돌아가기 버튼 */}
-      <div className="pt-2">
+      {/* 창 닫기 버튼 */}
+      <div className="pt-2 space-y-2">
         <button
           type="button"
-          onClick={onHome}
-          className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-[#322A1B] text-[#FAF8F5] rounded-xl text-xs font-semibold hover:bg-[#1E1910] transition-colors shadow-sm"
+          onClick={handleCloseWindow}
+          className="inline-flex items-center justify-center gap-2 px-7 py-3.5 bg-[#322A1B] text-[#FAF8F5] rounded-xl text-xs sm:text-sm font-semibold hover:bg-[#1E1910] transition-colors shadow-sm cursor-pointer"
         >
-          <Home className="w-3.5 h-3.5" />
-          <span>홈으로 돌아가기</span>
+          <X className="w-4 h-4" />
+          <span>창 닫기</span>
         </button>
+        {closedNotice && (
+          <p className="text-xs text-[#8F7A56] animate-fade-in pt-1">
+            인터넷 창이 자동으로 닫히지 않는 경우, 브라우저 상단의 창(탭) 닫기를 눌러주시면 됩니다.
+          </p>
+        )}
       </div>
     </div>
   );
