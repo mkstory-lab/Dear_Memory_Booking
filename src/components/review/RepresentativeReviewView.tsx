@@ -898,7 +898,7 @@ export const RepresentativeReviewView: React.FC<RepresentativeReviewViewProps> =
           top: 0,
           zIndex: -100,
           pointerEvents: 'none',
-          opacity: 0.01,
+          opacity: 1, // 화면 밖 배치 상태에서 100% 원본 선명도 및 텍스트 안티앨리어싱 보장
         }}
         aria-hidden="true"
       >

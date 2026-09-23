@@ -71,22 +71,36 @@ export class Html2CanvasPdfGenerator implements IPdfGenerator {
     for (let i = 0; i < targets.length; i++) {
       const pageEl = targets[i];
 
+      // 350 DPI 인쇄소 출판급 초고해상도 렌더링 (확대 시 픽셀 깨짐 제로화)
       const canvas = await html2canvas(pageEl, {
-        scale: 2, // 2배율 고해상도
+        scale: 3.5, // 기존 2배율(192 DPI) -> 3.5배율(약 350 DPI 초고화질)
         useCORS: true,
         backgroundColor: '#FFFFFF',
         logging: false,
-        windowWidth: 1024,
+        imageTimeout: 0,
+        onclone: (clonedDoc) => {
+          // 복제된 DOM에 폰트 스무딩 및 기하학적 텍스트 렌더링 강제 주입
+          const style = clonedDoc.createElement('style');
+          style.innerHTML = `
+            * {
+              -webkit-font-smoothing: antialiased !important;
+              -moz-osx-font-smoothing: grayscale !important;
+              text-rendering: geometricPrecision !important;
+            }
+          `;
+          clonedDoc.head.appendChild(style);
+        },
       });
 
-      const imgDataUrl = canvas.toDataURL('image/jpeg', 0.95);
+      // 무손실 PNG 인코딩으로 JPEG 압축 노이즈(글자 번짐) 완전 차단
+      const imgDataUrl = canvas.toDataURL('image/png');
 
       if (i === 0) {
         firstPageJpg = imgDataUrl;
-        pdf.addImage(imgDataUrl, 'JPEG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
+        pdf.addImage(imgDataUrl, 'PNG', 0, 0, pdfWidth, pdfHeight, undefined, 'SLOW');
       } else {
         pdf.addPage();
-        pdf.addImage(imgDataUrl, 'JPEG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
+        pdf.addImage(imgDataUrl, 'PNG', 0, 0, pdfWidth, pdfHeight, undefined, 'SLOW');
       }
     }
 
