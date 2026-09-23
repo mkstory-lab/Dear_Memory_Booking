@@ -142,13 +142,25 @@ export const RequestNotesSection: React.FC<RequestNotesSectionProps> = ({
                 key={opt}
                 type="button"
                 onClick={() => handleSelectOption(opt)}
-                className={`py-2.5 px-3 rounded-xl border text-center transition-all text-xs sm:text-sm ${
+                className={`py-2 px-2.5 rounded-xl border text-center transition-all text-xs sm:text-sm min-h-[48px] flex flex-col items-center justify-center ${
                   isSelected
                     ? 'bg-[#322A1B] text-[#FAF8F5] border-[#322A1B] font-bold shadow-sm'
                     : 'bg-white text-[#6E5C3D] border-[#DDD1BD] hover:border-[#8F7A56] font-medium'
                 }`}
               >
-                {opt}
+                {opt === '블로그 후기' ? (
+                  <div className="leading-snug">
+                    <div>블로그</div>
+                    <div>후기</div>
+                  </div>
+                ) : opt === '카페 후기' ? (
+                  <div className="leading-snug">
+                    <div>카페</div>
+                    <div>후기</div>
+                  </div>
+                ) : (
+                  <div className="whitespace-nowrap leading-snug">{opt}</div>
+                )}
               </button>
             );
           })}

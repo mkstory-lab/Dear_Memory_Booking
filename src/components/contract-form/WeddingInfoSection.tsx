@@ -53,9 +53,9 @@ export const WeddingInfoSection: React.FC<WeddingInfoSectionProps> = ({
         </p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
-        {/* 예식일 (터치/클릭 시 전용 달력 팝업 오픈) */}
-        <div>
+      <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 sm:gap-5">
+        {/* 예식일 (터치/클릭 시 전용 달력 팝업 오픈 - 좌우로 더 길게 sm:col-span-7) */}
+        <div className="sm:col-span-7">
           <label className="block text-xs sm:text-sm font-semibold text-[#322A1B] mb-2">
             예식일 <span className="text-red-500">*</span>
           </label>
@@ -97,20 +97,10 @@ export const WeddingInfoSection: React.FC<WeddingInfoSectionProps> = ({
             selectedDate={weddingDate}
             onSelectDate={(date) => onChange({ weddingDate: date })}
           />
-
-          {/* 일요일 할인 자동 감지 배너 */}
-          {weddingDate && isSunday && (
-            <div className="mt-2.5 p-3 bg-[#FAF8F5] border border-[#B09A74]/50 rounded-xl flex items-center gap-2.5 text-xs sm:text-sm text-[#6E5C3D] animate-fade-in shadow-sm">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#B09A74] inline-block animate-pulse shrink-0" />
-              <span>
-                <strong>일요일 예식</strong> 확인 — <span className="text-[#322A1B] font-bold">100,000원 즉시 할인</span>이 자동 적용됩니다.
-              </span>
-            </div>
-          )}
         </div>
 
-        {/* 예식시간 (자유 텍스트 입력창) */}
-        <div>
+        {/* 예식시간 (자유 텍스트 입력창 - 좌우로 좀 더 좁게 sm:col-span-5) */}
+        <div className="sm:col-span-5">
           <label className="block text-xs sm:text-sm font-semibold text-[#322A1B] mb-2">
             예식 시간 <span className="text-red-500">*</span>
           </label>
@@ -130,8 +120,18 @@ export const WeddingInfoSection: React.FC<WeddingInfoSectionProps> = ({
           )}
         </div>
 
+        {/* 일요일 할인 자동 감지 배너 (예식일과 예식시간 밑으로 1줄 전체 길게 이어짐) */}
+        {weddingDate && isSunday && (
+          <div className="col-span-1 sm:col-span-12 p-3 sm:p-3.5 bg-[#FAF8F5] border border-[#B09A74]/50 rounded-xl flex items-center gap-2.5 text-xs sm:text-sm text-[#6E5C3D] animate-fade-in shadow-sm">
+            <span className="w-2.5 h-2.5 rounded-full bg-[#B09A74] inline-block animate-pulse shrink-0" />
+            <span className="break-keep">
+              <strong>일요일 예식</strong> 확인 — <span className="text-[#322A1B] font-bold">100,000원 즉시 할인</span>이 자동 적용됩니다.
+            </span>
+          </div>
+        )}
+
         {/* 웨딩홀 명 */}
-        <div>
+        <div className="sm:col-span-6">
           <label className="block text-xs sm:text-sm font-semibold text-[#322A1B] mb-2">
             웨딩홀 명 <span className="text-red-500">*</span>
           </label>
@@ -150,7 +150,7 @@ export const WeddingInfoSection: React.FC<WeddingInfoSectionProps> = ({
         </div>
 
         {/* 홀명 / 층수 */}
-        <div>
+        <div className="sm:col-span-6">
           <label className="block text-xs sm:text-sm font-semibold text-[#322A1B] mb-2">
             홀 명칭 / 층수 <span className="text-red-500">*</span>
           </label>
@@ -169,7 +169,7 @@ export const WeddingInfoSection: React.FC<WeddingInfoSectionProps> = ({
         </div>
 
         {/* 메이크업 장소 / in, out 시간 (필수, 미정이면 미정 입력) */}
-        <div className="sm:col-span-2">
+        <div className="sm:col-span-12">
           <label className="block text-xs sm:text-sm font-semibold text-[#322A1B] mb-2">
             메이크업 장소 / in, out 시간 <span className="text-red-500">*</span>
           </label>
