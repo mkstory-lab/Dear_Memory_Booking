@@ -60,12 +60,18 @@ export class GoogleAppsScriptAdapter implements IBackendAdapter {
 
   async approveAndSendContract(req: ApproveAndSendRequest): Promise<ApproveAndSendResponse> {
     try {
+      const { generateContractNumber } = await import('@/lib/contractNumber');
+      const contractNumber = generateContractNumber(req.updatedData?.weddingDate);
+
       const response = await fetch(this.webAppUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           action: 'approve_and_send',
-          payload: req,
+          payload: {
+            ...req,
+            contractNumber,
+          },
         }),
       });
 
@@ -73,7 +79,11 @@ export class GoogleAppsScriptAdapter implements IBackendAdapter {
         throw new Error(`Google Apps Script 서버 응답 오류: ${response.statusText}`);
       }
 
-      return await response.json();
+      const result = await response.json();
+      return {
+        ...result,
+        contractNumber: result.contractNumber || contractNumber,
+      };
     } catch (err: any) {
       return {
         success: false,
@@ -93,7 +103,8 @@ let activeAdapter: IBackendAdapter | null = null;
 
 export function getBackendAdapter(): IBackendAdapter {
   if (!activeAdapter) {
-    const gasUrl = process.env.GAS_WEBAPP_URL;
+    const defaultGasUrl = 'https://script.google.com/macros/s/AKfycbxJ9SkHKRfA_SeG9cGi2m3zney4pKyrkglNTD8mjIfNXk5DGLGazcnpRwd4qYW2N-q5mg/exec';
+    const gasUrl = process.env.GAS_WEBAPP_URL || defaultGasUrl;
     if (gasUrl && gasUrl.trim() !== '') {
       activeAdapter = new GoogleAppsScriptAdapter(gasUrl);
     } else {
