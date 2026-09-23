@@ -154,7 +154,7 @@ function handleApproveAndSend(payload) {
       <div style="background: #F5F1EA; border-radius: 12px; padding: 18px; margin-bottom: 24px; font-size: 12px; line-height: 1.7; color: #6E5C3D;">
         <p style="margin: 0; font-weight: bold; color: #322A1B; font-size: 13px; margin-bottom: 6px;">[계약금 입금 및 일정 확정 안내]</p>
         <p style="margin: 0;">• 첨부된 공식 PDF 계약서 내용을 확인해 주시기 바랍니다.</p>
-        <p style="margin: 0;">• 계약금(100,000원) 입금 확인 시 스케줄이 최종 마감/확정됩니다.</p>
+        <p style="margin: 0;">• 계약금(300,000원) 입금 확인 시 스케줄이 최종 마감/확정됩니다.</p>
         <p style="margin: 0;">• 72시간 이내 취소 시 계약금 100% 전액 안심 환불 보장됩니다.</p>
       </div>
 
