@@ -18,6 +18,7 @@ import { TermsModal } from '@/components/ui/TermsModal';
 import { ContractFormData } from '@/types/contract';
 import { calculateContractPrice } from '@/lib/pricing';
 import { ArrowLeft } from 'lucide-react';
+import { DEAR_MEMORY_LOGO_BASE64 } from '@/assets/images';
 
 type ViewMode = 'home' | 'catalog' | 'terms' | 'form' | 'confirm' | 'success';
 
@@ -458,13 +459,20 @@ export default function CustomerContractPage() {
       </main>
 
       {/* 공통 푸터 */}
-      <footer className="border-t border-[#EBE3D5] py-8 mt-12 bg-[#FAF8F5] text-center text-xs text-[#8F7A56]">
-        <div className="max-w-3xl mx-auto px-4 space-y-1">
-          <p className="font-semibold text-[#6E5C3D]">DEAR MEMORY FOR BOOKING</p>
-          <p>웨딩 본식스냅 전문 스튜디오 | 대표 한민규</p>
-          <p className="text-[11px] text-[#A8987E] pt-1">
-            Copyright &copy; {new Date().getFullYear()} DEAR MEMORY. All rights reserved.
-          </p>
+      <footer className="border-t border-[#EBE3D5] py-10 mt-12 bg-[#FAF8F5] text-center text-xs text-[#8F7A56]">
+        <div className="max-w-3xl mx-auto px-4 flex flex-col items-center space-y-3">
+          {/* 디어메모리 정식 로고 */}
+          <img
+            src={DEAR_MEMORY_LOGO_BASE64}
+            alt="Dear Memory Photography Logo"
+            className="h-9 sm:h-11 w-auto object-contain select-none opacity-85 hover:opacity-100 transition-opacity"
+          />
+          <div className="space-y-1">
+            <p className="font-semibold text-[#322A1B] text-xs sm:text-sm">본식스냅 스튜디오 디어메모리</p>
+            <p className="text-[11px] text-[#A8987E]">
+              Copyright &copy; {new Date().getFullYear()} DEAR MEMORY. All rights reserved.
+            </p>
+          </div>
         </div>
       </footer>
 

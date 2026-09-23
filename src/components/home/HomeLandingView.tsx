@@ -1,5 +1,6 @@
 import React from 'react';
 import { Camera, FileEdit, ArrowRight, Sparkles, ShieldCheck } from 'lucide-react';
+import { DEAR_MEMORY_LOGO_BASE64 } from '@/assets/images';
 
 interface HomeLandingViewProps {
   onSelectCatalog: () => void;
@@ -125,9 +126,14 @@ export const HomeLandingView: React.FC<HomeLandingViewProps> = ({
       </div>
 
       {/* 하단 신뢰 안내문 */}
-      <div className="text-center text-xs text-[#8F7A56] pt-4 space-y-1">
-        <p className="font-medium tracking-wide text-[#6E5C3D]">
-          DEAR MEMORY &bull; 웨딩 본식스냅 전문 스튜디오
+      <div className="text-center text-xs text-[#8F7A56] pt-6 flex flex-col items-center space-y-2">
+        <img
+          src={DEAR_MEMORY_LOGO_BASE64}
+          alt="Dear Memory Photography"
+          className="h-8 sm:h-10 w-auto object-contain select-none opacity-85 hover:opacity-100 transition-opacity"
+        />
+        <p className="font-semibold text-[#322A1B] text-xs sm:text-sm">
+          본식스냅 스튜디오 디어메모리
         </p>
         <p className="text-[11px] text-[#A8987E] leading-relaxed">
           작성해 주신 정보는 안전하게 보호되며 대표 확인 및 계약서 발행 목적으로만 사용됩니다.

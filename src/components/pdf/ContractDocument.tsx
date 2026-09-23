@@ -4,6 +4,7 @@ import { getProductById } from '@/config/products';
 import { getOptionById } from '@/config/options';
 import { CONTRACT_POLICY_CONFIG } from '@/config/contractPolicy';
 import { formatKRW } from '@/lib/pricing';
+import { HANMINGYU_SEAL_BASE64 } from '@/assets/images';
 
 interface ContractDocumentProps {
   contractNumber: string;
@@ -368,12 +369,13 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
                   <span className="font-bold text-[#322A1B] text-sm tracking-wide">DEAR MEMORY</span>
                   <span className="text-xs font-semibold text-[#6E5C3D]">대표 한민규</span>
                 </div>
-                {/* 대표 인장 */}
-                <div
-                  className="w-11 h-11 rounded-full border-2 border-red-500 flex items-center justify-center text-red-500 font-serif text-[11px] font-bold rotate-[-10deg] select-none shadow-sm shrink-0"
-                  style={{ borderColor: 'rgba(239, 68, 68, 0.9)' }}
-                >
-                  한민규
+                {/* 대표 정식 직인 날인 */}
+                <div className="relative w-12 h-12 flex items-center justify-center shrink-0">
+                  <img
+                    src={HANMINGYU_SEAL_BASE64}
+                    alt="대표 직인"
+                    className="w-11 h-11 object-contain select-none transform rotate-[-3deg] drop-shadow-sm"
+                  />
                 </div>
               </div>
             </div>
