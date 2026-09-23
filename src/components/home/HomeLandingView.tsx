@@ -28,12 +28,20 @@ export const HomeLandingView: React.FC<HomeLandingViewProps> = ({
 
       {/* 2대 선택 카드: 계약상품 구경하기 vs 계약정보 작성하기 */}
       {/* 2대 선택 카드: 계약상품 구경하기 vs 계약정보 작성하기 */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
+      {/* 모바일 전용 좌우 안내 힌트 */}
+      <div className="flex md:hidden items-center justify-between text-xs text-[#8F7A56] px-1 -mb-1">
+        <span className="font-medium text-[#6E5C3D]">원하시는 항목을 선택해 주세요</span>
+        <span className="text-[11px] bg-[#F5F1EA] text-[#8F7A56] px-2 py-0.5 rounded-full border border-[#EBE3D5] flex items-center gap-1 font-medium">
+          좌우 넘김 ↔
+        </span>
+      </div>
+
+      <div className="flex md:grid md:grid-cols-2 gap-4 md:gap-6 overflow-x-auto md:overflow-visible snap-x snap-mandatory no-scrollbar pb-3 px-4 -mx-4 md:px-0 md:mx-0 items-stretch">
         
         {/* 카드 1: 계약상품 구경하기 */}
         <div
           onClick={onSelectCatalog}
-          className="group cursor-pointer bg-[#FFFFFF] border border-[#EBE3D5] hover:border-[#322A1B] rounded-3xl p-6 sm:p-8 transition-all duration-300 shadow-sm hover:shadow-md flex flex-col justify-between h-full relative overflow-hidden"
+          className="w-[86vw] sm:w-[360px] md:w-auto shrink-0 snap-center group cursor-pointer bg-[#FFFFFF] border border-[#EBE3D5] hover:border-[#322A1B] rounded-3xl p-6 sm:p-8 transition-all duration-300 shadow-sm hover:shadow-md flex flex-col justify-between h-full relative overflow-hidden"
         >
           <div className="space-y-4">
             <div className="w-12 h-12 rounded-2xl bg-[#FAF8F5] border border-[#EBE3D5] flex items-center justify-center text-[#8F7A56] group-hover:bg-[#322A1B] group-hover:text-[#FAF8F5] transition-colors">
@@ -78,7 +86,7 @@ export const HomeLandingView: React.FC<HomeLandingViewProps> = ({
         {/* 카드 2: 계약정보 작성하기 */}
         <div
           onClick={onSelectApply}
-          className="group cursor-pointer bg-[#FFFFFF] border-2 border-[#322A1B]/80 hover:border-[#322A1B] rounded-3xl p-6 sm:p-8 transition-all duration-300 shadow-sm hover:shadow-md flex flex-col justify-between h-full relative overflow-hidden bg-gradient-to-br from-[#FFFFFF] to-[#FAF8F5]"
+          className="w-[86vw] sm:w-[360px] md:w-auto shrink-0 snap-center group cursor-pointer bg-[#FFFFFF] border-2 border-[#322A1B]/80 hover:border-[#322A1B] rounded-3xl p-6 sm:p-8 transition-all duration-300 shadow-sm hover:shadow-md flex flex-col justify-between h-full relative overflow-hidden bg-gradient-to-br from-[#FFFFFF] to-[#FAF8F5]"
         >
           {/* 상단 추천 뱃지 */}
           <div className="absolute top-4 right-4">

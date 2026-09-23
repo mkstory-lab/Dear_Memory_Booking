@@ -24,7 +24,15 @@ export const ProductSelectSection: React.FC<ProductSelectSectionProps> = ({
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-stretch">
+      {/* 모바일 전용 좌우 선택 안내 힌트 */}
+      <div className="flex md:hidden items-center justify-between text-xs text-[#8F7A56] px-1 -mb-2">
+        <span>상품을 터치하여 선택해 주세요</span>
+        <span className="text-[11px] bg-[#F5F1EA] text-[#8F7A56] px-2 py-0.5 rounded-full border border-[#EBE3D5] flex items-center gap-1 font-medium">
+          좌우 넘김 ↔
+        </span>
+      </div>
+
+      <div className="flex md:grid md:grid-cols-2 gap-3 md:gap-4 overflow-x-auto md:overflow-visible snap-x snap-mandatory no-scrollbar pb-3 px-4 -mx-4 md:px-0 md:mx-0 items-stretch">
         {PRODUCTS_CONFIG.map((product) => {
           const isSelected = selectedProductId === product.id;
           const isPlus = product.isPlusPackage;
@@ -33,7 +41,7 @@ export const ProductSelectSection: React.FC<ProductSelectSectionProps> = ({
             <div
               key={product.id}
               onClick={() => onSelect(product.id)}
-              className={`cursor-pointer rounded-2xl p-5 sm:p-6 transition-all relative border flex flex-col justify-between ${
+              className={`w-[88vw] sm:w-[360px] md:w-auto shrink-0 snap-center cursor-pointer rounded-2xl p-5 sm:p-6 transition-all relative border flex flex-col justify-between ${
                 isSelected
                   ? 'border-[#322A1B] bg-[#FFFFFF] shadow-md ring-2 ring-[#322A1B]/10'
                   : 'border-[#EBE3D5] bg-[#FFFFFF]/70 hover:border-[#C7B698] hover:bg-[#FFFFFF]'
