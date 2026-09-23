@@ -132,7 +132,7 @@ function handleApproveAndSend(payload) {
       </div>
 
       <p style="font-size: 14px; line-height: 1.7; margin-bottom: 16px;">
-        안녕하세요, <strong>${data.groomName} · ${data.brideName}</strong> 고객님.<br/>
+        안녕하세요, <strong>${data.groomName} ❤️ ${data.brideName}</strong> 고객님.<br/>
         디어메모리와 함께 소중한 첫걸음을 맺어주셔서 진심으로 감사드립니다.
       </p>
 
