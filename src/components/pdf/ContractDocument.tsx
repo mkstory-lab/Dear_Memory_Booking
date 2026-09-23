@@ -197,8 +197,8 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
                 selectedOptions.map((opt) => (
                   <tr key={opt!.id}>
                     <td className="py-2 text-[#6E5C3D] font-medium text-[12.5px]">추가 옵션</td>
-                    <td className="py-2 text-[#4E412A] text-[12.5px]">
-                      {opt!.name} <span className="text-[11px] text-[#8F7A56]">({opt!.description})</span>
+                    <td className="py-2 text-[#4E412A] font-medium text-[12.5px]">
+                      {opt!.name}
                     </td>
                     <td className="py-2 text-right font-semibold text-[#6E5C3D] tabular-nums text-[13px]">
                       +{formatKRW(opt!.price)}
