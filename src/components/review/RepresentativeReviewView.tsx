@@ -195,7 +195,7 @@ export const RepresentativeReviewView: React.FC<RepresentativeReviewViewProps> =
               onClick={async () => {
                 try {
                   const res = await exportContractToPdfAndJpg('review-contract-doc-preview', contractNumber);
-                  triggerFileDownload(res.pdfBlob, `${contractNumber}_계약서.pdf`);
+                  triggerFileDownload(res.pdfBlob, `${contractNumber}_${formData.groomName}_${formData.brideName}_촬영계약서.pdf`);
                 } catch (e) {
                   alert('PDF 다운로드 중 오류가 발생했습니다.');
                 }

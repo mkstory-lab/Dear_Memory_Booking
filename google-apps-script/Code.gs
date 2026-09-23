@@ -126,15 +126,16 @@ function handleApproveAndSend(payload) {
 
   const subject = `[DEAR MEMORY] 본식스냅 촬영 계약서 안내 (${data.groomName} · ${data.brideName} 고객님)`;
   
-  // PDF Blob 변환
+  // PDF Blob 변환 (파일명: 계약번호_신랑이름_신부이름_촬영계약서.pdf)
   let pdfBlob = null;
+  const fileName = `${contractNumber}_${data.groomName}_${data.brideName}_촬영계약서.pdf`;
   if (pdfBase64 && typeof pdfBase64 === "string" && pdfBase64.trim().length > 0) {
     try {
       const commaIdx = pdfBase64.indexOf(",");
       const base64Data = commaIdx !== -1 ? pdfBase64.substring(commaIdx + 1) : pdfBase64;
       const cleanBase64 = base64Data.replace(/[\r\n\s]/g, "");
       const decodedBytes = Utilities.base64Decode(cleanBase64);
-      pdfBlob = Utilities.newBlob(decodedBytes, "application/pdf", `${contractNumber}_촬영계약서.pdf`);
+      pdfBlob = Utilities.newBlob(decodedBytes, "application/pdf", fileName);
     } catch (pdfErr) {
       Logger.log("PDF Blob 생성 실패: " + pdfErr.toString());
     }
@@ -242,7 +243,7 @@ function saveContractToGoogleDrive(data, contractNumber, pdfBlob, jpgBase64) {
       const commaIdx = jpgBase64.indexOf(",");
       const cleanJpg = (commaIdx !== -1 ? jpgBase64.substring(commaIdx + 1) : jpgBase64).replace(/[\r\n\s]/g, "");
       const jpgBytes = Utilities.base64Decode(cleanJpg);
-      const jpgBlob = Utilities.newBlob(jpgBytes, "image/jpeg", `${contractNumber}_계약서.jpg`);
+      const jpgBlob = Utilities.newBlob(jpgBytes, "image/jpeg", `${contractNumber}_${data.groomName}_${data.brideName}_촬영계약서.jpg`);
       eventFolder.createFile(jpgBlob);
     } catch (jpgErr) {
       Logger.log("JPG Drive 저장 실패: " + jpgErr.toString());
