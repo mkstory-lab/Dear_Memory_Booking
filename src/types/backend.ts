@@ -1,0 +1,57 @@
+/**
+ * Backend Adapter 및 API 응답 타입 정의
+ */
+
+import { ContractFormData, ContractSnapshot } from './contract';
+
+export interface SubmitContractRequest {
+  formData: ContractFormData;
+}
+
+export interface SubmitContractResponse {
+  success: boolean;
+  contractId: string;
+  approvalToken: string;
+  reviewUrl: string;
+  message?: string;
+  error?: string;
+}
+
+export interface ReviewContractResponse {
+  success: boolean;
+  contractId: string;
+  data: ContractFormData;
+  pricing: any;
+  isAlreadySent: boolean;
+  sentAt?: string;
+  error?: string;
+}
+
+export interface ApproveAndSendRequest {
+  token: string;
+  updatedData?: ContractFormData; // 대표가 수정한 경우
+  pdfBase64?: string; // 클라이언트에서 고품질 생성된 PDF
+  jpgBase64?: string; // 클라이언트에서 생성된 JPG (선택적)
+}
+
+export interface ApproveAndSendResponse {
+  success: boolean;
+  contractNumber: string;
+  snapshot: ContractSnapshot;
+  customerEmailSent: boolean;
+  representativeEmailSent: boolean;
+  driveSaved: boolean;
+  driveFolderUrl?: string;
+  message?: string;
+  error?: string;
+}
+
+export interface SentEmailRecord {
+  id: string;
+  to: string;
+  subject: string;
+  html: string;
+  hasAttachment: boolean;
+  sentAt: string;
+  type: 'rep_notification' | 'customer_contract' | 'rep_confirmation';
+}
