@@ -32,22 +32,14 @@ export const ProductSelectSection: React.FC<ProductSelectSectionProps> = ({
           <Layers className="w-4 h-4 text-[#8F7A56] shrink-0" />
           <span>전 상품 기본 공통 제공 사항 (실속형 / 화보형 공통)</span>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs sm:text-sm pt-1">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs sm:text-sm pt-1">
           <div className="flex items-center gap-2">
             <Check className="w-4 h-4 text-[#8F7A56] shrink-0" />
             <span className="font-semibold text-[#322A1B]">스냅 촬영 + 원판(기념촬영) 포함</span>
           </div>
           <div className="flex items-center gap-2">
             <Check className="w-4 h-4 text-[#8F7A56] shrink-0" />
-            <span className="font-semibold text-[#322A1B]">신부대기실 ~ 본식 ~ 원판 ~ 연회장 인사</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Check className="w-4 h-4 text-[#8F7A56] shrink-0" />
-            <span>정밀 세부 보정본 70장 전체 제공</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Check className="w-4 h-4 text-[#8F7A56] shrink-0" />
-            <span>고화질 원본 2,000장 이상 전체 제공</span>
+            <span className="font-semibold text-[#322A1B]">신부대기실 ~ 본식 ~ 원판 ~ 연회장 인사 (10~15분)</span>
           </div>
         </div>
       </div>
