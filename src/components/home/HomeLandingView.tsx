@@ -11,21 +11,7 @@ export const HomeLandingView: React.FC<HomeLandingViewProps> = ({
   onSelectApply,
 }) => {
   return (
-    <div className="max-w-3xl mx-auto py-4 sm:py-14 space-y-5 sm:space-y-10 animate-fade-in">
-      {/* 인트로 환영 섹션 */}
-      <div className="text-center space-y-3.5">
-        <span className="inline-block px-3.5 py-1 bg-[#F5F1EA] text-[#8F7A56] rounded-full text-[11px] font-semibold tracking-[0.2em] uppercase border border-[#EBE3D5]">
-          DEAR MEMORY FOR BOOKING
-        </span>
-        <h2 className="text-2xl sm:text-3xl font-serif font-bold text-[#322A1B] tracking-tight leading-snug">
-          소중한 그날의 시작을 함께합니다
-        </h2>
-        <p className="text-xs sm:text-sm text-[#6E5C3D] leading-relaxed max-w-md mx-auto font-normal">
-          상담이 완료된 신랑·신부님을 위한 전용 안내 페이지입니다.<br />
-          상품 구성을 확인하시거나 계약정보를 작성해 주세요.
-        </p>
-      </div>
-
+    <div className="max-w-3xl mx-auto py-5 sm:py-10 space-y-6 sm:space-y-8 animate-fade-in">
       {/* 2대 선택 카드: 모바일에서도 한 화면에 좌우 2열(grid-cols-2)로 나란히 표시 */}
       <div className="grid grid-cols-2 gap-2.5 sm:gap-6 items-stretch">
         
