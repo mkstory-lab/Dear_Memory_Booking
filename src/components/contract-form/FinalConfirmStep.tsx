@@ -21,8 +21,8 @@ export const FinalConfirmStep: React.FC<FinalConfirmStepProps> = ({
   isSubmitting,
 }) => {
   const product = getProductById(formData.productId);
-  const selectedOptions = formData.optionIds
-    .map((id) => getOptionById(id)?.name)
+  const selectedOptionItems = formData.optionIds
+    .map((id) => getOptionById(id))
     .filter(Boolean);
 
   const weddingDateFormatted = formData.weddingDate.replace(/-/g, '.');
@@ -115,10 +115,11 @@ export const FinalConfirmStep: React.FC<FinalConfirmStepProps> = ({
               <span className="font-medium text-[#322A1B] break-keep">{product?.name}</span>
               <span className="tabular-nums font-medium shrink-0 text-right">{formatKRW(pricing.basePrice)}</span>
             </div>
-            {selectedOptions.length > 0 ? (
-              selectedOptions.map((name, idx) => (
-                <div key={idx} className="flex justify-between items-center text-[#6E5C3D]">
-                  <span className="break-keep">+ {name}</span>
+            {selectedOptionItems.length > 0 ? (
+              selectedOptionItems.map((opt) => (
+                <div key={opt!.id} className="flex justify-between items-center text-[#6E5C3D]">
+                  <span className="break-keep">+ {opt!.name}</span>
+                  <span className="tabular-nums font-medium shrink-0 text-right">+{formatKRW(opt!.price)}</span>
                 </div>
               ))
             ) : (

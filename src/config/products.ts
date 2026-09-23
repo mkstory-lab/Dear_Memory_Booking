@@ -44,8 +44,8 @@ export const PRODUCTS_CONFIG: ProductItem[] = [
     baseIncludedNotice: '실속형의 모든 촬영 및 원본 제공 혜택 100% 기본 포함',
     plusBenefits: [
       {
-        title: '양가 부모님 앨범 2권 추가 제공',
-        detail: '부모님앨범 12x8 40p 2권 [원판 + 스냅 합본, 양가 부모님 선물용]',
+        title: '부모님 앨범 12x8 40p 2권 제공',
+        detail: '부모님 앨범 12x8 40p 2권 [원판·스냅 합본, 양가 부모님 선물용]',
         badge: '2권 추가 제공',
       },
       {

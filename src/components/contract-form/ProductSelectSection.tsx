@@ -137,7 +137,7 @@ export const ProductSelectSection: React.FC<ProductSelectSectionProps> = ({
                         </div>
                         <div className="flex items-center gap-1 p-1.5 bg-[#FAF8F5] rounded-lg border border-[#B09A74]/40 text-[8.5px] leading-tight h-[28px]">
                           <Sparkles className="w-3 h-3 text-[#B09A74] shrink-0" />
-                          <span className="font-semibold text-[#322A1B] truncate">부모님 앨범 2권 추가 제공 (40p)</span>
+                          <span className="font-semibold text-[#322A1B] truncate">부모님 앨범 12x8 40p 2권 제공</span>
                         </div>
                         <div className="flex items-center gap-1 p-1.5 bg-[#FAF8F5] rounded-lg border border-[#EBE3D5] text-[8.5px] leading-tight h-[28px]">
                           <Sparkles className="w-3 h-3 text-[#B09A74] shrink-0" />
@@ -156,23 +156,12 @@ export const ProductSelectSection: React.FC<ProductSelectSectionProps> = ({
 
                     {/* 데스크톱(PC/태블릿) 전용: 상세 설명 혜택 카드 */}
                     <div className="hidden sm:block space-y-2.5">
-                      <div className="p-2.5 bg-[#FAF8F5] border border-[#DDD1BD] rounded-xl space-y-1">
-                        <div className="flex items-center gap-1 text-xs font-semibold text-[#322A1B]">
-                          <Check className="w-3.5 h-3.5 text-[#8F7A56] shrink-0" />
-                          <span className="break-keep leading-tight">{product.baseIncludedNotice || '실속형 기본 구성 100% 포함'}</span>
-                        </div>
-                        <div className="pl-4 text-[11px] text-[#6E5C3D] space-y-0.5 font-medium border-t border-[#EBE3D5] pt-1">
-                          <div className="text-[#8F7A56] font-semibold">화보형 업그레이드:</div>
-                          {product.albumSpec.split('\n').map((line, idx) => (
-                            <div key={idx} className="flex items-center gap-1">
-                              <span className="text-[#B09A74]">•</span>
-                              <span className="text-[#322A1B]">{line}</span>
-                            </div>
-                          ))}
-                        </div>
+                      <div className="p-2 bg-[#FAF8F5] border border-[#DDD1BD] rounded-xl flex items-center gap-1.5 text-xs font-semibold text-[#322A1B]">
+                        <Check className="w-3.5 h-3.5 text-[#8F7A56] shrink-0" />
+                        <span className="break-keep">{product.baseIncludedNotice || '실속형 기본 구성 100% 포함'}</span>
                       </div>
 
-                      <div className="space-y-1.5 pt-1">
+                      <div className="space-y-1.5 pt-0.5">
                         <div className="flex items-center gap-1 text-[11px] font-bold text-[#8F7A56]">
                           <Sparkles className="w-3 h-3 text-[#B09A74]" />
                           <span>화보형 추가 혜택 (+20만원)</span>

@@ -36,6 +36,29 @@ function handleSubmitContract(payload) {
   const reviewUrl = payload.reviewUrl || "";
   
   const subject = `[DEAR MEMORY] 신규 계약 접수 | ${formData.groomName} · ${formData.brideName} 고객님 (${formData.weddingDate})`;
+  const optionNames = [];
+  if (formData.optionIds && Array.isArray(formData.optionIds)) {
+    if (formData.optionIds.indexOf('sub_photographer') !== -1) optionNames.push('2인 촬영 (+250,000원)');
+    if (formData.optionIds.indexOf('pyebaek') !== -1) optionNames.push('폐백 촬영 (+100,000원)');
+  }
+  const optionsText = optionNames.length > 0 ? optionNames.join(', ') : '선택 없음';
+
+  const discountNames = [];
+  if (formData.weddingDate) {
+    var parts = formData.weddingDate.split('-');
+    if (parts.length === 3) {
+      var d = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+      if (d.getDay() === 0) discountNames.push('일요일 예식 할인 (-100,000원)');
+    }
+  }
+  if (formData.partnerDiscount) {
+    discountNames.push('짝꿍 할인 ' + (formData.partnerName ? '(' + formData.partnerName + ')' : '') + ' (-50,000원)');
+  }
+  if (formData.portfolioConsent) {
+    discountNames.push('사진 공개 감사 할인 (-100,000원)');
+  }
+  const discountsText = discountNames.length > 0 ? discountNames.join(', ') : '적용 없음';
+
   const htmlBody = `
     <div style="font-family: 'Apple SD Gothic Neo', Pretendard, sans-serif; max-width: 600px; margin: 0 auto; padding: 30px; color: #322A1B; background: #FAF8F5; border: 1px solid #EBE3D5; border-radius: 16px;">
       <div style="border-bottom: 2px solid #322A1B; padding-bottom: 12px; margin-bottom: 20px;">
@@ -49,7 +72,9 @@ function handleSubmitContract(payload) {
         <p style="margin: 0;"><strong>예식장소:</strong> ${formData.weddingVenue} ${formData.weddingHall}</p>
         <p style="margin: 0;"><strong>연락처:</strong> 신랑 ${formData.groomPhone} / 신부 ${formData.bridePhone}</p>
         <p style="margin: 0;"><strong>고객 이메일:</strong> ${formData.email}</p>
-        <p style="margin: 0;"><strong>선택 상품:</strong> ${formData.productId === 'album_plus' ? '화보형 (대표 추천)' : '실속형'}</p>
+        <p style="margin: 0;"><strong>선택 상품:</strong> ${formData.productId === 'album_plus' ? '화보형 (대표 추천 · 1,450,000원)' : '실속형 (1,250,000원)'}</p>
+        <p style="margin: 0;"><strong>추가 옵션:</strong> ${optionsText}</p>
+        <p style="margin: 0;"><strong>즉시 할인:</strong> ${discountsText}</p>
       </div>
 
       <div style="text-align: center; margin: 30px 0;">
@@ -116,6 +141,7 @@ function handleApproveAndSend(payload) {
         <p style="margin: 0;"><strong>예식일시:</strong> ${data.weddingDate} ${data.weddingTime}</p>
         <p style="margin: 0;"><strong>예식장소:</strong> ${data.weddingVenue} ${data.weddingHall}</p>
         <p style="margin: 0;"><strong>선택상품:</strong> ${data.productId === 'album_plus' ? '화보형 (대표 추천)' : '실속형'}</p>
+        ${data.optionIds && data.optionIds.length > 0 ? `<p style="margin: 0;"><strong>추가옵션:</strong> ${data.optionIds.map(function(o){ return o === 'sub_photographer' ? '2인 촬영(+25만)' : o === 'pyebaek' ? '폐백 촬영(+10만)' : o; }).join(', ')}</p>` : ''}
       </div>
 
       <div style="background: #F5F1EA; border-radius: 12px; padding: 18px; margin-bottom: 24px; font-size: 12px; line-height: 1.7; color: #6E5C3D;">

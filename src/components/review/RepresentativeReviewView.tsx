@@ -130,9 +130,10 @@ export const RepresentativeReviewView: React.FC<RepresentativeReviewViewProps> =
 
   const weddingDateFormatted = formData.weddingDate.replace(/-/g, '.');
   const product = getProductById(formData.productId);
-  const selectedOptions = formData.optionIds
-    .map((id) => getOptionById(id)?.name)
+  const selectedOptionObjects = formData.optionIds
+    .map((id) => getOptionById(id))
     .filter(Boolean);
+  const selectedOptions = selectedOptionObjects.map((opt) => opt!.name);
 
   return (
     <>
@@ -539,30 +540,57 @@ export const RepresentativeReviewView: React.FC<RepresentativeReviewViewProps> =
 
         {/* 2. 일반 뷰: 선택 상품 및 정산 내역 */}
         <div className="space-y-3 text-xs sm:text-sm">
-          <div className="p-4 bg-[#FAF8F5] border border-[#EBE3D5] rounded-2xl space-y-2">
-            <div className="flex justify-between font-medium">
-              <span className="text-[#8F7A56]">선택 상품</span>
-              <span className="text-[#322A1B] tabular-nums">{product?.name} ({formatKRW(pricing.basePrice)})</span>
+          <div className="p-4 bg-[#FAF8F5] border border-[#EBE3D5] rounded-2xl space-y-2.5">
+            <div className="flex justify-between font-medium pb-1.5 border-b border-[#EBE3D5]">
+              <span className="text-[#8F7A56]">기본 상품</span>
+              <span className="font-semibold text-[#322A1B] tabular-nums">{product?.name} ({formatKRW(pricing.basePrice)})</span>
             </div>
 
-            <div className="flex justify-between">
-              <span className="text-[#8F7A56]">추가 옵션</span>
-              <span className="text-[#322A1B]">
-                {selectedOptions.length > 0 ? selectedOptions.join(', ') : '없음'}
-              </span>
-            </div>
+            {/* 추가 옵션 개별 내역 및 금액 */}
+            {selectedOptionObjects.length > 0 ? (
+              <div className="space-y-1.5 py-0.5">
+                {selectedOptionObjects.map((opt) => (
+                  <div key={opt!.id} className="flex justify-between text-xs sm:text-sm">
+                    <span className="text-[#6E5C3D]">+ {opt!.name}</span>
+                    <span className="font-semibold text-[#6E5C3D] tabular-nums">+{formatKRW(opt!.price)}</span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="flex justify-between text-xs text-[#8F7A56]">
+                <span>추가 옵션</span>
+                <span>없음</span>
+              </div>
+            )}
 
+            {/* 즉시 할인 상세 개별 분리 */}
             {pricing.immediateDiscountTotal > 0 && (
-              <div className="flex justify-between text-[#B09A74] font-medium">
-                <span>즉시 할인 합계</span>
-                <span className="tabular-nums">-{formatKRW(pricing.immediateDiscountTotal)}</span>
+              <div className="space-y-1.5 py-1 border-t border-[#EBE3D5] text-xs sm:text-sm text-[#B09A74]">
+                {pricing.isSunday && (
+                  <div className="flex justify-between">
+                    <span>일요일 예식 특별 할인</span>
+                    <span className="font-semibold tabular-nums">-100,000원</span>
+                  </div>
+                )}
+                {formData.partnerDiscount && (
+                  <div className="flex justify-between">
+                    <span>짝꿍 추천 할인 {formData.partnerName ? `(${formData.partnerName})` : ''}</span>
+                    <span className="font-semibold tabular-nums">-50,000원</span>
+                  </div>
+                )}
+                {formData.portfolioConsent && (
+                  <div className="flex justify-between">
+                    <span>사진 공개 감사 할인 (포트폴리오)</span>
+                    <span className="font-semibold tabular-nums">-100,000원</span>
+                  </div>
+                )}
               </div>
             )}
 
             {pricing.manualAdjustmentAmount !== 0 && (
-              <div className="flex justify-between text-[#6E5C3D]">
-                <span>수동 조정 ({manualReason || '조정'})</span>
-                <span className="tabular-nums">
+              <div className="flex justify-between text-[#6E5C3D] py-1 border-t border-[#EBE3D5]">
+                <span>수동 특약 조정 ({manualReason || '조정'})</span>
+                <span className="tabular-nums font-semibold">
                   {pricing.manualAdjustmentAmount > 0 ? '+' : ''}
                   {formatKRW(pricing.manualAdjustmentAmount)}
                 </span>

@@ -15,7 +15,8 @@ export function generateRepresentativeNotificationEmail(
   const subject = `[DEAR MEMORY] 신규 계약정보 | ${data.groomName} · ${data.brideName} | ${weddingDateFormatted}`;
 
   const product = getProductById(data.productId);
-  const selectedOptions = data.optionIds.map((id) => getOptionById(id)?.name).filter(Boolean);
+  const selectedOptionObjects = data.optionIds.map((id) => getOptionById(id)).filter(Boolean);
+  const selectedOptions = selectedOptionObjects.map((opt) => opt!.name);
 
   const html = `
 <!DOCTYPE html>
@@ -76,9 +77,10 @@ export function generateRepresentativeNotificationEmail(
             <span style="font-weight: 600; color: #322A1B;">${product?.name}</span>
             <span style="font-weight: 500;">${formatKRW(pricing.basePrice)}</span>
           </div>
-          ${selectedOptions.length > 0 ? selectedOptions.map((opt) => `
+          ${selectedOptionObjects.length > 0 ? selectedOptionObjects.map((opt) => `
             <div style="display: flex; justify-content: space-between; font-size: 13px; color: #6E5C3D; margin-top: 4px;">
-              <span>+ ${opt}</span>
+              <span>+ ${opt!.name}</span>
+              <span style="font-weight: 500;">+${formatKRW(opt!.price)}</span>
             </div>
           `).join('') : '<div style="font-size: 12px; color: #8F7A56;">추가 옵션 없음</div>'}
         </div>
@@ -88,18 +90,23 @@ export function generateRepresentativeNotificationEmail(
       <div style="background: #FAF8F5; border-radius: 8px; padding: 16px; margin-bottom: 24px;">
         <table style="width: 100%; font-size: 13px; border-collapse: collapse;">
           <tr>
-            <td style="padding: 4px 0; color: #6E5C3D;">기본 상품</td>
+            <td style="padding: 4px 0; color: #6E5C3D;">기본 상품 (${product?.name})</td>
             <td style="padding: 4px 0; text-align: right; font-weight: 500;">${formatKRW(pricing.basePrice)}</td>
           </tr>
           ${pricing.optionTotal > 0 ? `
           <tr>
-            <td style="padding: 4px 0; color: #6E5C3D;">추가 옵션</td>
+            <td style="padding: 4px 0; color: #6E5C3D;">추가 옵션 합계</td>
             <td style="padding: 4px 0; text-align: right; font-weight: 500;">+${formatKRW(pricing.optionTotal)}</td>
           </tr>` : ''}
           ${pricing.immediateDiscountTotal > 0 ? `
           <tr>
-            <td style="padding: 4px 0; color: #B09A74;">즉시 할인 혜택</td>
-            <td style="padding: 4px 0; text-align: right; font-weight: 600; color: #B09A74;">-${formatKRW(pricing.immediateDiscountTotal)}</td>
+            <td style="padding: 4px 0; color: #B09A74;">
+              즉시 할인 혜택
+              ${pricing.isSunday ? '<br><span style="font-size: 11px;">• 일요일 예식 (-100,000원)</span>' : ''}
+              ${data.partnerDiscount ? `<br><span style="font-size: 11px;">• 짝꿍 추천 (${data.partnerName}) (-50,000원)</span>` : ''}
+              ${data.portfolioConsent ? '<br><span style="font-size: 11px;">• 사진 공개 감사 (-100,000원)</span>' : ''}
+            </td>
+            <td style="padding: 4px 0; text-align: right; font-weight: 600; color: #B09A74; vertical-align: top;">-${formatKRW(pricing.immediateDiscountTotal)}</td>
           </tr>` : ''}
           ${pricing.manualAdjustmentAmount !== 0 ? `
           <tr>

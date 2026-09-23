@@ -38,6 +38,10 @@ export async function GET(req: NextRequest) {
       manualAdjustment: data.manualAdjustment,
     });
 
+    // 계약 식별 번호 (이미 발송된 번호 우선, 없으면 예식일 기반 정식 번호 생성)
+    const { generateContractNumber } = await import('@/lib/contractNumber');
+    const contractNumber = sentRecord?.contractNumber || generateContractNumber(data.weddingDate);
+
     return NextResponse.json({
       success: true,
       contractId,
@@ -45,7 +49,7 @@ export async function GET(req: NextRequest) {
       pricing,
       isAlreadySent: alreadySent,
       sentAt: sentRecord?.sentAt,
-      contractNumber: sentRecord?.contractNumber,
+      contractNumber,
     });
   } catch (err: any) {
     return NextResponse.json(
