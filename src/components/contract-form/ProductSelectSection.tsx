@@ -133,23 +133,23 @@ export const ProductSelectSection: React.FC<ProductSelectSectionProps> = ({
                       <div className="space-y-1">
                         <div className="flex items-center gap-1 p-1.5 bg-[#FAF8F5] rounded-lg border border-[#DDD1BD] text-[8.5px] leading-tight h-[28px]">
                           <Check className="w-3 h-3 text-[#8F7A56] shrink-0" />
-                          <span className="font-semibold text-[#322A1B] truncate">스냅 촬영 + 원판 촬영 포함</span>
-                        </div>
-                        <div className="flex items-center gap-1 p-1.5 bg-[#FAF8F5] rounded-lg border border-[#DDD1BD] text-[8.5px] leading-tight h-[28px]">
-                          <Check className="w-3 h-3 text-[#8F7A56] shrink-0" />
-                          <span className="font-semibold text-[#322A1B] truncate">신부대기실 ~ 본식 ~ 원판 ~ 연회장</span>
-                        </div>
-                        <div className="flex items-center gap-1 p-1.5 bg-[#FAF8F5] rounded-lg border border-[#EBE3D5] text-[8.5px] leading-tight h-[28px]">
-                          <Sparkles className="w-3 h-3 text-[#B09A74] shrink-0" />
-                          <span className="truncate">고화질 원본 2,500장 이상 (+500장)</span>
-                        </div>
-                        <div className="flex items-center gap-1 p-1.5 bg-[#FAF8F5] rounded-lg border border-[#EBE3D5] text-[8.5px] leading-tight h-[28px]">
-                          <Sparkles className="w-3 h-3 text-[#B09A74] shrink-0" />
-                          <span className="truncate">정밀 세부 보정본 80장 (+10장)</span>
+                          <span className="font-semibold text-[#322A1B] truncate">실속형 전 구성 100% 기본 포함</span>
                         </div>
                         <div className="flex items-center gap-1 p-1.5 bg-[#FAF8F5] rounded-lg border border-[#B09A74]/40 text-[8.5px] leading-tight h-[28px]">
                           <Sparkles className="w-3 h-3 text-[#B09A74] shrink-0" />
-                          <span className="font-semibold text-[#322A1B] truncate">부부 80p 1권 + 부모님 40p 2권</span>
+                          <span className="font-semibold text-[#322A1B] truncate">부모님 앨범 2권 추가 제공 (40p)</span>
+                        </div>
+                        <div className="flex items-center gap-1 p-1.5 bg-[#FAF8F5] rounded-lg border border-[#EBE3D5] text-[8.5px] leading-tight h-[28px]">
+                          <Sparkles className="w-3 h-3 text-[#B09A74] shrink-0" />
+                          <span className="truncate">부부앨범 80p (+10p 증면)</span>
+                        </div>
+                        <div className="flex items-center gap-1 p-1.5 bg-[#FAF8F5] rounded-lg border border-[#EBE3D5] text-[8.5px] leading-tight h-[28px]">
+                          <Sparkles className="w-3 h-3 text-[#B09A74] shrink-0" />
+                          <span className="truncate">정밀 세부 보정본 (+10장 추가)</span>
+                        </div>
+                        <div className="flex items-center gap-1 p-1.5 bg-[#FAF8F5] rounded-lg border border-[#EBE3D5] text-[8.5px] leading-tight h-[28px]">
+                          <Sparkles className="w-3 h-3 text-[#B09A74] shrink-0" />
+                          <span className="truncate">고화질 원본 (+500장 추가)</span>
                         </div>
                       </div>
                     </div>
