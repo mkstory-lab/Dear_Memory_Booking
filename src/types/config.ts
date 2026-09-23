@@ -29,6 +29,7 @@ export interface ProductItem {
 export interface OptionItem {
   id: string;
   name: string;
+  subtitle?: string;
   price: number;
   description: string;
   active: boolean;

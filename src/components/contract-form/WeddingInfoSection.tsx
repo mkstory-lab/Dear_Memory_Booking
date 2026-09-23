@@ -1,3 +1,4 @@
+import React, { useState } from 'react';
 import { Calendar, Clock, MapPin } from 'lucide-react';
 import { checkIsSunday } from '@/lib/pricing';
 import { CalendarModal } from '@/components/common/CalendarModal';
