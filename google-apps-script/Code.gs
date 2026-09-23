@@ -3,12 +3,12 @@
  * 
  * 기능:
  * 1. doPost(e): Web App 엔드포인트
- * 2. action: 'submit_contract' -> 대표 Gmail 알림 발송
- * 3. action: 'approve_and_send' -> 고객 메일 발송(PDF 첨부), 대표 메일 발송(PDF 첨부), Google Drive 자동 저장
+ * 2. action: 'submit_contract' -> 대표 이메일 알림 발송 (옵션 및 할인 상세 포함)
+ * 3. action: 'approve_and_send' -> 고객 메일 발송(❤️ 하트 포함, PDF 첨부), 대표 메일 발송, Google Drive 자동 저장
  */
 
-// 대표 Gmail 주소
-const REP_EMAIL = "contact@dearmemory.kr";
+// 알림을 수신할 대표 이메일 주소
+const REP_EMAIL = "dearmemory@kakao.com";
 
 function doPost(e) {
   try {
@@ -36,13 +36,20 @@ function handleSubmitContract(payload) {
   const reviewUrl = payload.reviewUrl || "";
   
   const subject = `[DEAR MEMORY] 신규 계약 접수 | ${formData.groomName} · ${formData.brideName} 고객님 (${formData.weddingDate})`;
+  
+  // 추가 옵션 정리 (second_shooter 및 sub_photographer 모두 호환)
   const optionNames = [];
   if (formData.optionIds && Array.isArray(formData.optionIds)) {
-    if (formData.optionIds.indexOf('sub_photographer') !== -1) optionNames.push('2인 촬영 (+250,000원)');
-    if (formData.optionIds.indexOf('pyebaek') !== -1) optionNames.push('폐백 촬영 (+100,000원)');
+    if (formData.optionIds.indexOf('second_shooter') !== -1 || formData.optionIds.indexOf('sub_photographer') !== -1) {
+      optionNames.push('2인 촬영 (+250,000원)');
+    }
+    if (formData.optionIds.indexOf('pyebaek') !== -1) {
+      optionNames.push('폐백 촬영 (+100,000원)');
+    }
   }
   const optionsText = optionNames.length > 0 ? optionNames.join(', ') : '선택 없음';
 
+  // 즉시 할인 정리
   const discountNames = [];
   if (formData.weddingDate) {
     var parts = formData.weddingDate.split('-');
@@ -67,7 +74,7 @@ function handleSubmitContract(payload) {
       </div>
       
       <div style="background: #FFFFFF; border: 1px solid #EBE3D5; border-radius: 12px; padding: 20px; margin-bottom: 24px; font-size: 13px; line-height: 1.8;">
-        <p style="margin: 0;"><strong>신랑·신부:</strong> ${formData.groomName} ♥ ${formData.brideName}</p>
+        <p style="margin: 0;"><strong>신랑·신부:</strong> ${formData.groomName} ❤️ ${formData.brideName}</p>
         <p style="margin: 0;"><strong>예식일시:</strong> ${formData.weddingDate} ${formData.weddingTime}</p>
         <p style="margin: 0;"><strong>예식장소:</strong> ${formData.weddingVenue} ${formData.weddingHall}</p>
         <p style="margin: 0;"><strong>연락처:</strong> 신랑 ${formData.groomPhone} / 신부 ${formData.bridePhone}</p>
@@ -123,7 +130,7 @@ function handleApproveAndSend(payload) {
     }
   }
 
-  // 고객 메일 발송 (PDF 첨부)
+  // 고객 메일 발송 (PDF 첨부 + 신랑·신부 사이에 ❤️ 빨간 하트 적용)
   const customerHtml = `
     <div style="font-family: 'Apple SD Gothic Neo', Pretendard, sans-serif; max-width: 600px; margin: 0 auto; padding: 30px; color: #322A1B; background: #FAF8F5; border: 1px solid #EBE3D5; border-radius: 16px;">
       <div style="border-bottom: 2px solid #322A1B; padding-bottom: 12px; margin-bottom: 20px;">
@@ -141,13 +148,13 @@ function handleApproveAndSend(payload) {
         <p style="margin: 0;"><strong>예식일시:</strong> ${data.weddingDate} ${data.weddingTime}</p>
         <p style="margin: 0;"><strong>예식장소:</strong> ${data.weddingVenue} ${data.weddingHall}</p>
         <p style="margin: 0;"><strong>선택상품:</strong> ${data.productId === 'album_plus' ? '화보형 (대표 추천)' : '실속형'}</p>
-        ${data.optionIds && data.optionIds.length > 0 ? `<p style="margin: 0;"><strong>추가옵션:</strong> ${data.optionIds.map(function(o){ return o === 'sub_photographer' ? '2인 촬영(+25만)' : o === 'pyebaek' ? '폐백 촬영(+10만)' : o; }).join(', ')}</p>` : ''}
+        ${data.optionIds && data.optionIds.length > 0 ? `<p style="margin: 0;"><strong>추가옵션:</strong> ${data.optionIds.map(function(o){ return (o === 'second_shooter' || o === 'sub_photographer') ? '2인 촬영(+25만)' : o === 'pyebaek' ? '폐백 촬영(+10만)' : o; }).join(', ')}</p>` : ''}
       </div>
 
       <div style="background: #F5F1EA; border-radius: 12px; padding: 18px; margin-bottom: 24px; font-size: 12px; line-height: 1.7; color: #6E5C3D;">
         <p style="margin: 0; font-weight: bold; color: #322A1B; font-size: 13px; margin-bottom: 6px;">[계약금 입금 및 일정 확정 안내]</p>
         <p style="margin: 0;">• 첨부된 공식 PDF 계약서 내용을 확인해 주시기 바랍니다.</p>
-        <p style="margin: 0;">• 계약금(300,000원) 입금 확인 시 스케줄이 최종 마감/확정됩니다.</p>
+        <p style="margin: 0;">• 계약금(100,000원) 입금 확인 시 스케줄이 최종 마감/확정됩니다.</p>
         <p style="margin: 0;">• 72시간 이내 취소 시 계약금 100% 전액 안심 환불 보장됩니다.</p>
       </div>
 
@@ -156,7 +163,7 @@ function handleApproveAndSend(payload) {
         감사합니다.
       </p>
 
-      <div style="text-align: center; border-top: 1px solid #EBE3D5; pt: 16px; margin-top: 20px; font-size: 11px; color: #8F7A56;">
+      <div style="text-align: center; border-top: 1px solid #EBE3D5; padding-top: 16px; margin-top: 20px; font-size: 11px; color: #8F7A56;">
         <p style="margin: 0;">DEAR MEMORY • 웨딩 본식스냅 전문 스튜디오</p>
       </div>
     </div>
@@ -200,7 +207,6 @@ function handleApproveAndSend(payload) {
 
 /**
  * Google Drive에 폴더 계층 생성 및 파일 저장
- * Dear Memory / Contracts / YYYY / YYYY-MM-DD_신랑_신부 / contract.pdf
  */
 function saveContractToGoogleDrive(data, contractNumber, pdfBlob, jpgBase64) {
   const rootFolderName = "Dear Memory";
@@ -208,13 +214,11 @@ function saveContractToGoogleDrive(data, contractNumber, pdfBlob, jpgBase64) {
   const yearStr = data.weddingDate.substring(0, 4);
   const targetFolderName = `${data.weddingDate}_${data.groomName}_${data.brideName}`;
 
-  // 루트 폴더 조회 또는 생성
   let rootFolder = getOrCreateSubFolder(DriveApp.getRootFolder(), rootFolderName);
   let contractsFolder = getOrCreateSubFolder(rootFolder, contractsFolderName);
   let yearFolder = getOrCreateSubFolder(contractsFolder, yearStr);
   let eventFolder = getOrCreateSubFolder(yearFolder, targetFolderName);
 
-  // PDF 저장
   if (pdfBlob) {
     try {
       eventFolder.createFile(pdfBlob);
@@ -223,7 +227,6 @@ function saveContractToGoogleDrive(data, contractNumber, pdfBlob, jpgBase64) {
     }
   }
 
-  // JPG 저장
   if (jpgBase64 && typeof jpgBase64 === "string" && jpgBase64.trim().length > 0) {
     try {
       const commaIdx = jpgBase64.indexOf(",");
