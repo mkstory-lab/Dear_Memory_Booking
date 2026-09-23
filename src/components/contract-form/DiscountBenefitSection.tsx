@@ -291,8 +291,14 @@ export const DiscountBenefitSection: React.FC<DiscountBenefitSectionProps> = ({
         </div>
 
         {/* 핵심 공지 문구 */}
-        <div className="p-3.5 bg-[#FAF8F5] border border-[#DDD1BD] rounded-xl text-xs sm:text-sm text-[#6E5C3D] leading-relaxed break-keep font-medium">
-          * 후기 이벤트는 잔금에서 차감 또는 페이백 적용.
+        <div className="p-3.5 sm:p-4 bg-[#FAF8F5] border border-[#DDD1BD] rounded-xl text-xs sm:text-sm text-[#6E5C3D] leading-relaxed break-keep space-y-1">
+          <p className="font-semibold text-[#322A1B]">
+            * 후기 이벤트는 잔금에서 차감 또는 페이백 적용.
+          </p>
+          <div className="text-xs text-[#8F7A56] space-y-0.5 pt-0.5 font-medium">
+            <p>(후기 작성 후 URL 주소 채널톡으로 전달)</p>
+            <p>(최소 6개월 글 유지)</p>
+          </div>
         </div>
 
         {/* 2-1. 계약 후기 할인 */}
