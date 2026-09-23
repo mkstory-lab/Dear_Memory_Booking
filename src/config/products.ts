@@ -24,7 +24,7 @@ export const PRODUCTS_CONFIG: ProductItem[] = [
   {
     id: 'album_plus',
     name: '화보형',
-    subtitle: '앨범 3권 상품 (부모님 앨범 2권 포함)',
+    subtitle: '앨범 3권 상품',
     basePrice: 1450000,
     description: '실속형 전 구성에 양가 부모님께 선물할 원판·스냅 합본 앨범 2권이 기본 포함된 인기 상품',
     includedItems: [

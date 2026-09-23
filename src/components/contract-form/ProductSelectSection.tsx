@@ -107,36 +107,60 @@ export const ProductSelectSection: React.FC<ProductSelectSectionProps> = ({
                   {formatKRW(product.basePrice)}
                 </div>
 
-                {/* 앨범 사양 핵심 비교 박스 */}
-                <div className="p-4 bg-[#FAF8F5] rounded-2xl border border-[#EBE3D5] space-y-2 text-xs sm:text-sm">
-                  <div className="flex items-center gap-1.5 text-[#8F7A56] font-semibold text-xs uppercase tracking-wide">
+                {/* 앨범 사양 핵심 비교 박스 (두 카드 완벽한 행별 줄맞춤) */}
+                <div className="p-4 bg-[#FAF8F5] rounded-2xl border border-[#DDD1BD] space-y-3 text-xs sm:text-sm">
+                  <div className="flex items-center gap-1.5 text-[#8F7A56] font-bold text-xs uppercase tracking-wide">
                     <BookOpen className="w-4 h-4 text-[#8F7A56]" />
                     <span>앨범 제공 구성</span>
                   </div>
 
-                  {!isPlus ? (
-                    <div className="space-y-1">
-                      <div className="font-bold text-[#322A1B] text-sm sm:text-base">
-                        &bull; 부부 앨범 15×12 70p (1권)
-                      </div>
-                      <div className="text-[#8F7A56] text-xs">
-                        * 양가 부모님 앨범 미포함 상품입니다.
-                      </div>
+                  <div className="space-y-2.5">
+                    {/* 1행: 부부 앨범 */}
+                    <div className="flex items-center justify-between py-1 border-b border-[#EBE3D5]">
+                      <span className="font-bold text-[#322A1B] text-xs sm:text-sm">부부 앨범 15×12 70p</span>
+                      <span className="text-xs px-2 py-0.5 bg-[#EBE3D5] text-[#6E5C3D] font-semibold rounded-md">
+                        1권 기본
+                      </span>
                     </div>
-                  ) : (
-                    <div className="space-y-1.5">
-                      <div className="font-bold text-[#322A1B] text-sm sm:text-base">
-                        &bull; 부부 앨범 15×12 70p (1권)
+
+                    {/* 2행: 부모님 앨범 */}
+                    <div className="flex items-center justify-between py-1 border-b border-[#EBE3D5]">
+                      <div className="flex items-center gap-1">
+                        {isPlus ? (
+                          <>
+                            <Sparkles className="w-3.5 h-3.5 text-[#B09A74] shrink-0" />
+                            <span className="font-bold text-[#322A1B] text-xs sm:text-sm">부모님 앨범 12×8 40p</span>
+                          </>
+                        ) : (
+                          <span className="text-xs sm:text-sm text-[#8F7A56] font-medium">부모님 앨범 (양가)</span>
+                        )}
                       </div>
-                      <div className="font-bold text-[#322A1B] text-sm sm:text-base flex items-center gap-1 text-[#8F7A56]">
-                        <Sparkles className="w-4 h-4 text-[#B09A74] shrink-0" />
-                        <span>부모님 앨범 12×8 40p (2권 기본 제공)</span>
-                      </div>
-                      <p className="text-xs text-[#6E5C3D] leading-snug">
-                        [원판·스냅 합본 수록, 양가 부모님 선물용 2권]
-                      </p>
+                      <span
+                        className={`text-xs px-2 py-0.5 font-semibold rounded-md ${
+                          isPlus
+                            ? 'bg-[#322A1B] text-[#FAF8F5]'
+                            : 'bg-[#F5F1EA] text-[#8F7A56]'
+                        }`}
+                      >
+                        {isPlus ? '2권 기본 제공' : '미포함'}
+                      </span>
                     </div>
-                  )}
+
+                    {/* 3행: 패키지 특징 배너 */}
+                    <div
+                      className={`p-2 rounded-xl text-xs text-center font-medium leading-relaxed ${
+                        isPlus
+                          ? 'bg-[#FAF8F5] border border-[#B09A74]/50 text-[#6E5C3D] font-semibold'
+                          : 'bg-[#FFFFFF] border border-[#DDD1BD] text-[#8F7A56]'
+                      }`}
+                    >
+                      {isPlus ? (
+                        <span>[원판·스냅 합본] 양가 부모님 선물용 2권</span>
+                      ) : (
+                        <span>부부 단독 소장용 (옵션에서 추가 가능)</span>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
 
