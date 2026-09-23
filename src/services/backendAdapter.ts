@@ -24,6 +24,12 @@ export interface IBackendAdapter {
   approveAndSendContract(req: ApproveAndSendRequest): Promise<ApproveAndSendResponse>;
 
   /**
+   * 짝꿍 코드 유효성 검증
+   * - Google Sheet 또는 사전 정의된 짝꿍 목록에서 코드 확인
+   */
+  validatePartnerCode(code: string): Promise<import('@/types/backend').ValidatePartnerCodeResponse>;
+
+  /**
    * 데모 및 테스트용: 가상 발송된 이메일 목록 확인
    */
   getMockMailbox?(): Promise<SentEmailRecord[]>;

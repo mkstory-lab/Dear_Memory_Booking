@@ -20,12 +20,22 @@ function doPost(e) {
       return handleSubmitContract(payload);
     } else if (action === "approve_and_send") {
       return handleApproveAndSend(payload);
+    } else if (action === "validate_partner_code") {
+      return handleValidatePartnerCode(payload);
     } else {
       return createJsonResponse({ success: false, error: "알 수 없는 요청 액션입니다." });
     }
   } catch (err) {
     return createJsonResponse({ success: false, error: err.toString() });
   }
+}
+
+function doGet(e) {
+  if (e && e.parameter && e.parameter.action === "validate_partner_code") {
+    return handleValidatePartnerCode({ code: e.parameter.code });
+  }
+  return ContentService.createTextOutput("Dear Memory Google Apps Script Web App is running.")
+    .setMimeType(ContentService.MimeType.TEXT);
 }
 
 /**
@@ -248,6 +258,109 @@ function getOrCreateSubFolder(parent, folderName) {
     return folders.next();
   }
   return parent.createFolder(folderName);
+}
+
+// 스프레드시트 및 시트 이름 상수
+const SPREADSHEET_NAME = "Dear Memory 데이터베이스";
+const PARTNER_SHEET_NAME = "짝꿍코드_목록";
+
+/**
+ * 짝꿍 코드 스프레드시트 가져오기 또는 자동 생성
+ */
+function getOrCreatePartnerSheet() {
+  const rootFolderName = "Dear Memory";
+  const rootFolder = getOrCreateSubFolder(DriveApp.getRootFolder(), rootFolderName);
+  
+  const files = rootFolder.getFilesByName(SPREADSHEET_NAME);
+  let spreadsheet;
+  if (files.hasNext()) {
+    spreadsheet = SpreadsheetApp.open(files.next());
+  } else {
+    // 없으면 루트 폴더에 스프레드시트 새로 생성
+    spreadsheet = SpreadsheetApp.create(SPREADSHEET_NAME);
+    const ssFile = DriveApp.getFileById(spreadsheet.getId());
+    rootFolder.addFile(ssFile);
+    DriveApp.getRootFolder().removeFile(ssFile);
+  }
+
+  let sheet = spreadsheet.getSheetByName(PARTNER_SHEET_NAME);
+  if (!sheet) {
+    sheet = spreadsheet.insertSheet(PARTNER_SHEET_NAME);
+    // 기본 헤더 및 샘플 데이터 작성
+    sheet.appendRow(["짝꿍 코드 / 추천인 성함", "할인 금액", "등록일시", "메모"]);
+    sheet.getRange(1, 1, 1, 4).setFontWeight("bold").setBackground("#F5F1EA");
+    sheet.appendRow(["261011김민수", 50000, new Date(), "초기 샘플"]);
+    sheet.appendRow(["261122이지은", 50000, new Date(), "초기 샘플"]);
+    sheet.appendRow(["테스트짝꿍", 50000, new Date(), "테스트용"]);
+  }
+
+  return sheet;
+}
+
+/**
+ * 3. 짝꿍 코드 유효성 검증
+ */
+function handleValidatePartnerCode(payload) {
+  const code = (payload.code || "").trim();
+  if (!code) {
+    return createJsonResponse({
+      success: true,
+      valid: false,
+      code: "",
+      discountAmount: 0,
+      message: "짝꿍 코드를 입력해 주세요."
+    });
+  }
+
+  try {
+    const sheet = getOrCreatePartnerSheet();
+    const data = sheet.getDataRange().getValues();
+    let isValid = false;
+    let discountAmount = 50000;
+    const cleanInput = code.replace(/\s+/g, "").toLowerCase();
+
+    // 헤더(index 0) 제외하고 1행부터 탐색
+    for (let i = 1; i < data.length; i++) {
+      const rowCode = String(data[i][0] || "").replace(/\s+/g, "").toLowerCase();
+      if (rowCode && rowCode === cleanInput) {
+        isValid = true;
+        if (data[i][1] && !isNaN(Number(data[i][1]))) {
+          discountAmount = Number(data[i][1]);
+        }
+        break;
+      }
+    }
+
+    if (isValid) {
+      return createJsonResponse({
+        success: true,
+        valid: true,
+        code: code,
+        discountAmount: discountAmount,
+        message: "유효한 짝꿍 코드입니다. 50,000원 할인이 적용되었습니다."
+      });
+    } else {
+      return createJsonResponse({
+        success: true,
+        valid: false,
+        code: code,
+        discountAmount: 0,
+        message: "등록되지 않은 짝꿍 코드입니다. 대표님께 확인 후 다시 입력해 주세요."
+      });
+    }
+  } catch (err) {
+    Logger.log("짝꿍 검증 오류: " + err.toString());
+    const fallbackList = ["261011김민수", "261122이지은", "테스트짝꿍"];
+    const cleanInput = code.replace(/\s+/g, "").toLowerCase();
+    const matched = fallbackList.some(function(c) { return c.toLowerCase() === cleanInput; });
+    return createJsonResponse({
+      success: true,
+      valid: matched,
+      code: code,
+      discountAmount: matched ? 50000 : 0,
+      message: matched ? "유효한 짝꿍 코드입니다. (확인 완료)" : "등록되지 않은 짝꿍 코드입니다."
+    });
+  }
 }
 
 function createJsonResponse(data) {

@@ -226,6 +226,40 @@ export class MockBackendAdapter implements IBackendAdapter {
     return [...mockMailbox];
   }
 
+  async validatePartnerCode(code: string): Promise<import('@/types/backend').ValidatePartnerCodeResponse> {
+    const trimmed = (code || '').trim().replace(/\s+/g, '').toLowerCase();
+    if (!trimmed) {
+      return {
+        success: true,
+        valid: false,
+        code: '',
+        discountAmount: 0,
+        message: '짝꿍 코드를 입력해 주세요.',
+      };
+    }
+
+    const mockValidCodes = ['261011김민수', '261122이지은', '테스트짝꿍'];
+    const matched = mockValidCodes.some((c) => c.toLowerCase() === trimmed);
+
+    if (matched) {
+      return {
+        success: true,
+        valid: true,
+        code,
+        discountAmount: 50000,
+        message: '유효한 짝꿍 코드입니다. 50,000원 할인이 적용되었습니다.',
+      };
+    }
+
+    return {
+      success: true,
+      valid: false,
+      code,
+      discountAmount: 0,
+      message: '등록되지 않은 짝꿍 코드입니다. 오탈자를 확인하시거나 대표님께 문의해 주세요.',
+    };
+  }
+
   // 테스트 및 데모 편의 메서드
   static clearMailbox(): void {
     mockMailbox.length = 0;

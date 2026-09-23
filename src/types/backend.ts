@@ -8,6 +8,19 @@ export interface SubmitContractRequest {
   formData: ContractFormData;
 }
 
+export interface ValidatePartnerCodeRequest {
+  code: string;
+}
+
+export interface ValidatePartnerCodeResponse {
+  success: boolean;
+  valid: boolean;
+  code: string;
+  discountAmount: number;
+  message?: string;
+  error?: string;
+}
+
 export interface SubmitContractResponse {
   success: boolean;
   contractId: string;

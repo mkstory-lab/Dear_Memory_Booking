@@ -4,6 +4,7 @@ import {
   SubmitContractResponse,
   ApproveAndSendRequest,
   ApproveAndSendResponse,
+  ValidatePartnerCodeResponse,
 } from '@/types/backend';
 import { MockBackendAdapter } from './mockBackendAdapter';
 
@@ -93,6 +94,40 @@ export class GoogleAppsScriptAdapter implements IBackendAdapter {
         representativeEmailSent: false,
         driveSaved: false,
         error: `Apps Script 최종 발송 통신 실패: ${err.message}`,
+      };
+    }
+  }
+
+  async validatePartnerCode(code: string): Promise<ValidatePartnerCodeResponse> {
+    try {
+      const response = await fetch(this.webAppUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'validate_partner_code',
+          payload: { code },
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Google Apps Script 서버 응답 오류: ${response.statusText}`);
+      }
+
+      const resData = await response.json();
+      return resData;
+    } catch (err: any) {
+      // 통신 지연 또는 구글 시트 초기화 중 안전한 fallback
+      const mockValidCodes = ['261011김민수', '261122이지은', '테스트짝꿍'];
+      const trimmed = (code || '').trim().replace(/\s+/g, '').toLowerCase();
+      const matched = mockValidCodes.some((c) => c.toLowerCase() === trimmed);
+      return {
+        success: true,
+        valid: matched,
+        code,
+        discountAmount: matched ? 50000 : 0,
+        message: matched
+          ? '유효한 짝꿍 코드입니다. 50,000원 할인이 적용되었습니다.'
+          : '등록되지 않은 짝꿍 코드입니다. 오탈자를 확인하시거나 대표님께 문의해 주세요.',
       };
     }
   }
