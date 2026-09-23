@@ -15,7 +15,6 @@ import { PriceSummarySticky } from '@/components/contract-form/PriceSummaryStick
 import { FinalConfirmStep } from '@/components/contract-form/FinalConfirmStep';
 import { SubmissionSuccessView } from '@/components/contract-form/SubmissionSuccessView';
 import { TermsModal } from '@/components/ui/TermsModal';
-import { DemoMailboxModal } from '@/components/demo/DemoMailboxModal';
 import { ContractFormData } from '@/types/contract';
 import { calculateContractPrice } from '@/lib/pricing';
 import { ArrowLeft } from 'lucide-react';
@@ -472,9 +471,6 @@ export default function CustomerContractPage() {
 
       {/* 약관 전문 열람 모달 */}
       <TermsModal isOpen={isTermsOpen} onClose={() => setIsTermsOpen(false)} />
-
-      {/* 데모 메일 수신함 플로팅 버튼 & 모달 */}
-      <DemoMailboxModal />
     </div>
   );
 }

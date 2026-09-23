@@ -6,7 +6,6 @@ import { Header } from '@/components/ui/Header';
 import { RepresentativeReviewView } from '@/components/review/RepresentativeReviewView';
 import { ContractFormData, PriceCalculationResult } from '@/types/contract';
 import { AlertTriangle, Loader2 } from 'lucide-react';
-import { DemoMailboxModal } from '@/components/demo/DemoMailboxModal';
 
 function ReviewPageContent() {
   const searchParams = useSearchParams();
@@ -97,9 +96,6 @@ function ReviewPageContent() {
       <footer className="border-t border-[#EBE3D5] py-6 text-center text-xs text-[#8F7A56]">
         <p>DEAR MEMORY FOR BOOKING &bull; 한민규 대표 전용 승인 페이지</p>
       </footer>
-
-      {/* 데모 메일함 */}
-      <DemoMailboxModal />
     </div>
   );
 }
