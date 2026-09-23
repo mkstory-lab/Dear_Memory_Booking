@@ -264,14 +264,18 @@ export const ProductCatalogView: React.FC<ProductCatalogViewProps> = ({
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {OPTIONS_CONFIG.map((opt) => (
-            <div key={opt.id} className="p-4 bg-[#FAF8F5] rounded-2xl border border-[#EBE3D5] space-y-2">
-              <div className="flex justify-between items-center">
+            <div key={opt.id} className="p-4 bg-[#FAF8F5] rounded-2xl border border-[#EBE3D5] space-y-2.5">
+              <div className="flex justify-between items-center pb-2 border-b border-[#EBE3D5]/60">
                 <span className="font-bold text-sm text-[#322A1B]">{opt.name}</span>
                 <span className="font-bold text-sm text-[#322A1B] tabular-nums">+{formatKRW(opt.price)}</span>
               </div>
-              <p className="text-xs text-[#6E5C3D] leading-relaxed">
-                {opt.description}
-              </p>
+              <div className="text-center text-xs text-[#6E5C3D] leading-relaxed py-1 space-y-1">
+                {opt.description.split('\n').map((line, idx) => (
+                  <p key={idx} className={idx === 1 ? "text-[11.5px] text-[#8F7A56] font-medium" : "text-[#322A1B]"}>
+                    {line}
+                  </p>
+                ))}
+              </div>
             </div>
           ))}
         </div>

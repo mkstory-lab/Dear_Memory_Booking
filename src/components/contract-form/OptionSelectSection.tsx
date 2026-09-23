@@ -52,9 +52,13 @@ export const OptionSelectSection: React.FC<OptionSelectSectionProps> = ({
                     {isSelected && <Check className="w-3.5 h-3.5" />}
                   </div>
                 </div>
-                <p className="text-xs text-[#8F7A56] leading-relaxed mb-4 min-h-[40px] flex items-center break-keep">
-                  {option.description}
-                </p>
+                <div className="text-center text-xs text-[#6E5C3D] leading-relaxed mb-4 min-h-[44px] flex flex-col justify-center space-y-0.5 py-1">
+                  {option.description.split('\n').map((line, idx) => (
+                    <p key={idx} className={idx === 1 ? "text-[11px] text-[#8F7A56] font-medium" : "text-[#322A1B]"}>
+                      {line}
+                    </p>
+                  ))}
+                </div>
               </div>
 
               <div className="text-base font-bold text-[#322A1B] pt-3 border-t border-[#F5F1EA] tabular-nums">
