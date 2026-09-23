@@ -49,19 +49,14 @@ export class Html2CanvasPdfGenerator implements IPdfGenerator {
     const html2canvas = html2canvasModule.default;
     const { jsPDF } = await import('jspdf');
 
-    // 4. 고해상도 Canvas 캡처
-    const canvas = await html2canvas(element, {
-      scale: 2, // 2배율 고해상도
-      useCORS: true,
-      backgroundColor: '#FFFFFF',
-      logging: false,
-      windowWidth: 1024, // 모바일에서도 일관된 데스크톱 해상도 렌더링 유지
-    });
+    // 4. 멀티페이지 탐색 (.contract-page 또는 [data-pdf-page])
+    const pageElements = Array.from(
+      element.querySelectorAll<HTMLElement>('.contract-page, [data-pdf-page]')
+    );
 
-    // 5. 고화질 이미지 추출
-    const imgDataUrl = canvas.toDataURL('image/jpeg', 0.95);
+    const targets = pageElements.length > 0 ? pageElements : [element];
 
-    // 6. A4 세로 PDF 생성 (210mm x 297mm)
+    // 5. A4 세로 PDF 생성 (210mm x 297mm)
     const pdf = new jsPDF({
       orientation: 'portrait',
       unit: 'mm',
@@ -71,8 +66,29 @@ export class Html2CanvasPdfGenerator implements IPdfGenerator {
 
     const pdfWidth = 210;
     const pdfHeight = 297;
+    let firstPageJpg = '';
 
-    pdf.addImage(imgDataUrl, 'JPEG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
+    for (let i = 0; i < targets.length; i++) {
+      const pageEl = targets[i];
+
+      const canvas = await html2canvas(pageEl, {
+        scale: 2, // 2배율 고해상도
+        useCORS: true,
+        backgroundColor: '#FFFFFF',
+        logging: false,
+        windowWidth: 1024,
+      });
+
+      const imgDataUrl = canvas.toDataURL('image/jpeg', 0.95);
+
+      if (i === 0) {
+        firstPageJpg = imgDataUrl;
+        pdf.addImage(imgDataUrl, 'JPEG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
+      } else {
+        pdf.addPage();
+        pdf.addImage(imgDataUrl, 'JPEG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
+      }
+    }
 
     const pdfBlob = pdf.output('blob');
     const pdfBase64 = pdf.output('datauristring');
@@ -80,7 +96,7 @@ export class Html2CanvasPdfGenerator implements IPdfGenerator {
     return {
       pdfBlob,
       pdfBase64,
-      jpgBase64: imgDataUrl, // V1.1 대비용
+      jpgBase64: firstPageJpg,
     };
   }
 }

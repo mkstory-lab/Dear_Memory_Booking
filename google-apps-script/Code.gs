@@ -86,10 +86,16 @@ function handleApproveAndSend(payload) {
   
   // PDF Blob 변환
   let pdfBlob = null;
-  if (pdfBase64) {
-    const base64Data = pdfBase64.replace(/^data:application\/pdf;base64,/, "");
-    const decodedBytes = Utilities.base64Decode(base64Data);
-    pdfBlob = Utilities.newBlob(decodedBytes, "application/pdf", `${contractNumber}_촬영계약서.pdf`);
+  if (pdfBase64 && typeof pdfBase64 === "string" && pdfBase64.trim().length > 0) {
+    try {
+      const commaIdx = pdfBase64.indexOf(",");
+      const base64Data = commaIdx !== -1 ? pdfBase64.substring(commaIdx + 1) : pdfBase64;
+      const cleanBase64 = base64Data.replace(/[\r\n\s]/g, "");
+      const decodedBytes = Utilities.base64Decode(cleanBase64);
+      pdfBlob = Utilities.newBlob(decodedBytes, "application/pdf", `${contractNumber}_촬영계약서.pdf`);
+    } catch (pdfErr) {
+      Logger.log("PDF Blob 생성 실패: " + pdfErr.toString());
+    }
   }
 
   // 고객 메일 발송 (PDF 첨부)
@@ -184,15 +190,24 @@ function saveContractToGoogleDrive(data, contractNumber, pdfBlob, jpgBase64) {
 
   // PDF 저장
   if (pdfBlob) {
-    eventFolder.createFile(pdfBlob);
+    try {
+      eventFolder.createFile(pdfBlob);
+    } catch (e) {
+      Logger.log("PDF Drive 저장 오류: " + e.toString());
+    }
   }
 
   // JPG 저장
-  if (jpgBase64) {
-    const jpgClean = jpgBase64.replace(/^data:image\/jpeg;base64,/, "");
-    const jpgBytes = Utilities.base64Decode(jpgClean);
-    const jpgBlob = Utilities.newBlob(jpgBytes, "image/jpeg", `${contractNumber}_계약서.jpg`);
-    eventFolder.createFile(jpgBlob);
+  if (jpgBase64 && typeof jpgBase64 === "string" && jpgBase64.trim().length > 0) {
+    try {
+      const commaIdx = jpgBase64.indexOf(",");
+      const cleanJpg = (commaIdx !== -1 ? jpgBase64.substring(commaIdx + 1) : jpgBase64).replace(/[\r\n\s]/g, "");
+      const jpgBytes = Utilities.base64Decode(cleanJpg);
+      const jpgBlob = Utilities.newBlob(jpgBytes, "image/jpeg", `${contractNumber}_계약서.jpg`);
+      eventFolder.createFile(jpgBlob);
+    } catch (jpgErr) {
+      Logger.log("JPG Drive 저장 실패: " + jpgErr.toString());
+    }
   }
 
   return eventFolder.getUrl();
