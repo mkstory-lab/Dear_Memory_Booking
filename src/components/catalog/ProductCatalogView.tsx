@@ -43,22 +43,14 @@ export const ProductCatalogView: React.FC<ProductCatalogViewProps> = ({
       </div>
 
       {/* 1. 상품 비교 카드 (실속형 vs 화보형) */}
-      {/* 모바일 전용 좌우 비교 안내 힌트 */}
-      <div className="flex md:hidden items-center justify-between text-xs text-[#8F7A56] px-1 -mb-1">
-        <span className="font-semibold text-[#322A1B]">실속형 vs 화보형 비교</span>
-        <span className="text-[11px] bg-[#F5F1EA] text-[#8F7A56] px-2 py-0.5 rounded-full border border-[#EBE3D5] flex items-center gap-1 font-medium">
-          좌우 넘김 ↔
-        </span>
-      </div>
-
-      <div className="flex md:grid md:grid-cols-2 gap-4 md:gap-6 overflow-x-auto md:overflow-visible snap-x snap-mandatory no-scrollbar pb-3 px-4 -mx-4 md:px-0 md:mx-0 items-stretch">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
         {PRODUCTS_CONFIG.map((product) => {
           const isPlus = product.isPlusPackage;
 
           return (
             <div
               key={product.id}
-              className={`w-[88vw] sm:w-[380px] md:w-auto shrink-0 snap-center bg-white border ${
+              className={`bg-white border ${
                 isPlus ? 'border-[#B09A74] shadow-md ring-1 ring-[#B09A74]/30' : 'border-[#EBE3D5] shadow-sm'
               } rounded-3xl p-6 sm:p-8 flex flex-col justify-between relative overflow-hidden`}
             >

@@ -11,7 +11,7 @@ export const HomeLandingView: React.FC<HomeLandingViewProps> = ({
   onSelectApply,
 }) => {
   return (
-    <div className="max-w-3xl mx-auto py-8 sm:py-14 space-y-10 animate-fade-in">
+    <div className="max-w-3xl mx-auto py-4 sm:py-14 space-y-5 sm:space-y-10 animate-fade-in">
       {/* 인트로 환영 섹션 */}
       <div className="text-center space-y-3.5">
         <span className="inline-block px-3.5 py-1 bg-[#F5F1EA] text-[#8F7A56] rounded-full text-[11px] font-semibold tracking-[0.2em] uppercase border border-[#EBE3D5]">
@@ -26,109 +26,101 @@ export const HomeLandingView: React.FC<HomeLandingViewProps> = ({
         </p>
       </div>
 
-      {/* 2대 선택 카드: 계약상품 구경하기 vs 계약정보 작성하기 */}
-      {/* 2대 선택 카드: 계약상품 구경하기 vs 계약정보 작성하기 */}
-      {/* 모바일 전용 좌우 안내 힌트 */}
-      <div className="flex md:hidden items-center justify-between text-xs text-[#8F7A56] px-1 -mb-1">
-        <span className="font-medium text-[#6E5C3D]">원하시는 항목을 선택해 주세요</span>
-        <span className="text-[11px] bg-[#F5F1EA] text-[#8F7A56] px-2 py-0.5 rounded-full border border-[#EBE3D5] flex items-center gap-1 font-medium">
-          좌우 넘김 ↔
-        </span>
-      </div>
-
-      <div className="flex md:grid md:grid-cols-2 gap-4 md:gap-6 overflow-x-auto md:overflow-visible snap-x snap-mandatory no-scrollbar pb-3 px-4 -mx-4 md:px-0 md:mx-0 items-stretch">
+      {/* 2대 선택 카드: 모바일에서도 한 화면에 좌우 2열(grid-cols-2)로 나란히 표시 */}
+      <div className="grid grid-cols-2 gap-2.5 sm:gap-6 items-stretch">
         
         {/* 카드 1: 계약상품 구경하기 */}
         <div
           onClick={onSelectCatalog}
-          className="w-[86vw] sm:w-[360px] md:w-auto shrink-0 snap-center group cursor-pointer bg-[#FFFFFF] border border-[#EBE3D5] hover:border-[#322A1B] rounded-3xl p-6 sm:p-8 transition-all duration-300 shadow-sm hover:shadow-md flex flex-col justify-between h-full relative overflow-hidden"
+          className="group cursor-pointer bg-[#FFFFFF] border border-[#EBE3D5] hover:border-[#322A1B] rounded-2xl sm:rounded-3xl p-3.5 sm:p-8 transition-all duration-300 shadow-sm hover:shadow-md flex flex-col justify-between h-full relative overflow-hidden"
         >
-          <div className="space-y-4">
-            <div className="w-12 h-12 rounded-2xl bg-[#FAF8F5] border border-[#EBE3D5] flex items-center justify-center text-[#8F7A56] group-hover:bg-[#322A1B] group-hover:text-[#FAF8F5] transition-colors">
-              <Camera className="w-6 h-6" />
+          <div className="space-y-2.5 sm:space-y-4">
+            <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-[#FAF8F5] border border-[#EBE3D5] flex items-center justify-center text-[#8F7A56] group-hover:bg-[#322A1B] group-hover:text-[#FAF8F5] transition-colors">
+              <Camera className="w-4.5 h-4.5 sm:w-6 sm:h-6" />
             </div>
 
             <div>
-              <span className="text-[11px] font-semibold text-[#8F7A56] tracking-wider uppercase">
-                PRODUCTS & OPTIONS
+              <span className="text-[9px] sm:text-[11px] font-semibold text-[#8F7A56] tracking-wider uppercase">
+                PRODUCTS
               </span>
-              <h3 className="text-lg sm:text-xl font-serif font-bold text-[#322A1B] mt-0.5">
+              <h3 className="text-sm sm:text-xl font-serif font-bold text-[#322A1B] mt-0.5 leading-snug">
                 계약상품 구경하기
               </h3>
-              <p className="text-xs text-[#6E5C3D] mt-2 leading-relaxed min-h-[44px] break-keep">
-                실속형·화보형 상품의 상세 앨범 구성, 원본/보정 컷 수, 추가 촬영 옵션 및 할인 혜택을 한눈에 살펴보실 수 있습니다.
+              <p className="text-[11px] sm:text-xs text-[#6E5C3D] mt-1 sm:mt-2 leading-relaxed break-keep">
+                실속형·화보형 구성과 혜택을 한눈에 살펴봅니다.
               </p>
             </div>
 
             {/* 주요 하이라이트 박스 */}
-            <div className="p-3.5 bg-[#FAF8F5] rounded-xl border border-[#EBE3D5] space-y-1.5 text-xs text-[#8F7A56] min-h-[92px] flex flex-col justify-center">
-              <div className="flex items-center gap-1.5">
+            <div className="p-2 sm:p-3.5 bg-[#FAF8F5] rounded-xl border border-[#EBE3D5] space-y-1 sm:space-y-1.5 text-[10px] sm:text-xs text-[#8F7A56]">
+              <div className="flex items-center gap-1 sm:gap-1.5">
                 <span className="text-[#B09A74]">•</span>
-                <span className="break-keep">실속형 (125만원) & 화보형 (145만원)</span>
+                <span className="break-keep font-medium text-[#322A1B]">실속 125만 / 화보 145만</span>
               </div>
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1 sm:gap-1.5">
                 <span className="text-[#B09A74]">•</span>
-                <span className="break-keep">2인 촬영 (+25만) / 폐백 촬영 (+10만)</span>
+                <span className="break-keep">2인촬영 · 폐백 옵션</span>
               </div>
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1 sm:gap-1.5">
                 <span className="text-[#B09A74]">•</span>
-                <span className="break-keep">일요일 · 짝꿍 · 사진 공개 감사 할인</span>
+                <span className="break-keep">일요일·짝꿍 할인</span>
               </div>
             </div>
           </div>
 
-          <div className="mt-8 pt-4 border-t border-[#F5F1EA] flex items-center justify-between text-xs font-semibold text-[#322A1B] group-hover:text-[#8F7A56] transition-colors">
-            <span>상품 구성 자세히 보기</span>
-            <ArrowRight className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" />
+          <div className="mt-4 sm:mt-8 pt-3 sm:pt-4 border-t border-[#F5F1EA] flex items-center justify-between text-[11px] sm:text-xs font-semibold text-[#322A1B] group-hover:text-[#8F7A56] transition-colors">
+            <span>상품 보기</span>
+            <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 transform group-hover:translate-x-1 transition-transform" />
           </div>
         </div>
 
         {/* 카드 2: 계약정보 작성하기 */}
         <div
           onClick={onSelectApply}
-          className="w-[86vw] sm:w-[360px] md:w-auto shrink-0 snap-center group cursor-pointer bg-[#FFFFFF] border-2 border-[#322A1B]/80 hover:border-[#322A1B] rounded-3xl p-6 sm:p-8 transition-all duration-300 shadow-sm hover:shadow-md flex flex-col justify-between h-full relative overflow-hidden bg-gradient-to-br from-[#FFFFFF] to-[#FAF8F5]"
+          className="group cursor-pointer bg-[#FFFFFF] border-2 border-[#322A1B]/80 hover:border-[#322A1B] rounded-2xl sm:rounded-3xl p-3.5 sm:p-8 transition-all duration-300 shadow-sm hover:shadow-md flex flex-col justify-between h-full relative overflow-hidden bg-gradient-to-br from-[#FFFFFF] to-[#FAF8F5]"
         >
           {/* 상단 추천 뱃지 */}
-          <div className="absolute top-4 right-4">
-            <span className="px-2.5 py-1 bg-[#322A1B] text-[#FAF8F5] rounded-full text-[10px] font-semibold tracking-wider uppercase flex items-center gap-1">
-              <Sparkles className="w-3 h-3 text-[#C7B698]" />
-              <span>상담 완료 고객</span>
+          <div className="absolute top-2.5 right-2.5 sm:top-4 sm:right-4">
+            <span className="px-1.5 sm:px-2.5 py-0.5 sm:py-1 bg-[#322A1B] text-[#FAF8F5] rounded-full text-[9px] sm:text-[10px] font-semibold tracking-wider flex items-center gap-0.5 sm:gap-1">
+              <Sparkles className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-[#C7B698]" />
+              <span className="hidden sm:inline">상담 완료 고객</span>
+              <span className="sm:hidden">추천</span>
             </span>
           </div>
 
-          <div className="space-y-4">
-            <div className="w-12 h-12 rounded-2xl bg-[#322A1B] text-[#FAF8F5] flex items-center justify-center">
-              <FileEdit className="w-6 h-6 text-[#C7B698]" />
+          <div className="space-y-2.5 sm:space-y-4">
+            <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-[#322A1B] text-[#FAF8F5] flex items-center justify-center">
+              <FileEdit className="w-4.5 h-4.5 sm:w-6 sm:h-6 text-[#C7B698]" />
             </div>
 
             <div>
-              <span className="text-[11px] font-semibold text-[#8F7A56] tracking-wider uppercase">
-                CONTRACT APPLICATION
+              <span className="text-[9px] sm:text-[11px] font-semibold text-[#8F7A56] tracking-wider uppercase">
+                APPLICATION
               </span>
-              <h3 className="text-lg sm:text-xl font-serif font-bold text-[#322A1B] mt-0.5">
+              <h3 className="text-sm sm:text-xl font-serif font-bold text-[#322A1B] mt-0.5 leading-snug">
                 계약정보 작성하기
               </h3>
-              <p className="text-xs text-[#6E5C3D] mt-2 leading-relaxed min-h-[44px] break-keep">
-                상담을 완료하신 후 계약을 확정하고자 하실 때 약관을 확인하시고 예식 일정 및 고객 정보를 작성합니다.
+              <p className="text-[11px] sm:text-xs text-[#6E5C3D] mt-1 sm:mt-2 leading-relaxed break-keep">
+                약관을 확인하시고 예식 일정 및 고객 정보를 작성합니다.
               </p>
             </div>
 
             {/* 안내 배지 박스 */}
-            <div className="p-3.5 bg-[#FAF8F5] border border-[#EBE3D5] rounded-xl text-xs text-[#8F7A56] space-y-1.5 min-h-[92px] flex flex-col justify-center">
+            <div className="p-2 sm:p-3.5 bg-[#FAF8F5] border border-[#EBE3D5] rounded-xl text-[10px] sm:text-xs text-[#8F7A56] space-y-1 sm:space-y-1.5">
               <div className="flex items-center gap-1 font-semibold text-[#322A1B]">
-                <ShieldCheck className="w-3.5 h-3.5 text-[#8F7A56] shrink-0" />
-                <span>약관 사전 확인 후 안전 작성</span>
+                <ShieldCheck className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#8F7A56] shrink-0" />
+                <span>약관 사전 확인</span>
               </div>
-              <p className="text-[11px] text-[#6E5C3D] leading-relaxed break-keep">
-                약관 동의 &rarr; 계약정보 입력 &rarr; 대표 확인 후 이메일로 공식 PDF 계약서 발송
+              <p className="text-[9.5px] sm:text-[11px] text-[#6E5C3D] leading-tight break-keep">
+                약관 동의 &rarr; 정보 입력 &rarr; 대표 확인 후 이메일 발송
               </p>
             </div>
           </div>
 
-          <div className="mt-8 pt-4 border-t border-[#F5F1EA] flex items-center justify-between text-xs font-semibold text-[#322A1B]">
-            <span>약관 확인 및 작성 시작</span>
-            <div className="w-7 h-7 rounded-full bg-[#322A1B] text-[#FAF8F5] flex items-center justify-center group-hover:bg-[#1E1910] transition-colors">
-              <ArrowRight className="w-3.5 h-3.5" />
+          <div className="mt-4 sm:mt-8 pt-3 sm:pt-4 border-t border-[#F5F1EA] flex items-center justify-between text-[11px] sm:text-xs font-semibold text-[#322A1B]">
+            <span>작성 시작</span>
+            <div className="w-5 h-5 sm:w-7 sm:h-7 rounded-full bg-[#322A1B] text-[#FAF8F5] flex items-center justify-center group-hover:bg-[#1E1910] transition-colors">
+              <ArrowRight className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
             </div>
           </div>
         </div>
