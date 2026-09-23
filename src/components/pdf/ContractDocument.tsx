@@ -246,19 +246,26 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
                 </tr>
               )}
 
-              {/* 대표 수동 특약 조정 (있을 경우) */}
-              {data.manualAdjustment && data.manualAdjustment.amount !== 0 && (
-                <tr>
-                  <td className="py-2 text-[#8F7A56] font-medium text-[12.5px]">특별 조정</td>
-                  <td className="py-2 text-[#8F7A56] text-[12.5px]">
-                    대표 특약 조정: {data.manualAdjustment.reason}
-                  </td>
-                  <td className="py-2 text-right font-semibold tabular-nums text-[#322A1B] text-[13px]">
-                    {data.manualAdjustment.amount > 0 ? '+' : ''}
-                    {formatKRW(data.manualAdjustment.amount)}
-                  </td>
-                </tr>
-              )}
+              {/* 지인 할인 / 대표 특약 조정 (할인 시 즉시 할인 행으로 자연스럽게 표시) */}
+              {((data.manualAdjustment && data.manualAdjustment.amount !== 0) || (pricing.manualAdjustmentAmount && pricing.manualAdjustmentAmount !== 0)) && (() => {
+                const adjAmount = data.manualAdjustment?.amount ?? pricing.manualAdjustmentAmount ?? 0;
+                const adjReason = (data.manualAdjustment?.reason || '').trim() || (pricing.breakdown?.find(b => b.category === 'manual_adjustment')?.name) || '지인 특별 할인';
+                const isDiscount = adjAmount < 0;
+                return (
+                  <tr key="manual-adjustment-row">
+                    <td className={`py-2 font-medium text-[12.5px] ${isDiscount ? 'text-[#B09A74]' : 'text-[#8F7A56]'}`}>
+                      {isDiscount ? '즉시 할인' : '추가 금액'}
+                    </td>
+                    <td className={`py-2 text-[12.5px] ${isDiscount ? 'text-[#B09A74]' : 'text-[#8F7A56]'}`}>
+                      {adjReason}
+                    </td>
+                    <td className={`py-2 text-right font-semibold tabular-nums text-[13px] ${isDiscount ? 'text-[#B09A74]' : 'text-[#322A1B]'}`}>
+                      {adjAmount > 0 ? '+' : ''}
+                      {formatKRW(adjAmount)}
+                    </td>
+                  </tr>
+                );
+              })()}
 
               {/* 최종 확정 계약 금액 행 */}
               <tr className="border-t-2 border-[#322A1B] bg-white/70">

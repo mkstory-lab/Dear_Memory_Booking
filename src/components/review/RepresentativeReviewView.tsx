@@ -213,8 +213,11 @@ export const RepresentativeReviewView: React.FC<RepresentativeReviewViewProps> =
       reviewContractCashback: formData.reviewContractCashback,
       reviewMainCashback: formData.reviewMainCashback,
       manualAdjustment:
-        manualAmount !== 0 && manualReason.trim()
-          ? { amount: manualAmount, reason: manualReason }
+        manualAmount !== 0
+          ? {
+              amount: manualAmount,
+              reason: manualReason.trim() || (manualAmount < 0 ? '지인 특별 할인' : '대표 특약 금액 조정'),
+            }
           : undefined,
     });
     setPricing(updatedPricing);
@@ -248,8 +251,11 @@ export const RepresentativeReviewView: React.FC<RepresentativeReviewViewProps> =
           updatedData: {
             ...formData,
             manualAdjustment:
-              manualAmount !== 0 && manualReason.trim()
-                ? { amount: manualAmount, reason: manualReason }
+              manualAmount !== 0
+                ? {
+                    amount: manualAmount,
+                    reason: manualReason.trim() || (manualAmount < 0 ? '지인 특별 할인' : '대표 특약 금액 조정'),
+                  }
                 : undefined,
           },
           pdfBase64,
@@ -754,8 +760,8 @@ export const RepresentativeReviewView: React.FC<RepresentativeReviewViewProps> =
             )}
 
             {pricing.manualAdjustmentAmount !== 0 && (
-              <div className="flex justify-between text-[#6E5C3D] py-1 border-t border-[#EBE3D5]">
-                <span>수동 특약 조정 ({manualReason || '조정'})</span>
+              <div className={`flex justify-between py-1 border-t border-[#EBE3D5] ${pricing.manualAdjustmentAmount < 0 ? 'text-[#B09A74]' : 'text-[#6E5C3D]'}`}>
+                <span>{manualReason.trim() || (pricing.manualAdjustmentAmount < 0 ? '지인 특별 할인' : '수동 금액 조정')}</span>
                 <span className="tabular-nums font-semibold">
                   {pricing.manualAdjustmentAmount > 0 ? '+' : ''}
                   {formatKRW(pricing.manualAdjustmentAmount)}
@@ -905,7 +911,16 @@ export const RepresentativeReviewView: React.FC<RepresentativeReviewViewProps> =
         <ContractDocument
           id="review-contract-doc-preview"
           contractNumber={contractNumber}
-          data={formData}
+          data={{
+            ...formData,
+            manualAdjustment:
+              manualAmount !== 0
+                ? {
+                    amount: manualAmount,
+                    reason: manualReason.trim() || (manualAmount < 0 ? '지인 특별 할인' : '대표 특약 금액 조정'),
+                  }
+                : undefined,
+          }}
           pricing={pricing}
         />
       </div>
