@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { CONTRACT_POLICY_CONFIG } from '@/config/contractPolicy';
-import { ShieldCheck, ArrowRight, Check, AlertCircle, ChevronDown, ChevronUp, FileText } from 'lucide-react';
+import { ArrowRight, Check, AlertCircle, ChevronDown, ChevronUp, FileText } from 'lucide-react';
 
 interface TermsAgreementStepProps {
   termsAgreed: boolean;
@@ -64,12 +64,6 @@ export const TermsAgreementStep: React.FC<TermsAgreementStepProps> = ({
     <div className="max-w-3xl mx-auto py-6 sm:py-10 space-y-8 animate-fade-in">
       {/* 헤더 */}
       <div className="text-center space-y-2">
-        <div className="w-14 h-14 rounded-2xl bg-[#FAF8F5] border border-[#DDD1BD] flex items-center justify-center mx-auto text-[#8F7A56] mb-3 shadow-sm">
-          <ShieldCheck className="w-7 h-7" />
-        </div>
-        <p className="text-xs font-semibold tracking-widest text-[#8F7A56] uppercase">
-          DEAR MEMORY
-        </p>
         <h2 className="text-2xl sm:text-3xl font-serif font-bold text-[#322A1B]">
           계약 약관 및 운영 정책 동의
         </h2>
