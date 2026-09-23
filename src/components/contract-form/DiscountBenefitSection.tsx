@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Tag, Gift, Check, Sparkles, UserCheck, AlertCircle, Loader2 } from 'lucide-react';
+import React from 'react';
+import { Tag, Gift, Check, UserCheck } from 'lucide-react';
 
 interface DiscountBenefitSectionProps {
   isSunday: boolean;
@@ -28,81 +28,13 @@ export const DiscountBenefitSection: React.FC<DiscountBenefitSectionProps> = ({
   onChange,
   errors = {},
 }) => {
-  const [inputCode, setInputCode] = useState(partnerName || '');
-  const [verifyStatus, setVerifyStatus] = useState<'idle' | 'checking' | 'valid' | 'invalid'>(
-    partnerDiscount && partnerName ? 'valid' : 'idle'
-  );
-  const [verifyMessage, setVerifyMessage] = useState(
-    partnerDiscount && partnerName ? '유효한 짝꿍 코드입니다. 50,000원 할인이 적용되었습니다.' : ''
-  );
-
-  // 외부 partnerName 변경 시 동기화
-  useEffect(() => {
-    if (partnerName !== inputCode && !inputCode) {
-      setInputCode(partnerName);
-    }
-  }, [partnerName]);
-
-  // 코드 입력 시 검증 상태 리셋 (다시 확인 버튼을 눌러야 적용됨)
-  const handleInputChange = (val: string) => {
-    setInputCode(val);
-    if (verifyStatus !== 'idle') {
-      setVerifyStatus('idle');
-      setVerifyMessage('');
-      onChange({
-        partnerDiscount: false,
-        partnerName: val,
-      });
-    } else {
-      onChange({ partnerName: val });
-    }
-  };
-
-  // 짝꿍 코드 검증 요청
-  const handleVerifyCode = async () => {
-    const trimmed = inputCode.trim();
-    if (!trimmed) {
-      setVerifyStatus('invalid');
-      setVerifyMessage('짝꿍 코드(또는 추천인 성함)를 입력해 주세요.');
-      onChange({ partnerDiscount: false, partnerName: '' });
-      return;
-    }
-
-    setVerifyStatus('checking');
-    setVerifyMessage('');
-
-    try {
-      const res = await fetch('/api/validate-partner-code', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code: trimmed }),
-      });
-
-      const data = await res.json();
-
-      if (data.valid) {
-        setVerifyStatus('valid');
-        setVerifyMessage(data.message || '짝꿍 확인 완료! 50,000원 할인이 적용되었습니다.');
-        onChange({
-          partnerDiscount: true,
-          partnerName: trimmed,
-        });
-      } else {
-        setVerifyStatus('invalid');
-        setVerifyMessage(data.message || '등록되지 않은 짝꿍 코드입니다. 대표님께 확인 후 다시 입력해 주세요.');
-        onChange({
-          partnerDiscount: false,
-          partnerName: trimmed,
-        });
-      }
-    } catch (err: any) {
-      setVerifyStatus('invalid');
-      setVerifyMessage('검증 중 오류가 발생했습니다. 다시 시도해 주세요.');
-      onChange({
-        partnerDiscount: false,
-        partnerName: trimmed,
-      });
-    }
+  // 짝꿍 코드/성함 입력 핸들러: 한 글자라도 입력 시 5만원 즉시 자동 차감, 내용 비우면 해제
+  const handlePartnerNameChange = (val: string) => {
+    const hasValue = val.trim().length > 0;
+    onChange({
+      partnerName: val,
+      partnerDiscount: hasValue,
+    });
   };
 
   return (
@@ -152,7 +84,7 @@ export const DiscountBenefitSection: React.FC<DiscountBenefitSectionProps> = ({
           </p>
         </div>
 
-        {/* 1-2. 짝꿍 할인 (체크박스 없이 순수 빈칸 입력 및 사전 등록 코드 검증 방식) */}
+        {/* 1-2. 짝꿍 할인 (복잡한 검증 없이 입력 즉시 5만원 자동 차감 복원) */}
         <div
           className={`p-4 sm:p-5 rounded-2xl border transition-all ${
             partnerDiscount
@@ -161,9 +93,25 @@ export const DiscountBenefitSection: React.FC<DiscountBenefitSectionProps> = ({
           }`}
         >
           <div className="flex items-start justify-between gap-3">
-            <div className="flex items-center gap-2">
-              <UserCheck className="w-5 h-5 text-[#8F7A56] shrink-0" />
+            <div className="flex items-center gap-2.5">
+              <div
+                onClick={() => {
+                  if (partnerDiscount) {
+                    onChange({ partnerDiscount: false, partnerName: '' });
+                  } else {
+                    onChange({ partnerDiscount: true });
+                  }
+                }}
+                className={`w-5 h-5 rounded-md flex items-center justify-center border transition-colors shrink-0 cursor-pointer ${
+                  partnerDiscount
+                    ? 'bg-[#322A1B] border-[#322A1B] text-[#FAF8F5]'
+                    : 'border-[#DDD1BD] bg-white'
+                }`}
+              >
+                {partnerDiscount && <Check className="w-3.5 h-3.5 stroke-[3]" />}
+              </div>
               <span className="text-sm sm:text-base font-semibold text-[#322A1B] break-keep flex items-center gap-2">
+                <UserCheck className="w-4 h-4 text-[#8F7A56]" />
                 <span>짝꿍 할인</span>
                 {partnerDiscount ? (
                   <span className="text-xs px-2.5 py-0.5 rounded-full bg-[#322A1B] text-[#FAF8F5] font-semibold">
@@ -171,7 +119,7 @@ export const DiscountBenefitSection: React.FC<DiscountBenefitSectionProps> = ({
                   </span>
                 ) : (
                   <span className="text-xs px-2 py-0.5 rounded-full bg-[#FAF8F5] border border-[#DDD1BD] text-[#8F7A56]">
-                    코드 입력 시 적용
+                    입력 시 5만원 자동 차감
                   </span>
                 )}
               </span>
@@ -181,65 +129,26 @@ export const DiscountBenefitSection: React.FC<DiscountBenefitSectionProps> = ({
             </span>
           </div>
 
-          <p className="text-xs sm:text-sm text-[#8F7A56] mt-2 leading-relaxed break-keep">
-            사전에 한민규 대표님께 전달받으신 <strong>짝꿍 코드(또는 추천인 성함)</strong>를 입력 후 [코드 확인]을 눌러주세요.
+          <p className="text-xs sm:text-sm text-[#8F7A56] mt-2 pl-7.5 leading-relaxed break-keep">
+            아래 빈칸에 <strong>짝꿍 코드(또는 추천인 성함)</strong>를 입력하시면 <strong>50,000원 즉시 할인</strong>이 전체 금액에서 자동 차감됩니다.
           </p>
 
-          {/* 짝꿍 코드 입력 빈칸 + 확인 버튼 */}
-          <div className="mt-3.5 pt-3.5 border-t border-[#F5F1EA] space-y-2">
-            <div className="flex items-center gap-2">
+          {/* 짝꿍 코드/성함 입력 빈칸 (상시 노출) */}
+          <div className="mt-3.5 pt-3.5 border-t border-[#F5F1EA] pl-7.5 space-y-1.5">
+            <label className="block text-xs sm:text-sm font-semibold text-[#322A1B]">
+              짝꿍 코드 (또는 추천인 성함)
+            </label>
+            <div className="relative">
               <input
                 type="text"
-                placeholder="예: 261011김민수 (코드 또는 성함 입력)"
-                value={inputCode}
-                onChange={(e) => handleInputChange(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault();
-                    handleVerifyCode();
-                  }
-                }}
-                className={`flex-1 h-12 px-3.5 bg-[#FAF8F5] border ${
-                  verifyStatus === 'valid'
-                    ? 'border-emerald-600 bg-emerald-50/20 text-[#322A1B]'
-                    : verifyStatus === 'invalid'
-                    ? 'border-red-400 bg-red-50/20 text-[#322A1B]'
-                    : 'border-[#DDD1BD] focus:border-[#322A1B]'
-                } rounded-xl text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-[#322A1B]/10 transition-all placeholder:text-[#8F7A56]/60 font-medium`}
+                placeholder="예: 261011김민수 (또는 추천인 성함 입력 시 자동 차감)"
+                value={partnerName}
+                onChange={(e) => handlePartnerNameChange(e.target.value)}
+                className="w-full h-12 px-3.5 bg-[#FAF8F5] border border-[#DDD1BD] focus:border-[#322A1B] rounded-xl text-sm sm:text-base text-[#322A1B] focus:outline-none focus:ring-2 focus:ring-[#322A1B]/10 transition-all placeholder:text-[#8F7A56]/70 font-medium"
               />
-              <button
-                type="button"
-                onClick={handleVerifyCode}
-                disabled={verifyStatus === 'checking'}
-                className="h-12 px-4 sm:px-5 bg-[#322A1B] text-[#FAF8F5] hover:bg-[#1E1910] rounded-xl text-xs sm:text-sm font-semibold transition-all shrink-0 flex items-center gap-1.5 disabled:opacity-50 cursor-pointer shadow-sm"
-              >
-                {verifyStatus === 'checking' ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin text-[#C7B698]" />
-                    <span>확인 중</span>
-                  </>
-                ) : (
-                  <span>코드 확인</span>
-                )}
-              </button>
             </div>
-
-            {/* 검증 결과 실시간 안내 피드백 */}
-            {verifyStatus === 'valid' && (
-              <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-xs sm:text-sm text-emerald-800 flex items-center gap-2 animate-fade-in font-medium">
-                <Check className="w-4 h-4 text-emerald-600 shrink-0 stroke-[3]" />
-                <span>{verifyMessage}</span>
-              </div>
-            )}
-            {verifyStatus === 'invalid' && (
-              <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-xs sm:text-sm text-red-700 flex items-center gap-2 animate-fade-in font-medium">
-                <AlertCircle className="w-4 h-4 text-red-600 shrink-0" />
-                <span>{verifyMessage}</span>
-              </div>
-            )}
-
             {errors.partnerName && (
-              <p className="text-xs text-red-500 font-medium">{errors.partnerName}</p>
+              <p className="text-xs text-red-500 mt-1 font-medium">{errors.partnerName}</p>
             )}
           </div>
         </div>
