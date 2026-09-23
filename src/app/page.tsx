@@ -22,8 +22,8 @@ import { ArrowLeft } from 'lucide-react';
 type ViewMode = 'home' | 'catalog' | 'terms' | 'form' | 'confirm' | 'success';
 
 export default function CustomerContractPage() {
-  // 화면 네비게이션 상태 (기본값: 홈 화면)
-  const [viewMode, setViewMode] = useState<ViewMode>('home');
+  // 화면 네비게이션 상태 (링크 접속 시 바로 약관 동의 페이지 노출)
+  const [viewMode, setViewMode] = useState<ViewMode>('terms');
 
   // 폼 상태
   const [formData, setFormData] = useState<ContractFormData>({

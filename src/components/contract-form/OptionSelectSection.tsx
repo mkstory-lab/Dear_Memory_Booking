@@ -31,37 +31,37 @@ export const OptionSelectSection: React.FC<OptionSelectSectionProps> = ({
             <div
               key={option.id}
               onClick={() => onToggleOption(option.id)}
-              className={`cursor-pointer rounded-2xl p-5 transition-all border flex flex-col justify-between ${
+              className={`cursor-pointer rounded-2xl p-5 sm:p-6 transition-all border flex flex-col justify-between ${
                 isSelected
-                  ? 'border-[#322A1B] bg-[#FFFFFF] shadow-sm ring-1 ring-[#322A1B]/15'
-                  : 'border-[#EBE3D5] bg-[#FFFFFF]/70 hover:border-[#C7B698] hover:bg-[#FFFFFF]'
+                  ? 'border-2 border-[#322A1B] bg-[#FFFFFF] shadow-sm ring-2 ring-[#322A1B]/10'
+                  : 'border border-[#EBE3D5] bg-[#FFFFFF] hover:border-[#8F7A56]'
               }`}
             >
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <h4 className="text-sm sm:text-base font-semibold text-[#322A1B]">
+                  <h4 className="text-base sm:text-lg font-bold text-[#322A1B]">
                     {option.name}
                   </h4>
                   <div
-                    className={`w-5 h-5 rounded-md flex items-center justify-center border transition-colors shrink-0 ${
+                    className={`w-6 h-6 rounded-md flex items-center justify-center border transition-colors shrink-0 ${
                       isSelected
                         ? 'bg-[#322A1B] border-[#322A1B] text-[#FAF8F5]'
                         : 'border-[#DDD1BD] bg-[#FFFFFF]'
                     }`}
                   >
-                    {isSelected && <Check className="w-3.5 h-3.5" />}
+                    {isSelected && <Check className="w-4 h-4 stroke-[3]" />}
                   </div>
                 </div>
-                <div className="text-center text-xs text-[#6E5C3D] leading-relaxed mb-4 min-h-[44px] flex flex-col justify-center space-y-0.5 py-1">
+                <div className="text-center text-xs sm:text-sm text-[#6E5C3D] leading-relaxed mb-4 min-h-[44px] flex flex-col justify-center space-y-0.5 py-1">
                   {option.description.split('\n').map((line, idx) => (
-                    <p key={idx} className={idx === 1 ? "text-[11px] text-[#8F7A56] font-medium" : "text-[#322A1B]"}>
+                    <p key={idx} className={idx === 1 ? "text-xs text-[#8F7A56] font-medium" : "text-[#322A1B] font-semibold"}>
                       {line}
                     </p>
                   ))}
                 </div>
               </div>
 
-              <div className="text-base font-bold text-[#322A1B] pt-3 border-t border-[#F5F1EA] tabular-nums">
+              <div className="text-lg sm:text-xl font-bold text-[#322A1B] pt-3 border-t border-[#F5F1EA] tabular-nums">
                 +{formatKRW(option.price)}
               </div>
             </div>

@@ -605,10 +605,10 @@ export const RepresentativeReviewView: React.FC<RepresentativeReviewViewProps> =
             </div>
           </div>
 
-          {/* 추후 페이백 요약 */}
+          {/* 후기 이벤트 요약 */}
           {pricing.futureCashbackTotal > 0 && (
             <div className="p-3 bg-[#F5F1EA] border border-[#DDD1BD] rounded-xl text-xs flex justify-between items-center text-[#6E5C3D]">
-              <span className="break-keep">후기 작성 시 페이백 가능 금액</span>
+              <span className="break-keep">후기 이벤트 (잔금 차감 또는 페이백)</span>
               <span className="font-bold text-[#322A1B] tabular-nums whitespace-nowrap shrink-0">최대 {formatKRW(pricing.futureCashbackTotal)}</span>
             </div>
           )}

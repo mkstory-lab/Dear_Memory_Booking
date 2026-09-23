@@ -1,16 +1,18 @@
 import React from 'react';
+import { Camera, Check, Sparkles, BookOpen, Layers } from 'lucide-react';
 import { PRODUCTS_CONFIG } from '@/config/products';
 import { formatKRW } from '@/lib/pricing';
-import { Camera, CheckCircle2, BookOpen, Sparkles, Check } from 'lucide-react';
 
 interface ProductSelectSectionProps {
   selectedProductId: string;
   onSelect: (productId: string) => void;
+  errors?: Record<string, string>;
 }
 
 export const ProductSelectSection: React.FC<ProductSelectSectionProps> = ({
   selectedProductId,
   onSelect,
+  errors = {},
 }) => {
   return (
     <div className="space-y-6">
@@ -19,182 +21,145 @@ export const ProductSelectSection: React.FC<ProductSelectSectionProps> = ({
           <Camera className="w-5 h-5 text-[#8F7A56]" />
           <span>3. 상품 선택</span>
         </h3>
-        <p className="text-xs text-[#8F7A56] mt-1">
-          상담 시 결정하신 본식스냅 상품 구성을 선택해 주세요.
+        <p className="text-xs sm:text-sm text-[#8F7A56] mt-1">
+          디어메모리의 본식스냅 패키지를 선택해 주세요.
         </p>
       </div>
 
-      <div className="grid grid-cols-2 gap-2.5 sm:gap-4 items-stretch">
+      {/* 실속형 · 화보형 전 상품 공통 포함 사항 배너 */}
+      <div className="p-4 sm:p-4.5 bg-[#FAF8F5] border border-[#DDD1BD] rounded-2xl space-y-2 text-xs sm:text-sm text-[#6E5C3D] shadow-sm">
+        <div className="flex items-center gap-2 text-xs sm:text-sm font-bold text-[#322A1B]">
+          <Layers className="w-4 h-4 text-[#8F7A56] shrink-0" />
+          <span>전 상품 기본 공통 제공 사항 (실속형 / 화보형 공통)</span>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs sm:text-sm pt-1">
+          <div className="flex items-center gap-2">
+            <Check className="w-4 h-4 text-[#8F7A56] shrink-0" />
+            <span className="font-semibold text-[#322A1B]">스냅 촬영 + 원판(기념촬영) 포함</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Check className="w-4 h-4 text-[#8F7A56] shrink-0" />
+            <span className="font-semibold text-[#322A1B]">신부대기실 ~ 본식 ~ 원판 ~ 연회장 인사</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Check className="w-4 h-4 text-[#8F7A56] shrink-0" />
+            <span>정밀 세부 보정본 70장 전체 제공</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Check className="w-4 h-4 text-[#8F7A56] shrink-0" />
+            <span>고화질 원본 2,000장 이상 전체 제공</span>
+          </div>
+        </div>
+      </div>
+
+      {/* 상품 선택 카드 (실속형 vs 화보형) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
         {PRODUCTS_CONFIG.map((product) => {
           const isSelected = selectedProductId === product.id;
-          const isPlus = product.isPlusPackage;
+          const isPlus = product.id === 'album_plus';
 
           return (
             <div
               key={product.id}
               onClick={() => onSelect(product.id)}
-              className={`cursor-pointer rounded-xl sm:rounded-2xl p-3 sm:p-6 transition-all relative border flex flex-col justify-between h-full ${
+              className={`cursor-pointer rounded-3xl p-5 sm:p-6 transition-all duration-300 relative flex flex-col justify-between select-none ${
                 isSelected
-                  ? 'border-[#322A1B] bg-[#FFFFFF] shadow-md ring-2 ring-[#322A1B]/10'
-                  : 'border-[#EBE3D5] bg-[#FFFFFF]/70 hover:border-[#C7B698] hover:bg-[#FFFFFF]'
+                  ? 'bg-[#FFFFFF] border-2 border-[#322A1B] shadow-md ring-2 ring-[#322A1B]/10'
+                  : 'bg-[#FFFFFF] border border-[#EBE3D5] hover:border-[#8F7A56] shadow-sm'
               }`}
             >
-              <div className="space-y-2 sm:space-y-3.5">
-                {/* 상단 뱃지 & 선택 상태 (높이 일치) */}
-                <div className="h-6 sm:h-7 flex items-center justify-between">
+              <div className="space-y-4">
+                {/* 상단 라디오 & 뱃지 */}
+                <div className="flex items-center justify-between">
                   <span
-                    className={`text-[9.5px] sm:text-[11px] font-medium px-2 py-0.5 rounded-full ${
-                      isSelected
+                    className={`text-xs font-semibold px-2.5 py-0.5 rounded-full ${
+                      isPlus
                         ? 'bg-[#322A1B] text-[#FAF8F5]'
-                        : isPlus
-                        ? 'bg-[#FAF8F5] text-[#8F7A56] border border-[#DDD1BD]'
-                        : 'bg-[#F5F1EA] text-[#8F7A56]'
+                        : 'bg-[#F5F1EA] text-[#6E5C3D] border border-[#EBE3D5]'
                     }`}
                   >
-                    {isPlus ? '대표 추천' : (product.badge || '기본')}
+                    {isPlus ? '대표 추천' : '기본 상품'}
                   </span>
-                  <CheckCircle2
-                    className={`w-4 h-4 sm:w-5 sm:h-5 transition-colors ${
-                      isSelected ? 'text-[#322A1B]' : 'text-[#DDD1BD]'
+
+                  <div
+                    className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${
+                      isSelected
+                        ? 'border-[#322A1B] bg-[#322A1B]'
+                        : 'border-[#DDD1BD] bg-[#FFFFFF]'
                     }`}
-                  />
+                  >
+                    {isSelected && <div className="w-2.5 h-2.5 rounded-full bg-[#FAF8F5]" />}
+                  </div>
                 </div>
 
-                {/* 상품명 (높이 일치) */}
-                <div className="h-6 sm:h-7 flex items-center gap-1 sm:gap-2">
-                  <h4 className="text-sm sm:text-lg font-serif font-bold text-[#322A1B]">
+                {/* 상품명 및 부제 */}
+                <div>
+                  <h4 className="text-xl sm:text-2xl font-serif font-bold text-[#322A1B]">
                     {product.name}
                   </h4>
-                  {isPlus && (
-                    <span className="text-[9px] sm:text-[11px] font-sans font-normal text-[#8F7A56] bg-[#FAF8F5] px-1.5 py-0.5 rounded-full border border-[#DDD1BD]">
-                      부모님 앨범
-                    </span>
-                  )}
-                </div>
-
-                {/* 부제 (높이 일치) */}
-                <div className="h-7 sm:h-9 flex items-center">
-                  <p className="text-[9.5px] sm:text-xs text-[#8F7A56] leading-tight break-keep line-clamp-2">
+                  <p className="text-sm sm:text-base font-semibold text-[#8F7A56] mt-1">
                     {product.subtitle}
                   </p>
                 </div>
 
-                {/* 가격 (높이 일치) */}
-                <div className="h-8 sm:h-10 flex items-center text-base sm:text-2xl font-bold text-[#322A1B] pb-2 sm:pb-3 border-b border-[#F5F1EA] tabular-nums">
+                {/* 가격 */}
+                <div className="text-2xl sm:text-3xl font-bold text-[#322A1B] pb-3 border-b border-[#F5F1EA] tabular-nums">
                   {formatKRW(product.basePrice)}
                 </div>
 
-                {/* 앨범 사양 요약 박스 (2줄 높이 완전 통일) */}
-                <div className="p-2 sm:p-3 bg-[#FAF8F5] rounded-xl border border-[#EBE3D5] space-y-1 text-[9px] sm:text-xs min-h-[58px] sm:min-h-[64px] flex flex-col justify-center">
-                  <div className="flex items-center gap-1 text-[#8F7A56] font-medium">
-                    <BookOpen className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-                    <span>앨범 사양</span>
+                {/* 앨범 사양 핵심 비교 박스 */}
+                <div className="p-4 bg-[#FAF8F5] rounded-2xl border border-[#EBE3D5] space-y-2 text-xs sm:text-sm">
+                  <div className="flex items-center gap-1.5 text-[#8F7A56] font-semibold text-xs uppercase tracking-wide">
+                    <BookOpen className="w-4 h-4 text-[#8F7A56]" />
+                    <span>앨범 제공 구성</span>
                   </div>
-                  <div className="font-semibold text-[#322A1B] space-y-0.5 pl-4 text-[8.5px] sm:text-xs leading-tight whitespace-nowrap">
-                    {!isPlus ? (
-                      <>
-                        <div className="truncate">부부 15×12 70p (1권)</div>
-                        <div className="text-[#A8987E] font-normal text-[8px] sm:text-[10.5px] truncate">(부모님앨범 미포함)</div>
-                      </>
-                    ) : (
-                      <>
-                        <div className="truncate">부부 15×12 80p (1권)</div>
-                        <div className="text-[#8F7A56] font-semibold text-[8px] sm:text-[10.5px] truncate">부모님 12×8 40p (2권)</div>
-                      </>
-                    )}
-                  </div>
+
+                  {!isPlus ? (
+                    <div className="space-y-1">
+                      <div className="font-bold text-[#322A1B] text-sm sm:text-base">
+                        &bull; 부부 앨범 15×12 70p (1권)
+                      </div>
+                      <div className="text-[#8F7A56] text-xs">
+                        * 양가 부모님 앨범 미포함 상품입니다.
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-1.5">
+                      <div className="font-bold text-[#322A1B] text-sm sm:text-base">
+                        &bull; 부부 앨범 15×12 70p (1권)
+                      </div>
+                      <div className="font-bold text-[#322A1B] text-sm sm:text-base flex items-center gap-1 text-[#8F7A56]">
+                        <Sparkles className="w-4 h-4 text-[#B09A74] shrink-0" />
+                        <span>부모님 앨범 12×8 40p (2권 기본 제공)</span>
+                      </div>
+                      <p className="text-xs text-[#6E5C3D] leading-snug">
+                        [원판·스냅 합본 수록, 양가 부모님 선물용 2권]
+                      </p>
+                    </div>
+                  )}
                 </div>
+              </div>
 
-                {/* 상품 구성 */}
-                {!isPlus ? (
-                  /* 실속형: 기본 포함 5대 구성 목록 */
-                  <div className="space-y-1.5 sm:space-y-2 text-[9.5px] sm:text-xs text-[#6E5C3D]">
-                    <div className="font-semibold text-[9.5px] sm:text-[11px] uppercase tracking-wider text-[#8F7A56] h-5 flex items-center">
-                      기본 포함 5대 구성
-                    </div>
-                    <div className="space-y-1 sm:space-y-1.5">
-                      {product.includedItems.map((item, idx) => (
-                        <div key={idx} className="flex items-center gap-1 sm:gap-2 p-1.5 sm:p-2 bg-[#FAF8F5]/60 rounded-lg sm:rounded-xl border border-[#EBE3D5]/60 text-[8.5px] sm:text-xs leading-tight h-[28px] sm:h-[34px]">
-                          <Check className="w-3 h-3 text-[#B09A74] shrink-0" />
-                          <span className="truncate">{item}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ) : (
-                  /* 화보형: 실속형 기본 포함 + 추가 혜택 */
-                  <div className="space-y-1.5 sm:space-y-2 text-[9.5px] sm:text-xs text-[#4E412A]">
-                    {/* 모바일 전용: 실속형과 1:1 대칭을 이루는 5대 정렬 알약 리스트 */}
-                    <div className="sm:hidden space-y-1.5">
-                      <div className="font-semibold text-[9.5px] uppercase tracking-wider text-[#8F7A56] h-5 flex items-center gap-1">
-                        <Sparkles className="w-3 h-3 text-[#B09A74]" />
-                        <span>화보형 프리미엄 5대 구성</span>
-                      </div>
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-1 p-1.5 bg-[#FAF8F5] rounded-lg border border-[#DDD1BD] text-[8.5px] leading-tight h-[28px]">
-                          <Check className="w-3 h-3 text-[#8F7A56] shrink-0" />
-                          <span className="font-semibold text-[#322A1B] truncate">실속형 전 구성 100% 기본 포함</span>
-                        </div>
-                        <div className="flex items-center gap-1 p-1.5 bg-[#FAF8F5] rounded-lg border border-[#B09A74]/40 text-[8.5px] leading-tight h-[28px]">
-                          <Sparkles className="w-3 h-3 text-[#B09A74] shrink-0" />
-                          <span className="font-semibold text-[#322A1B] truncate">부모님 앨범 12x8 40p 2권 제공</span>
-                        </div>
-                        <div className="flex items-center gap-1 p-1.5 bg-[#FAF8F5] rounded-lg border border-[#EBE3D5] text-[8.5px] leading-tight h-[28px]">
-                          <Sparkles className="w-3 h-3 text-[#B09A74] shrink-0" />
-                          <span className="truncate">부부앨범 80p (+10p 증면)</span>
-                        </div>
-                        <div className="flex items-center gap-1 p-1.5 bg-[#FAF8F5] rounded-lg border border-[#EBE3D5] text-[8.5px] leading-tight h-[28px]">
-                          <Sparkles className="w-3 h-3 text-[#B09A74] shrink-0" />
-                          <span className="truncate">정밀 세부 보정본 (+10장 추가)</span>
-                        </div>
-                        <div className="flex items-center gap-1 p-1.5 bg-[#FAF8F5] rounded-lg border border-[#EBE3D5] text-[8.5px] leading-tight h-[28px]">
-                          <Sparkles className="w-3 h-3 text-[#B09A74] shrink-0" />
-                          <span className="truncate">고화질 원본 (+500장 추가)</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* 데스크톱(PC/태블릿) 전용: 상세 설명 혜택 카드 */}
-                    <div className="hidden sm:block space-y-2.5">
-                      <div className="p-2 bg-[#FAF8F5] border border-[#DDD1BD] rounded-xl flex items-center gap-1.5 text-xs font-semibold text-[#322A1B]">
-                        <Check className="w-3.5 h-3.5 text-[#8F7A56] shrink-0" />
-                        <span className="break-keep">{product.baseIncludedNotice || '실속형 기본 구성 100% 포함'}</span>
-                      </div>
-
-                      <div className="space-y-1.5 pt-0.5">
-                        <div className="flex items-center gap-1 text-[11px] font-bold text-[#8F7A56]">
-                          <Sparkles className="w-3 h-3 text-[#B09A74]" />
-                          <span>화보형 추가 혜택 (+20만원)</span>
-                        </div>
-                        {product.plusBenefits?.map((benefit, idx) => (
-                          <div
-                            key={idx}
-                            className="p-2 bg-[#FAF8F5] rounded-lg border border-[#EBE3D5] space-y-0.5"
-                          >
-                            <div className="flex items-center justify-between">
-                              <span className="font-bold text-xs text-[#322A1B] break-keep">
-                                {benefit.title}
-                              </span>
-                              {benefit.badge && (
-                                <span className="text-[10px] font-semibold px-1.5 py-0.2 bg-[#EBE3D5] text-[#6E5C3D] rounded shrink-0">
-                                  {benefit.badge}
-                                </span>
-                              )}
-                            </div>
-                            <p className="text-[11px] text-[#6E5C3D] leading-snug break-keep">
-                              {benefit.detail}
-                            </p>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                )}
+              {/* 하단 선택 안내 */}
+              <div className="pt-4 mt-2">
+                <div
+                  className={`w-full py-2.5 rounded-xl text-center text-xs sm:text-sm font-semibold transition-colors ${
+                    isSelected
+                      ? 'bg-[#322A1B] text-[#FAF8F5]'
+                      : 'bg-[#FAF8F5] text-[#8F7A56] border border-[#DDD1BD]'
+                  }`}
+                >
+                  {isSelected ? '선택됨' : '선택하기'}
+                </div>
               </div>
             </div>
           );
         })}
       </div>
+
+      {errors.productId && (
+        <p className="text-xs text-red-500 font-medium">{errors.productId}</p>
+      )}
     </div>
   );
 };

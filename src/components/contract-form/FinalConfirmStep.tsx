@@ -155,8 +155,8 @@ export const FinalConfirmStep: React.FC<FinalConfirmStepProps> = ({
               )}
               {pricing.futureCashbackTotal > 0 && (
                 <div className="mt-2.5 p-3 bg-[#FAF8F5] rounded-xl text-xs flex justify-between items-center text-[#6E5C3D] gap-2">
-                  <span className="break-keep">추후 후기 작성 시 페이백 예정:</span>
-                  <span className="font-bold text-[#322A1B] tabular-nums shrink-0 text-right whitespace-nowrap">{formatKRW(pricing.futureCashbackTotal)}</span>
+                  <span className="break-keep">후기 이벤트 (잔금 차감 또는 페이백):</span>
+                  <span className="font-bold text-[#322A1B] tabular-nums shrink-0 text-right whitespace-nowrap">최대 {formatKRW(pricing.futureCashbackTotal)}</span>
                 </div>
               )}
             </div>

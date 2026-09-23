@@ -326,12 +326,12 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
             </div>
           </div>
 
-          {/* 후기 페이백 별도 안내 */}
+          {/* 후기 이벤트 별도 안내 */}
           {pricing.futureCashbackTotal > 0 && (
             <div className="mt-2.5 p-2 bg-[#F5F1EA]/80 rounded border border-[#DDD1BD] text-[11px] flex justify-between items-center text-[#6E5C3D]">
-              <span>* 후기 작성 혜택: 계약 후기 및 본식 후기 작성 확인 시 대표 계좌 입금</span>
+              <span>* 후기 이벤트: 잔금에서 차감 또는 후기 확인 후 페이백 적용</span>
               <span className="font-bold text-[#322A1B] tabular-nums">
-                최대 {formatKRW(pricing.futureCashbackTotal)} 페이백
+                최대 {formatKRW(pricing.futureCashbackTotal)} 혜택
               </span>
             </div>
           )}
