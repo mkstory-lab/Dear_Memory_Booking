@@ -107,10 +107,10 @@ export const ProductSelectSection: React.FC<ProductSelectSectionProps> = ({
 
                 {/* 상품 구성 */}
                 {!isPlus ? (
-                  /* 실속형: 기본 포함 구성 목록 */
+                  /* 실속형: 기본 포함 5대 구성 목록 */
                   <div className="space-y-1.5 sm:space-y-2 text-[9.5px] sm:text-xs text-[#6E5C3D]">
                     <div className="font-semibold text-[9.5px] sm:text-[11px] uppercase tracking-wider text-[#8F7A56] h-5 flex items-center">
-                      기본 포함 구성
+                      기본 포함 5대 구성
                     </div>
                     <div className="space-y-1 sm:space-y-1.5">
                       {product.includedItems.map((item, idx) => (
@@ -124,36 +124,32 @@ export const ProductSelectSection: React.FC<ProductSelectSectionProps> = ({
                 ) : (
                   /* 화보형: 실속형 기본 포함 + 추가 혜택 */
                   <div className="space-y-1.5 sm:space-y-2 text-[9.5px] sm:text-xs text-[#4E412A]">
-                    {/* 모바일 전용: 실속형과 1:1 대칭을 이루는 6개 정렬 알약 리스트 */}
+                    {/* 모바일 전용: 실속형과 1:1 대칭을 이루는 5대 정렬 알약 리스트 */}
                     <div className="sm:hidden space-y-1.5">
                       <div className="font-semibold text-[9.5px] uppercase tracking-wider text-[#8F7A56] h-5 flex items-center gap-1">
                         <Sparkles className="w-3 h-3 text-[#B09A74]" />
-                        <span>화보형 프리미엄 구성</span>
+                        <span>화보형 프리미엄 5대 구성</span>
                       </div>
                       <div className="space-y-1">
                         <div className="flex items-center gap-1 p-1.5 bg-[#FAF8F5] rounded-lg border border-[#DDD1BD] text-[8.5px] leading-tight h-[28px]">
                           <Check className="w-3 h-3 text-[#8F7A56] shrink-0" />
-                          <span className="font-semibold text-[#322A1B] truncate">실속형 전 구성 100% 포함</span>
+                          <span className="font-semibold text-[#322A1B] truncate">스냅 촬영 + 원판 촬영 포함</span>
+                        </div>
+                        <div className="flex items-center gap-1 p-1.5 bg-[#FAF8F5] rounded-lg border border-[#DDD1BD] text-[8.5px] leading-tight h-[28px]">
+                          <Check className="w-3 h-3 text-[#8F7A56] shrink-0" />
+                          <span className="font-semibold text-[#322A1B] truncate">신부대기실 ~ 본식 ~ 원판 ~ 연회장</span>
+                        </div>
+                        <div className="flex items-center gap-1 p-1.5 bg-[#FAF8F5] rounded-lg border border-[#EBE3D5] text-[8.5px] leading-tight h-[28px]">
+                          <Sparkles className="w-3 h-3 text-[#B09A74] shrink-0" />
+                          <span className="truncate">고화질 원본 2,500장 이상 (+500장)</span>
+                        </div>
+                        <div className="flex items-center gap-1 p-1.5 bg-[#FAF8F5] rounded-lg border border-[#EBE3D5] text-[8.5px] leading-tight h-[28px]">
+                          <Sparkles className="w-3 h-3 text-[#B09A74] shrink-0" />
+                          <span className="truncate">정밀 세부 보정본 80장 (+10장)</span>
                         </div>
                         <div className="flex items-center gap-1 p-1.5 bg-[#FAF8F5] rounded-lg border border-[#B09A74]/40 text-[8.5px] leading-tight h-[28px]">
                           <Sparkles className="w-3 h-3 text-[#B09A74] shrink-0" />
-                          <span className="font-semibold text-[#322A1B] truncate">부모님 앨범 2권 증정 (40p)</span>
-                        </div>
-                        <div className="flex items-center gap-1 p-1.5 bg-[#FAF8F5] rounded-lg border border-[#EBE3D5] text-[8.5px] leading-tight h-[28px]">
-                          <Sparkles className="w-3 h-3 text-[#B09A74] shrink-0" />
-                          <span className="truncate">부부앨범 80p (+10p 증면)</span>
-                        </div>
-                        <div className="flex items-center gap-1 p-1.5 bg-[#FAF8F5] rounded-lg border border-[#EBE3D5] text-[8.5px] leading-tight h-[28px]">
-                          <Sparkles className="w-3 h-3 text-[#B09A74] shrink-0" />
-                          <span className="truncate">세부 보정본 80장 (+10장)</span>
-                        </div>
-                        <div className="flex items-center gap-1 p-1.5 bg-[#FAF8F5] rounded-lg border border-[#EBE3D5] text-[8.5px] leading-tight h-[28px]">
-                          <Sparkles className="w-3 h-3 text-[#B09A74] shrink-0" />
-                          <span className="truncate">고화질 원본 2,500장 이상</span>
-                        </div>
-                        <div className="flex items-center gap-1 p-1.5 bg-[#FAF8F5] rounded-lg border border-[#EBE3D5] text-[8.5px] leading-tight h-[28px]">
-                          <Check className="w-3 h-3 text-[#B09A74] shrink-0" />
-                          <span className="truncate">대표 1인 전 과정 단독 촬영</span>
+                          <span className="font-semibold text-[#322A1B] truncate">부부 80p 1권 + 부모님 40p 2권</span>
                         </div>
                       </div>
                     </div>
