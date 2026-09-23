@@ -451,8 +451,7 @@ export default function CustomerContractPage() {
         {viewMode === 'success' && (
           <SubmissionSuccessView
             email={formData.email}
-            reviewUrl={submittedReviewUrl}
-            onReset={handleReset}
+            onHome={handleReset}
           />
         )}
 
