@@ -3,6 +3,8 @@ import { getBackendAdapter } from '@/services/googleAppsScriptAdapter';
 import { MockBackendAdapter } from '@/services/mockBackendAdapter';
 import { clearSentRegistry } from '@/lib/idempotency';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   const adapter = getBackendAdapter();
   if (adapter.getMockMailbox) {

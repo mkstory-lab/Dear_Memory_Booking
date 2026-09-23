@@ -3,6 +3,8 @@ import { verifyApprovalToken } from '@/lib/token';
 import { calculateContractPrice } from '@/lib/pricing';
 import { isContractAlreadySent, getSentRecord } from '@/lib/idempotency';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
