@@ -103,7 +103,7 @@ let activeAdapter: IBackendAdapter | null = null;
 
 export function getBackendAdapter(): IBackendAdapter {
   if (!activeAdapter) {
-    const defaultGasUrl = 'https://script.google.com/macros/s/AKfycbxJ9SkHKRfA_SeG9cGi2m3zney4pKyrkglNTD8mjIfNXk5DGLGazcnpRwd4qYW2N-q5mg/exec';
+    const defaultGasUrl = 'https://script.google.com/macros/s/AKfycby6kW5BWQm4cZrdrjXQWGRPw9vvZgAziw0EyMt_1T9BFXIQrXs0FxhbBVrVRZ5rb_r8BA/exec';
     const gasUrl = process.env.GAS_WEBAPP_URL || defaultGasUrl;
     if (gasUrl && gasUrl.trim() !== '') {
       activeAdapter = new GoogleAppsScriptAdapter(gasUrl);
