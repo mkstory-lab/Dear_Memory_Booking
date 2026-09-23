@@ -214,8 +214,8 @@ export const CalendarModal: React.FC<CalendarModalProps> = ({
 
         {/* 안내 푸터 및 닫기 버튼 */}
         <div className="pt-2 border-t border-[#EBE3D5] space-y-2.5">
-          <div className="flex items-center gap-1.5 p-2 bg-[#FAF8F5] rounded-xl text-xs text-[#6E5C3D] border border-[#DDD1BD]">
-            <Sparkles className="w-3.5 h-3.5 text-[#B09A74] shrink-0" />
+          <div className="flex items-center gap-2 p-2 bg-[#FAF8F5] rounded-xl text-xs text-[#6E5C3D] border border-[#DDD1BD]">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#B09A74] shrink-0 inline-block" />
             <span>
               <strong>일요일 예식</strong> 선택 시 100,000원 즉시 할인이 자동 적용됩니다.
             </span>

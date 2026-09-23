@@ -71,8 +71,7 @@ export const HomeLandingView: React.FC<HomeLandingViewProps> = ({
         >
           {/* 상단 추천 뱃지 */}
           <div className="absolute top-2.5 right-2.5 sm:top-4 sm:right-4">
-            <span className="px-1.5 sm:px-2.5 py-0.5 sm:py-1 bg-[#322A1B] text-[#FAF8F5] rounded-full text-[8.5px] sm:text-[10px] font-semibold tracking-wider flex items-center gap-0.5 sm:gap-1">
-              <Sparkles className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-[#C7B698]" />
+            <span className="px-2 sm:px-2.5 py-0.5 sm:py-1 bg-[#322A1B] text-[#FAF8F5] rounded-full text-[8.5px] sm:text-[10px] font-semibold tracking-wider flex items-center">
               <span className="hidden sm:inline">상담 완료 고객</span>
               <span className="sm:hidden">추천</span>
             </span>

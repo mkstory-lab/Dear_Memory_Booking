@@ -111,11 +111,12 @@ export const ProductSelectSection: React.FC<ProductSelectSectionProps> = ({
                     <div className="flex items-center justify-between py-1.5 border-b border-[#EBE3D5]">
                       <div className="text-left font-bold text-[#322A1B] leading-tight">
                         <div className="text-xs sm:text-sm">부부 앨범</div>
-                        <div className="text-[#8F7A56] font-semibold text-[11px] sm:text-xs mt-0.5">15×12 70p</div>
+                        <div className="text-[#8F7A56] font-semibold text-[11px] sm:text-xs mt-0.5">
+                          {isPlus ? '15×12 80p' : '15×12 70p'}
+                        </div>
                       </div>
-                      <div className="px-2.5 py-1 bg-[#EBE3D5] text-[#6E5C3D] font-bold text-xs rounded-lg text-center leading-tight shrink-0 min-w-[54px]">
-                        <div>1권</div>
-                        <div>기본</div>
+                      <div className="px-2.5 py-1.5 bg-[#EBE3D5] text-[#6E5C3D] font-bold text-xs rounded-lg text-center leading-tight shrink-0 min-w-[54px] flex items-center justify-center">
+                        1권
                       </div>
                     </div>
 
@@ -123,11 +124,10 @@ export const ProductSelectSection: React.FC<ProductSelectSectionProps> = ({
                     <div className="flex items-center justify-between py-1.5 border-b border-[#EBE3D5]">
                       {isPlus ? (
                         <div className="text-left font-bold text-[#322A1B] leading-tight">
-                          <div className="flex items-center gap-1 text-xs sm:text-sm text-[#B09A74]">
-                            <Sparkles className="w-3.5 h-3.5 shrink-0" />
-                            <span>부모님 앨범</span>
+                          <div className="text-xs sm:text-sm text-[#322A1B]">
+                            부모님 앨범
                           </div>
-                          <div className="text-[#B09A74] font-semibold text-[11px] sm:text-xs pl-4.5 mt-0.5">
+                          <div className="text-[#8F7A56] font-semibold text-[11px] sm:text-xs mt-0.5">
                             12×8 40p
                           </div>
                         </div>
@@ -139,12 +139,11 @@ export const ProductSelectSection: React.FC<ProductSelectSectionProps> = ({
                       )}
 
                       {isPlus ? (
-                        <div className="px-2 py-1 bg-[#322A1B] text-[#FAF8F5] font-bold text-xs rounded-lg text-center leading-tight shrink-0 min-w-[54px]">
-                          <div>2권</div>
-                          <div>기본제공</div>
+                        <div className="px-2.5 py-1.5 bg-[#322A1B] text-[#FAF8F5] font-bold text-xs rounded-lg text-center leading-tight shrink-0 min-w-[54px] flex items-center justify-center">
+                          2권
                         </div>
                       ) : (
-                        <div className="px-2.5 py-1 bg-[#F5F1EA] text-[#8F7A56] font-bold text-xs rounded-lg text-center whitespace-nowrap shrink-0 min-w-[54px] min-h-[36px] flex items-center justify-center">
+                        <div className="px-2.5 py-1.5 bg-[#F5F1EA] text-[#8F7A56] font-bold text-xs rounded-lg text-center whitespace-nowrap shrink-0 min-w-[54px] min-h-[36px] flex items-center justify-center">
                           미포함
                         </div>
                       )}

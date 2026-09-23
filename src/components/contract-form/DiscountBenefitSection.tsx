@@ -133,7 +133,7 @@ export const DiscountBenefitSection: React.FC<DiscountBenefitSectionProps> = ({
         >
           <div className="flex items-start justify-between gap-3">
             <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
-              <Sparkles className={`w-4 h-4 shrink-0 ${isSunday ? 'text-[#B09A74]' : 'text-[#C7B698]'}`} />
+              <Tag className={`w-4 h-4 shrink-0 ${isSunday ? 'text-[#B09A74]' : 'text-[#C7B698]'}`} />
               <span className="text-sm sm:text-base font-semibold text-[#322A1B] break-keep">
                 일요일 예식 할인
               </span>

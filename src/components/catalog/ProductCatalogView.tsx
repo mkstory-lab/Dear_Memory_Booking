@@ -161,8 +161,7 @@ export const ProductCatalogView: React.FC<ProductCatalogViewProps> = ({
                     <div className="space-y-1.5 sm:space-y-2 text-[10px] sm:text-xs text-[#4E412A]">
                       {/* 모바일 전용: 실속형과 1:1 대칭을 이루는 5대 정렬 알약 리스트 */}
                       <div className="sm:hidden space-y-1.5">
-                        <div className="font-semibold text-[9.5px] uppercase tracking-wider text-[#8F7A56] h-5 flex items-center gap-1">
-                          <Sparkles className="w-3 h-3 text-[#B09A74]" />
+                        <div className="font-semibold text-[9.5px] uppercase tracking-wider text-[#8F7A56] h-5 flex items-center">
                           <span>화보형 프리미엄 5대 구성</span>
                         </div>
                         <div className="space-y-1">
@@ -171,19 +170,19 @@ export const ProductCatalogView: React.FC<ProductCatalogViewProps> = ({
                             <span className="font-semibold text-[#322A1B] truncate">실속형 전 구성 100% 기본 포함</span>
                           </div>
                           <div className="flex items-center gap-1 p-1.5 bg-[#FAF8F5] rounded-lg border border-[#B09A74]/40 text-[8.5px] leading-tight h-[28px]">
-                            <Sparkles className="w-3 h-3 text-[#B09A74] shrink-0" />
+                            <Check className="w-3 h-3 text-[#B09A74] shrink-0" />
                             <span className="font-semibold text-[#322A1B] truncate">부모님 앨범 2권 추가 제공 (40p)</span>
                           </div>
                           <div className="flex items-center gap-1 p-1.5 bg-[#FAF8F5] rounded-lg border border-[#EBE3D5] text-[8.5px] leading-tight h-[28px]">
-                            <Sparkles className="w-3 h-3 text-[#B09A74] shrink-0" />
+                            <Check className="w-3 h-3 text-[#8F7A56] shrink-0" />
                             <span className="truncate">부부앨범 80p (+10p 증면)</span>
                           </div>
                           <div className="flex items-center gap-1 p-1.5 bg-[#FAF8F5] rounded-lg border border-[#EBE3D5] text-[8.5px] leading-tight h-[28px]">
-                            <Sparkles className="w-3 h-3 text-[#B09A74] shrink-0" />
+                            <Check className="w-3 h-3 text-[#8F7A56] shrink-0" />
                             <span className="truncate">정밀 세부 보정본 (+10장 추가)</span>
                           </div>
                           <div className="flex items-center gap-1 p-1.5 bg-[#FAF8F5] rounded-lg border border-[#EBE3D5] text-[8.5px] leading-tight h-[28px]">
-                            <Sparkles className="w-3 h-3 text-[#B09A74] shrink-0" />
+                            <Check className="w-3 h-3 text-[#8F7A56] shrink-0" />
                             <span className="truncate">고화질 원본 (+500장 추가)</span>
                           </div>
                         </div>
@@ -201,8 +200,7 @@ export const ProductCatalogView: React.FC<ProductCatalogViewProps> = ({
 
                         {/* 추가 제공 혜택 */}
                         <div className="space-y-1.5">
-                          <div className="flex items-center gap-1 text-[11px] font-bold text-[#8F7A56] uppercase tracking-wider h-5">
-                            <Sparkles className="w-3 h-3 text-[#B09A74]" />
+                          <div className="flex items-center text-[11px] font-bold text-[#8F7A56] uppercase tracking-wider h-5">
                             <span>화보형 특별 업그레이드</span>
                           </div>
                           {product.plusBenefits?.map((benefit, idx) => (
