@@ -190,14 +190,7 @@ function handleApproveAndSend(payload) {
 
   GmailApp.sendEmail(data.email, subject, "", mailOptions);
 
-  // 대표 메일에도 발송완료 통지 및 동일 PDF 첨부
-  const repSubject = `[DEAR MEMORY 계약서 발송완료] ${data.groomName} · ${data.brideName} | ${data.weddingDate}`;
-  GmailApp.sendEmail(REP_EMAIL, repSubject, `계약번호: ${contractNumber}\n고객(${data.email})에게 계약서가 발송되었습니다.`, {
-    attachments: pdfBlob ? [pdfBlob] : [],
-    name: "DEAR MEMORY CONTRACT",
-  });
-
-  // 3. Optional Google Drive 자동 저장
+  // 3. Google Drive 자동 저장 (PDF 및 JPG 계약서 안전 보관)
   let driveFolderUrl = "";
   try {
     driveFolderUrl = saveContractToGoogleDrive(data, contractNumber, pdfBlob, jpgBase64);
@@ -209,10 +202,9 @@ function handleApproveAndSend(payload) {
     success: true,
     contractNumber: contractNumber,
     customerEmailSent: true,
-    representativeEmailSent: true,
     driveSaved: !!driveFolderUrl,
     driveFolderUrl: driveFolderUrl,
-    message: "계약서 발송 및 드라이브 저장이 완료되었습니다.",
+    message: "고객에게 계약서가 성공적으로 발송되었으며 드라이브에 저장되었습니다.",
   });
 }
 
