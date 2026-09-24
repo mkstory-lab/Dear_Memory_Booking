@@ -315,7 +315,7 @@ export const TermsAgreementStep: React.FC<TermsAgreementStepProps> = ({
         {showValidationError && (
           <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-xs sm:text-sm text-red-600 flex items-center gap-2 animate-fade-in">
             <AlertCircle className="w-4 h-4 shrink-0" />
-            <span>계약정보 작성을 진행하시려면 필수 약관 동의에 체크해 주셔야 합니다.</span>
+            <span className="break-keep leading-relaxed">계약정보 작성을 진행하시려면 <span className="whitespace-nowrap font-medium">필수 약관 동의</span>에 체크해 주셔야 합니다.</span>
           </div>
         )}
 

@@ -71,8 +71,8 @@ export const RequestNotesSection: React.FC<RequestNotesSectionProps> = ({
           <MessageSquare className="w-5 h-5 text-[#8F7A56]" />
           <span>6. 상세 요청사항 및 안내</span>
         </h3>
-        <p className="text-xs sm:text-sm text-[#8F7A56] mt-1">
-          만족스러운 결과물을 위해 촬영 및 보정 스타일, 전달 사항을 작성해 주세요.
+        <p className="text-xs sm:text-sm text-[#8F7A56] mt-1 break-keep leading-relaxed">
+          만족스러운 결과물을 위해 촬영 및 보정 스타일, 전달 사항을 <span className="whitespace-nowrap">작성해 주세요.</span>
         </p>
       </div>
 
@@ -220,21 +220,25 @@ export const RequestNotesSection: React.FC<RequestNotesSectionProps> = ({
       </div>
 
       {/* 약관 동의 확인 뱃지 카드 */}
-      <div className="p-4 bg-[#FAF8F5] border border-[#EBE3D5] rounded-2xl flex items-center justify-between text-xs sm:text-sm">
-        <div className="flex items-center gap-2.5">
-          <div className="w-5 h-5 rounded-full bg-[#322A1B] text-[#FAF8F5] flex items-center justify-center shrink-0">
+      <div className="p-4 bg-[#FAF8F5] border border-[#EBE3D5] rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs sm:text-sm">
+        <div className="flex items-start sm:items-center gap-2.5 min-w-0">
+          <div className="w-5 h-5 rounded-full bg-[#322A1B] text-[#FAF8F5] flex items-center justify-center shrink-0 mt-0.5 sm:mt-0">
             <Check className="w-3.5 h-3.5 stroke-[3]" />
           </div>
-          <div>
-            <span className="font-semibold text-[#322A1B] block">계약 약관 및 개인정보 수집·이용 동의 완료</span>
-            <span className="text-xs text-[#8F7A56]">작성 시작 전 필수 약관(제1조~제13조)에 사전 동의하셨습니다.</span>
+          <div className="min-w-0 break-keep leading-relaxed">
+            <span className="font-semibold text-[#322A1B] block">
+              계약 약관 및 개인정보 수집·이용 동의 완료
+            </span>
+            <span className="text-xs text-[#8F7A56] block mt-0.5">
+              작성 시작 전 <span className="whitespace-nowrap font-medium text-[#6E5C3D]">필수 약관(제1조~제13조)</span>에 사전 동의하셨습니다.
+            </span>
           </div>
         </div>
 
         <button
           type="button"
           onClick={onOpenTermsModal}
-          className="text-[#8F7A56] hover:text-[#322A1B] font-medium flex items-center gap-1 underline underline-offset-4 transition-colors ml-2 shrink-0 text-xs"
+          className="self-end sm:self-auto text-[#8F7A56] hover:text-[#322A1B] font-semibold flex items-center gap-1 underline underline-offset-4 transition-colors shrink-0 text-xs py-0.5"
         >
           <span>약관 다시보기</span>
           <ExternalLink className="w-3 h-3" />

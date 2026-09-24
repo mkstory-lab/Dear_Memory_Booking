@@ -48,8 +48,8 @@ export const WeddingInfoSection: React.FC<WeddingInfoSectionProps> = ({
           <Calendar className="w-5 h-5 text-[#8F7A56]" />
           <span>1. 예식 정보</span>
         </h3>
-        <p className="text-xs sm:text-sm text-[#8F7A56] mt-1">
-          예식이 진행되는 소중한 날짜와 시간, 장소를 입력해 주세요.
+        <p className="text-xs sm:text-sm text-[#8F7A56] mt-1 break-keep leading-relaxed">
+          예식이 진행되는 소중한 날짜와 시간, 장소를 <span className="whitespace-nowrap">입력해 주세요.</span>
         </p>
       </div>
 
@@ -124,8 +124,8 @@ export const WeddingInfoSection: React.FC<WeddingInfoSectionProps> = ({
         {weddingDate && isSunday && (
           <div className="col-span-1 sm:col-span-12 p-3 sm:p-3.5 bg-[#FAF8F5] border border-[#B09A74]/50 rounded-xl flex items-center gap-2.5 text-xs sm:text-sm text-[#6E5C3D] animate-fade-in shadow-sm">
             <span className="w-2.5 h-2.5 rounded-full bg-[#B09A74] inline-block animate-pulse shrink-0" />
-            <span className="break-keep">
-              <strong>일요일 예식</strong> 확인 — <span className="text-[#322A1B] font-bold">100,000원 즉시 할인</span>이 자동 적용됩니다.
+            <span className="break-keep leading-relaxed">
+              <strong>일요일 예식</strong> 확인 — <span className="text-[#322A1B] font-bold whitespace-nowrap">100,000원 즉시 할인</span>이 자동 적용됩니다.
             </span>
           </div>
         )}
@@ -182,8 +182,8 @@ export const WeddingInfoSection: React.FC<WeddingInfoSectionProps> = ({
               errors.makeupLocation ? 'border-red-400' : 'border-[#DDD1BD] focus:border-[#322A1B]'
             } rounded-xl text-sm sm:text-base text-[#322A1B] focus:outline-none focus:ring-2 focus:ring-[#322A1B]/10 transition-all placeholder:text-[#8F7A56]/70 font-medium`}
           />
-          <p className="text-xs sm:text-sm text-[#8F7A56] mt-2">
-            * 아직 메이크업 샵이나 시간이 정해지지 않으셨다면 <strong>'미정'</strong>으로 편하게 적어주세요.
+          <p className="text-xs sm:text-sm text-[#8F7A56] mt-2 break-keep leading-relaxed">
+            * 아직 메이크업 샵이나 시간이 정해지지 않으셨다면 <strong className="whitespace-nowrap">'미정'</strong>으로 <span className="whitespace-nowrap">편하게 적어주세요.</span>
           </p>
           {errors.makeupLocation && (
             <p className="text-xs text-red-500 mt-1.5 font-medium">{errors.makeupLocation}</p>

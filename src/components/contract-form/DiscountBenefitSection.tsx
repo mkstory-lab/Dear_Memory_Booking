@@ -44,8 +44,8 @@ export const DiscountBenefitSection: React.FC<DiscountBenefitSectionProps> = ({
           <Tag className="w-5 h-5 text-[#8F7A56]" />
           <span>5. 할인 및 혜택</span>
         </h3>
-        <p className="text-xs sm:text-sm text-[#8F7A56] mt-1">
-          적용 가능한 즉시 할인 항목과 후기 혜택을 확인해 주세요.
+        <p className="text-xs sm:text-sm text-[#8F7A56] mt-1 break-keep leading-relaxed">
+          적용 가능한 즉시 할인 항목과 후기 혜택을 <span className="whitespace-nowrap">확인해 주세요.</span>
         </p>
       </div>
 
@@ -239,7 +239,7 @@ export const DiscountBenefitSection: React.FC<DiscountBenefitSectionProps> = ({
             </span>
           </div>
           <p className="text-xs sm:text-sm text-[#8F7A56] mt-2 pl-7.5 leading-relaxed break-keep">
-            웨딩 커뮤니티 또는 개인 블로그에 계약 후기 작성 시 5만원 페이백 (다이렉트웨딩카페는 제외)
+            웨딩 커뮤니티 또는 개인 블로그에 계약 후기 작성 시 5만원 페이백 <span className="whitespace-nowrap">(다이렉트웨딩카페 제외)</span>
           </p>
         </div>
 
@@ -272,7 +272,7 @@ export const DiscountBenefitSection: React.FC<DiscountBenefitSectionProps> = ({
             </span>
           </div>
           <p className="text-xs sm:text-sm text-[#8F7A56] mt-2 pl-7.5 leading-relaxed break-keep">
-            본식 촬영 종료 및 최종본 수령 후 커뮤니티/블로그에 후기 작성 시 5만원 페이백
+            본식 촬영 종료 및 최종본 수령 후 커뮤니티/블로그에 후기 작성 시 <span className="whitespace-nowrap">5만원 페이백</span>
           </p>
         </div>
       </div>

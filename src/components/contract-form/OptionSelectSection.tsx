@@ -19,8 +19,8 @@ export const OptionSelectSection: React.FC<OptionSelectSectionProps> = ({
           <PlusCircle className="w-5 h-5 text-[#8F7A56]" />
           <span>4. 추가 옵션</span>
         </h3>
-        <p className="text-xs sm:text-sm text-[#8F7A56] mt-1">
-          사전 상담 시 요청하신 추가 촬영 옵션이 있다면 선택해 주세요.
+        <p className="text-xs sm:text-sm text-[#8F7A56] mt-1 break-keep leading-relaxed">
+          사전 상담 시 요청하신 추가 촬영 옵션이 있다면 <span className="whitespace-nowrap">선택해 주세요.</span>
         </p>
       </div>
 

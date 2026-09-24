@@ -35,8 +35,8 @@ export const FinalConfirmStep: React.FC<FinalConfirmStepProps> = ({
           <CheckCircle className="w-5 h-5 text-[#8F7A56]" />
           <span>최종 확인 및 제출</span>
         </h3>
-        <p className="text-xs text-[#8F7A56] mt-1">
-          작성하신 계약정보를 마지막으로 꼼꼼히 확인해 주세요.
+        <p className="text-xs sm:text-sm text-[#8F7A56] mt-1 break-keep leading-relaxed">
+          작성하신 계약정보를 마지막으로 꼼꼼히 <span className="whitespace-nowrap">확인해 주세요.</span>
         </p>
       </div>
 

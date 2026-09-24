@@ -39,8 +39,8 @@ export const CustomerInfoSection: React.FC<CustomerInfoSectionProps> = ({
           <User className="w-5 h-5 text-[#8F7A56]" />
           <span>2. 고객 정보</span>
         </h3>
-        <p className="text-xs sm:text-sm text-[#8F7A56] mt-1">
-          신랑님과 신부님의 연락처 및 계약서를 받으실 이메일을 입력해 주세요.
+        <p className="text-xs sm:text-sm text-[#8F7A56] mt-1 break-keep leading-relaxed">
+          신랑님과 신부님의 연락처 및 계약서를 받으실 이메일을 <span className="whitespace-nowrap">입력해 주세요.</span>
         </p>
       </div>
 
@@ -101,8 +101,8 @@ export const CustomerInfoSection: React.FC<CustomerInfoSectionProps> = ({
                 errors.groomFamilyMembers ? 'border-red-400 focus:ring-red-400' : 'border-[#DDD1BD] focus:border-[#322A1B]'
               } rounded-xl text-sm sm:text-base text-[#322A1B] focus:outline-none focus:ring-2 focus:ring-[#322A1B]/10 transition-all placeholder:text-[#8F7A56]/70 font-medium`}
             />
-            <p className="text-xs sm:text-sm text-[#8F7A56] mt-2">
-              * 본식 당일 원판(가족사진) 촬영 동선을 위해 정확히 기재해 주세요.
+            <p className="text-xs sm:text-sm text-[#8F7A56] mt-2 break-keep leading-relaxed">
+              * 본식 당일 원판(가족사진) 촬영 동선을 위해 <span className="whitespace-nowrap">정확히 기재해 주세요.</span>
             </p>
             {errors.groomFamilyMembers && (
               <p className="text-xs text-red-500 mt-1.5 font-medium">{errors.groomFamilyMembers}</p>
@@ -168,8 +168,8 @@ export const CustomerInfoSection: React.FC<CustomerInfoSectionProps> = ({
                 errors.brideFamilyMembers ? 'border-red-400 focus:ring-red-400' : 'border-[#DDD1BD] focus:border-[#322A1B]'
               } rounded-xl text-sm sm:text-base text-[#322A1B] focus:outline-none focus:ring-2 focus:ring-[#322A1B]/10 transition-all placeholder:text-[#8F7A56]/70 font-medium`}
             />
-            <p className="text-xs sm:text-sm text-[#8F7A56] mt-2">
-              * 본식 당일 원판(가족사진) 촬영 동선을 위해 정확히 기재해 주세요.
+            <p className="text-xs sm:text-sm text-[#8F7A56] mt-2 break-keep leading-relaxed">
+              * 본식 당일 원판(가족사진) 촬영 동선을 위해 <span className="whitespace-nowrap">정확히 기재해 주세요.</span>
             </p>
             {errors.brideFamilyMembers && (
               <p className="text-xs text-red-500 mt-1.5 font-medium">{errors.brideFamilyMembers}</p>
@@ -194,8 +194,8 @@ export const CustomerInfoSection: React.FC<CustomerInfoSectionProps> = ({
             } rounded-xl text-sm sm:text-base text-[#322A1B] focus:outline-none focus:ring-2 focus:ring-[#322A1B]/10 transition-all placeholder:text-[#8F7A56]/70 font-medium`}
           />
         </div>
-        <p className="text-xs sm:text-sm text-[#8F7A56] mt-2">
-          * 작성하신 이메일로 최종 전자 계약서(PDF)가 발송됩니다.
+        <p className="text-xs sm:text-sm text-[#8F7A56] mt-2 break-keep leading-relaxed">
+          * 작성하신 이메일로 최종 전자 계약서(PDF)가 <span className="whitespace-nowrap">발송됩니다.</span>
         </p>
         {errors.email && (
           <p className="text-xs text-red-500 mt-1.5 font-medium">{errors.email}</p>

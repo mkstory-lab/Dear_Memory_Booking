@@ -134,8 +134,8 @@ export const HomeLandingView: React.FC<HomeLandingViewProps> = ({
         <p className="font-semibold text-[#322A1B] text-xs sm:text-sm">
           본식스냅 스튜디오 디어메모리
         </p>
-        <p className="text-[11px] text-[#A8987E] leading-relaxed">
-          작성해 주신 정보는 안전하게 보호되며 대표 확인 및 계약서 발행 목적으로만 사용됩니다.
+        <p className="text-[11px] text-[#A8987E] leading-relaxed break-keep max-w-sm mx-auto">
+          작성해 주신 정보는 안전하게 보호되며 대표 확인 및 계약서 발행 목적으로만 <span className="whitespace-nowrap">사용됩니다.</span>
         </p>
       </div>
     </div>
