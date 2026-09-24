@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { CONTRACT_POLICY_CONFIG } from '@/config/contractPolicy';
 import { ArrowRight, Check, AlertCircle, ChevronDown, ChevronUp, FileText } from 'lucide-react';
 
@@ -19,13 +19,49 @@ export const TermsAgreementStep: React.FC<TermsAgreementStepProps> = ({
   const [showScrollWarning, setShowScrollWarning] = useState(false);
   const [showValidationError, setShowValidationError] = useState(false);
 
-  // 약관 전문 스크롤 감지 핸들러
+  const bottomAnchorRef = useRef<HTMLDivElement>(null);
+  const termsBoxRef = useRef<HTMLDivElement>(null);
+
+  // 1. IntersectionObserver를 통한 모바일 스크롤 끝 도달 100% 자동 감지
+  useEffect(() => {
+    if (!showAllArticles || hasScrolledToBottom) return;
+
+    const anchorEl = bottomAnchorRef.current;
+    const boxEl = termsBoxRef.current;
+    if (!anchorEl || !boxEl) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries;
+        if (entry.isIntersecting) {
+          setHasScrolledToBottom(true);
+          setShowScrollWarning(false);
+        }
+      },
+      {
+        root: boxEl,
+        rootMargin: '0px 0px 80px 0px', // 80px 여유 마진 (모바일 서브픽셀 및 오차 완전 방어)
+        threshold: 0.1,
+      }
+    );
+
+    observer.observe(anchorEl);
+    return () => observer.disconnect();
+  }, [showAllArticles, hasScrolledToBottom]);
+
+  // 2. 약관 전문 스크롤 감지 핸들러 (이중 안전장치: 여유 마진 80px)
   const handleTermsScroll = (e: React.UIEvent<HTMLDivElement>) => {
     const target = e.currentTarget;
-    if (target.scrollTop + target.clientHeight >= target.scrollHeight - 30) {
+    if (target.scrollTop + target.clientHeight >= target.scrollHeight - 80) {
       setHasScrolledToBottom(true);
       setShowScrollWarning(false);
     }
+  };
+
+  // 3. 약관 확인 완료 수동 처리 핸들러 (삼중 안전장치: 버튼 터치 시 즉시 해제)
+  const handleMarkAsRead = () => {
+    setHasScrolledToBottom(true);
+    setShowScrollWarning(false);
   };
 
   // 체크박스 클릭 핸들러
@@ -35,6 +71,9 @@ export const TermsAgreementStep: React.FC<TermsAgreementStepProps> = ({
       if (!showAllArticles) {
         setShowAllArticles(true);
       }
+      setTimeout(() => {
+        termsBoxRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }, 100);
       return;
     }
     onAgreeChange(!termsAgreed);
@@ -188,6 +227,7 @@ export const TermsAgreementStep: React.FC<TermsAgreementStepProps> = ({
               </div>
 
               <div
+                ref={termsBoxRef}
                 onScroll={handleTermsScroll}
                 className="p-5 bg-[#FAF8F5] rounded-2xl border-2 border-[#DDD1BD] max-h-80 overflow-y-auto space-y-4 text-xs sm:text-sm text-[#4E412A] leading-relaxed shadow-inner"
               >
@@ -198,9 +238,26 @@ export const TermsAgreementStep: React.FC<TermsAgreementStepProps> = ({
                   </div>
                 ))}
 
-                {/* 약관 맨 끝 도달 확인 앵커 */}
-                <div className="p-3 bg-[#EBE3D5]/40 rounded-xl text-center text-xs font-semibold text-[#322A1B]">
-                  약관 전문의 끝입니다. 아래의 동의 체크박스를 확인해 주세요.
+                {/* 약관 맨 끝 도달 확인 앵커 및 원터치 확인 완료 버튼 */}
+                <div
+                  ref={bottomAnchorRef}
+                  className="p-4 bg-[#EBE3D5]/50 border border-[#DDD1BD] rounded-xl text-center space-y-2 mt-2"
+                >
+                  <p className="text-xs font-semibold text-[#322A1B]">
+                    약관 전문(제1조 ~ 제13조)의 끝입니다.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={handleMarkAsRead}
+                    className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                      hasScrolledToBottom
+                        ? 'bg-emerald-600 text-white cursor-default'
+                        : 'bg-[#322A1B] text-[#FAF8F5] hover:bg-[#1E1910] cursor-pointer shadow-sm'
+                    }`}
+                  >
+                    <Check className="w-3.5 h-3.5 stroke-[3]" />
+                    <span>{hasScrolledToBottom ? '약관 확인 완료됨' : '약관 내용 확인 완료하기'}</span>
+                  </button>
                 </div>
               </div>
             </div>
