@@ -64,13 +64,17 @@ export const TermsAgreementStep: React.FC<TermsAgreementStepProps> = ({
     <div className="max-w-3xl mx-auto py-6 sm:py-10 space-y-8 animate-fade-in">
       {/* 헤더 */}
       <div className="text-center space-y-2">
-        <h2 className="text-2xl sm:text-3xl font-serif font-bold text-[#322A1B]">
+        <h2 className="text-2xl sm:text-3xl font-serif font-bold text-[#322A1B] break-keep">
           계약 약관 및 운영 정책 동의
         </h2>
-        <p className="text-sm sm:text-base text-[#6E5C3D] max-w-lg mx-auto leading-relaxed pt-1">
-          디어메모리는 상호 신뢰를 바탕으로 투명하고 정직한 촬영 계약을 체결합니다.<br className="hidden sm:inline" />
-          계약정보 작성에 앞서 표준 약관 전문을 먼저 확인해 주세요.
-        </p>
+        <div className="text-xs sm:text-sm text-[#6E5C3D] max-w-md mx-auto leading-relaxed pt-1 break-keep space-y-1">
+          <p>
+            디어메모리는 상호 신뢰를 바탕으로<br className="sm:hidden" /> 투명하고 정직한 촬영 계약을 체결합니다.
+          </p>
+          <p className="text-[#8F7A56]">
+            계약정보 작성에 앞서<br className="sm:hidden" /> 표준 약관 전문을 먼저 확인해 주세요.
+          </p>
+        </div>
       </div>
 
       {/* 1. 핵심 규정 요약 카드 */}
