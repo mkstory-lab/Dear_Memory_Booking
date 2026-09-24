@@ -143,20 +143,43 @@ export const TermsAgreementStep: React.FC<TermsAgreementStepProps> = ({
                 setShowAllArticles(!showAllArticles);
                 if (showScrollWarning) setShowScrollWarning(false);
               }}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-[#FAF8F5] border-2 border-[#8F7A56] hover:bg-[#F5F1EA] text-[#322A1B] rounded-2xl text-sm sm:text-base font-bold transition-all shadow-sm"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 sm:px-8 py-3 sm:py-3.5 bg-[#FAF8F5] border-2 border-[#8F7A56] hover:bg-[#F5F1EA] text-[#322A1B] rounded-2xl text-[13px] sm:text-base font-bold transition-all shadow-sm cursor-pointer"
             >
-              <span>약관 전문 (제1조 ~ 제13조) 전체 펼쳐보기</span>
-              {showAllArticles ? <ChevronUp className="w-5 h-5 text-[#8F7A56]" /> : <ChevronDown className="w-5 h-5 text-[#8F7A56]" />}
+              <span className="break-keep">
+                {showAllArticles
+                  ? '약관 전문 (제1조 ~ 제13조) 닫기'
+                  : '약관 전문 (제1조 ~ 제13조) 전체 펼쳐보기'}
+              </span>
+              {showAllArticles ? (
+                <ChevronUp className="w-4 h-4 sm:w-5 sm:h-5 text-[#8F7A56] shrink-0" />
+              ) : (
+                <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 text-[#8F7A56] shrink-0" />
+              )}
             </button>
           </div>
 
           {/* 펼쳐진 약관 전문 박스 (스크롤 끝까지 내려야 활성화) */}
           {showAllArticles && (
             <div className="mt-4 space-y-2 animate-fade-in">
-              <div className="flex justify-between items-center text-xs text-[#8F7A56] px-1">
-                <span>* 약관 내용을 아래로 끝까지 스크롤하여 확인해 주세요.</span>
-                <span className={hasScrolledToBottom ? 'text-green-600 font-bold' : 'text-[#8F7A56]'}>
-                  {hasScrolledToBottom ? '✓ 약관 전문 확인 완료' : '스크롤 진행 중...'}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-1 text-xs text-[#8F7A56]">
+                <span className="break-keep font-medium">
+                  * 약관 내용을 아래로 끝까지 스크롤하여 확인해 주세요.
+                </span>
+                <span
+                  className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold self-start sm:self-auto shrink-0 transition-colors ${
+                    hasScrolledToBottom
+                      ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                      : 'bg-[#F5F1EA] text-[#8F7A56] border border-[#DDD1BD]'
+                  }`}
+                >
+                  {hasScrolledToBottom ? (
+                    <>
+                      <Check className="w-3.5 h-3.5 stroke-[3]" />
+                      <span>약관 전문 확인 완료</span>
+                    </>
+                  ) : (
+                    <span>스크롤 진행 중...</span>
+                  )}
                 </span>
               </div>
 
