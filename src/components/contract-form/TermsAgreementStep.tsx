@@ -237,14 +237,14 @@ export const TermsAgreementStep: React.FC<TermsAgreementStepProps> = ({
           >
             {termsAgreed && <Check className="w-4 h-4 stroke-[3]" />}
           </div>
-          <div className="flex-1">
-            <span className="text-sm sm:text-base font-semibold text-[#322A1B] break-keep leading-relaxed">
+          <div className="flex-1 min-w-0">
+            <p className="text-sm sm:text-base font-semibold text-[#322A1B] break-keep leading-relaxed">
+              <span className="text-red-500 font-bold mr-1.5 whitespace-nowrap shrink-0">[필수]</span>
               본식스냅 계약 약관 및 운영 정책의 내용을 모두 확인하였으며 이에 동의합니다.
-            </span>
-            <span className="text-red-500 font-bold ml-1.5 shrink-0 text-sm">* [필수]</span>
+            </p>
 
             {!hasScrolledToBottom && (
-              <p className="text-xs text-[#8F7A56] mt-1">
+              <p className="text-xs text-[#8F7A56] mt-1 break-keep leading-relaxed">
                 (약관 전문을 끝까지 스크롤하여 확인하시면 체크할 수 있습니다.)
               </p>
             )}
