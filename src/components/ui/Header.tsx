@@ -10,7 +10,7 @@ export const Header: React.FC<HeaderProps> = ({
   subtitle = '상담이 완료된 고객님께 전달드리는 페이지입니다.',
 }) => {
   return (
-    <header className="border-b border-[#EBE3D5] bg-[#FAF8F5]/90 backdrop-blur-md sticky top-0 z-30 transition-all">
+    <header className="border-b border-[#EBE3D5] bg-[#FAF8F5]">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 py-4 flex flex-col items-center text-center">
         <p className="text-[10px] sm:text-[11px] font-semibold tracking-[0.3em] text-[#8F7A56] uppercase mb-1 font-sans">
           WEDDING PHOTOGRAPHY
