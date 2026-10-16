@@ -1,17 +1,77 @@
-/**
- * Dear Memory for Booking — PDF & Document Generation Engine
- * 
- * [한글 폰트 무결성 및 A4 렌더링 핵심 보장 장치]
- * 1. document.fonts.ready 비동기 완료 대기로 시스템/웹 폰트 미로딩에 의한 글자 깨짐 및 치수 어긋남 차단
- * 2. html2canvas 고화질(scale: 2) 래스터라이즈로 모든 국문 자모/합자/특수문자 왜곡 없는 무결성 보장
- * 3. 210mm x 297mm A4 1:1 정밀 좌표 배치
- * 4. 향후 대체 엔진(Puppeteer, pdf-lib 등)으로 즉시 교체 가능하도록 어댑터 인터페이스 제공
- */
-
+/** Dear Memory contract PDF. Preserve two original A4 pages without silently clipping contents. */
 export interface GeneratedDocuments {
   pdfBlob: Blob;
   pdfBase64: string;
-  jpgBase64?: string; // V1.1 대비 유지
+  jpgBase64?: string;
+}
+
+export interface PdfPageLayout {
+  xMm: number;
+  yMm: number;
+  widthMm: number;
+  heightMm: number;
+  scale: number;
+}
+
+const PAGE_WIDTH_MM = 210;
+const PAGE_HEIGHT_MM = 297;
+const MIN_READABLE_SCALE = 0.82;
+
+/** A measured page that exceeds the configured A4 box must be captured in full. */
+export function assertPageFits(
+  page: Pick<HTMLElement, 'scrollHeight' | 'clientHeight' | 'scrollWidth' | 'clientWidth'>
+): void {
+  if (page.scrollHeight > page.clientHeight + 3 || page.scrollWidth > page.clientWidth + 3) {
+    throw new Error('계약서 내용이 A4 페이지 영역을 초과했습니다.');
+  }
+}
+
+/** Fit a complete captured page into ONE A4 sheet while keeping its aspect ratio.
+ * Refuse unreadably small text rather than cropping it or creating a surprise page.
+ */
+export function fitRasterToA4(width: number, height: number): PdfPageLayout {
+  if (!Number.isFinite(width) || !Number.isFinite(height) || width <= 0 || height <= 0) {
+    throw new Error('계약서 PDF 이미지 크기를 계산하지 못했습니다.');
+  }
+  const unscaledHeightMm = height / width * PAGE_WIDTH_MM;
+  const scale = Math.min(1, PAGE_HEIGHT_MM / unscaledHeightMm);
+  if (scale < MIN_READABLE_SCALE) {
+    throw new Error('계약서 내용이 너무 길어 2페이지에 읽기 좋게 넣기 어렵습니다. 상품·할인·입력 내용을 점검해 주세요.');
+  }
+  const widthMm = PAGE_WIDTH_MM * scale;
+  const heightMm = unscaledHeightMm * scale;
+  return {
+    xMm: (PAGE_WIDTH_MM - widthMm) / 2,
+    yMm: 0,
+    widthMm,
+    heightMm,
+    scale,
+  };
+}
+
+function overflowsA4(element: HTMLElement): boolean {
+  if (element.scrollHeight > element.clientHeight + 3
+    || element.scrollWidth > element.clientWidth + 3) return true;
+  const bounds = element.getBoundingClientRect();
+  const style = getComputedStyle(element);
+  const printableBottom = bounds.bottom
+    - (parseFloat(style.paddingBottom) || 0)
+    - (parseFloat(style.borderBottomWidth) || 0);
+  return Array.from(element.children)
+    .some(child => child.getBoundingClientRect().bottom > printableBottom + 3);
+}
+
+function verifyExpandedPage(element: HTMLElement): void {
+  const bounds = element.getBoundingClientRect();
+  const style = getComputedStyle(element);
+  const printableBottom = bounds.bottom
+    - (parseFloat(style.paddingBottom) || 0)
+    - (parseFloat(style.borderBottomWidth) || 0);
+  if (element.scrollHeight > element.clientHeight + 3
+    || element.scrollWidth > element.clientWidth + 3
+    || Array.from(element.children).some(c => c.getBoundingClientRect().bottom > printableBottom + 3)) {
+    throw new Error('계약서 레이아웃에 잘림 위험이 있어 PDF 생성을 중단했습니다.');
+  }
 }
 
 export interface IPdfGenerator {
@@ -26,96 +86,94 @@ export class Html2CanvasPdfGenerator implements IPdfGenerator {
     if (typeof window === 'undefined') {
       throw new Error('PDF 생성은 브라우저 환경에서만 실행할 수 있습니다.');
     }
+    const container = document.getElementById(elementId);
+    if (!container) throw new Error('계약서 화면을 찾을 수 없습니다: ' + elementId);
 
-    const element = document.getElementById(elementId);
-    if (!element) {
-      throw new Error(`계약서 DOM 요소(#${elementId})를 찾을 수 없습니다.`);
+    if (document.fonts?.ready) {
+      try { await document.fonts.ready; }
+      catch (error) { console.warn('폰트 로딩 지연:', error); }
     }
+    await new Promise(resolve => requestAnimationFrame(() => setTimeout(resolve, 80)));
 
-    // 1. 한글 웹폰트 및 시스템 폰트 로딩 완료 보장
-    if (document.fonts && document.fonts.ready) {
-      try {
-        await document.fonts.ready;
-      } catch (fontErr) {
-        console.warn('폰트 로딩 대기 경고:', fontErr);
-      }
-    }
-
-    // 2. DOM 렌더링 안정화를 위한 틱 대기
-    await new Promise((resolve) => requestAnimationFrame(() => setTimeout(resolve, 80)));
-
-    // 3. 모듈 동적 로드 (SSR 호환)
-    const html2canvasModule = await import('html2canvas');
-    const html2canvas = html2canvasModule.default;
+    const html2canvas = (await import('html2canvas')).default;
     const { jsPDF } = await import('jspdf');
-
-    // 4. 멀티페이지 탐색 (.contract-page 또는 [data-pdf-page])
-    const pageElements = Array.from(
-      element.querySelectorAll<HTMLElement>('.contract-page, [data-pdf-page]')
+    const pages = Array.from(
+      container.querySelectorAll<HTMLElement>('.contract-page, [data-pdf-page]')
     );
+    if (pages.length !== 2) {
+      throw new Error('계약서는 본문 1페이지와 약관 1페이지로 구성되어야 합니다.');
+    }
 
-    const targets = pageElements.length > 0 ? pageElements : [element];
-
-    // 5. A4 세로 PDF 생성 (210mm x 297mm)
     const pdf = new jsPDF({
       orientation: 'portrait',
       unit: 'mm',
       format: 'a4',
       compress: true,
     });
-
-    const pdfWidth = 210;
-    const pdfHeight = 297;
+    pdf.setProperties({ title: contractNumber });
     let firstPageJpg = '';
 
-    for (let i = 0; i < targets.length; i++) {
-      const pageEl = targets[i];
-
-      // 350 DPI 인쇄소 출판급 초고해상도 렌더링 (확대 시 픽셀 깨짐 제로화)
-      const canvas = await html2canvas(pageEl, {
-        scale: 3.5, // 기존 2배율(192 DPI) -> 3.5배율(약 350 DPI 초고화질)
-        useCORS: true,
-        backgroundColor: '#FFFFFF',
-        logging: false,
-        imageTimeout: 0,
-        onclone: (clonedDoc) => {
-          // 복제된 DOM에 폰트 스무딩 및 기하학적 텍스트 렌더링 강제 주입
-          const style = clonedDoc.createElement('style');
-          style.innerHTML = `
-            * {
-              -webkit-font-smoothing: antialiased !important;
-              -moz-osx-font-smoothing: grayscale !important;
-              text-rendering: geometricPrecision !important;
-            }
-          `;
-          clonedDoc.head.appendChild(style);
-        },
-      });
-
-      // 무손실 PNG 인코딩으로 JPEG 압축 노이즈(글자 번짐) 완전 차단
-      const imgDataUrl = canvas.toDataURL('image/png');
-
-      if (i === 0) {
-        firstPageJpg = imgDataUrl;
-        pdf.addImage(imgDataUrl, 'PNG', 0, 0, pdfWidth, pdfHeight, undefined, 'SLOW');
-      } else {
-        pdf.addPage();
-        pdf.addImage(imgDataUrl, 'PNG', 0, 0, pdfWidth, pdfHeight, undefined, 'SLOW');
+    for (let index = 0; index < pages.length; index++) {
+      const element = pages[index];
+      const oldStyle = {
+        height: element.style.height,
+        maxHeight: element.style.maxHeight,
+        minHeight: element.style.minHeight,
+      };
+      let canvas: HTMLCanvasElement;
+      try {
+        if (overflowsA4(element)) {
+          // Only change layout while capturing; never mutate the actual contract DOM.
+          element.style.height = 'auto';
+          element.style.maxHeight = 'none';
+          element.style.minHeight = '297mm';
+          await new Promise(resolve => requestAnimationFrame(resolve));
+          verifyExpandedPage(element);
+        } else {
+          assertPageFits(element);
+        }
+        canvas = await html2canvas(element, {
+          scale: 3.5,
+          useCORS: true,
+          backgroundColor: '#FFFFFF',
+          logging: false,
+          imageTimeout: 0,
+          onclone: doc => {
+            const style = doc.createElement('style');
+            style.textContent =
+              '*{-webkit-font-smoothing:antialiased!important;-moz-osx-font-smoothing:grayscale!important;text-rendering:geometricPrecision!important}';
+            doc.head.appendChild(style);
+          },
+        });
+      } finally {
+        element.style.height = oldStyle.height;
+        element.style.maxHeight = oldStyle.maxHeight;
+        element.style.minHeight = oldStyle.minHeight;
       }
+
+      const raster = canvas!;
+      const fit = fitRasterToA4(raster.width, raster.height);
+      const png = raster.toDataURL('image/png');
+      if (index === 0) firstPageJpg = png;
+      else pdf.addPage();
+      pdf.addImage(png, 'PNG', fit.xMm, fit.yMm, fit.widthMm, fit.heightMm, undefined, 'SLOW');
+
+      // Page number stays accurate; the PDF always has two A4 sheets.
+      pdf.setFont('helvetica', 'normal');
+      pdf.setFontSize(8);
+      pdf.setTextColor(100, 100, 100);
+      pdf.text(String(index + 1) + ' / 2', 202, 294.5, { align: 'right' });
     }
 
     const pdfBlob = pdf.output('blob');
-    const pdfBase64 = pdf.output('datauristring');
-
     return {
       pdfBlob,
-      pdfBase64,
+      pdfBase64: pdf.output('datauristring'),
       jpgBase64: firstPageJpg,
     };
   }
 }
 
-// 기본 싱글톤 인스턴스
 const defaultGenerator = new Html2CanvasPdfGenerator();
 
 export async function exportContractToPdfAndJpg(
@@ -125,18 +183,13 @@ export async function exportContractToPdfAndJpg(
   return defaultGenerator.generatePdf(elementId, contractNumber);
 }
 
-/**
- * 브라우저에서 파일 다운로드 트리거
- */
 export function triggerFileDownload(blobOrUrl: Blob | string, filename: string): void {
   const url = typeof blobOrUrl === 'string' ? blobOrUrl : URL.createObjectURL(blobOrUrl);
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = filename;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  if (typeof blobOrUrl !== 'string') {
-    URL.revokeObjectURL(url);
-  }
+  const anchor = document.createElement('a');
+  anchor.href = url;
+  anchor.download = filename;
+  document.body.appendChild(anchor);
+  anchor.click();
+  document.body.removeChild(anchor);
+  if (typeof blobOrUrl !== 'string') URL.revokeObjectURL(url);
 }

@@ -5,6 +5,7 @@ import { getOptionById } from '@/config/options';
 import { CONTRACT_POLICY_CONFIG } from '@/config/contractPolicy';
 import { formatKRW } from '@/lib/pricing';
 import { HANMINGYU_SEAL_BASE64 } from '@/assets/images';
+import { getPaymentAccountInfo } from '@/config/paymentAccount';
 
 export interface ContractDocumentProps {
   id?: string;
@@ -21,6 +22,8 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
   pricing,
 }) => {
   const product = getProductById(data.productId);
+  if (!product) throw new Error('계약서에 존재하지 않는 상품이 선택되었습니다.');
+  const paymentAccount = getPaymentAccountInfo();
 
   const selectedOptions = (data.optionIds || [])
     .map((optId) => getOptionById(optId))
@@ -41,6 +44,34 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
 
   return (
     <div id={id} className="space-y-8 select-none">
+      <style>{`
+        /* Add real separation between text and dividers; retain a clean two-page A4 layout. */
+        .contract-main .contract-receipt table thead th {
+          padding-top: 5px !important;
+          padding-bottom: 5px !important;
+          line-height: 1.45 !important;
+        }
+        .contract-main .contract-receipt table tbody td {
+          padding-top: 5px !important;
+          padding-bottom: 7px !important;
+          line-height: 1.45 !important;
+          vertical-align: middle !important;
+        }
+        .contract-main .contract-receipt table tbody tr:last-child td {
+          padding-top: 7px !important;
+          padding-bottom: 7px !important;
+        }
+        /* Optical center measured in the exported PDF, not only in the browser DOM. */
+        .contract-main .pdf-centered-label > span {
+          position: relative;
+          top: -6px;
+          line-height: 1;
+          display: block;
+        }
+        .contract-main .pdf-centered-label.product-label > span {
+          top: -8px;
+        }
+      `}</style>
       {/* =========================================================================
           PAGE 1 : 본식스냅 계약서 본문 (A4 규격 210mm x 297mm)
           [고대비 인쇄 배색: 퓨어 화이트 배경 + 딥 챠콜 폰트 + 2~3pt 확대]
@@ -48,12 +79,12 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
       <div
         id={`${id}-page-1`}
         data-pdf-page="1"
-        className="contract-page bg-white text-[#111827] mx-auto border border-[#E5E7EB] shadow-none"
+        className="contract-page contract-main bg-white text-[#111827] mx-auto border border-[#E5E7EB] shadow-none"
         style={{
           width: '210mm',
           height: '297mm',
           maxHeight: '297mm',
-          padding: '11mm 15mm',
+          padding: '8mm 15mm',
           boxSizing: 'border-box',
           backgroundColor: '#FFFFFF',
           color: '#111827',
@@ -87,7 +118,7 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
         {/* 2. 고객(계약자) 및 예식 정보 (2열 그리드) */}
         <div className="grid grid-cols-2 gap-3.5 my-1.5">
           {/* 고객(계약자) 정보 */}
-          <div className="border border-[#D1D5DB] rounded-lg p-3.5 bg-[#F9FAFB] space-y-2">
+          <div className="border border-[#D1D5DB] rounded-lg p-2.5 bg-[#F9FAFB] space-y-1">
             <h3 className="font-bold text-[#111827] text-base border-b border-[#E5E7EB] pb-1.5 mb-1.5">
               1. 고객 (계약자) 정보
             </h3>
@@ -112,7 +143,7 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
           </div>
 
           {/* 예식 일정 및 장소 */}
-          <div className="border border-[#D1D5DB] rounded-lg p-3.5 bg-[#F9FAFB] space-y-2">
+          <div className="border border-[#D1D5DB] rounded-lg p-2.5 bg-[#F9FAFB] space-y-1">
             <h3 className="font-bold text-[#111827] text-base border-b border-[#E5E7EB] pb-1.5 mb-1.5">
               2. 예식 일정 및 장소
             </h3>
@@ -132,12 +163,12 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
         </div>
 
         {/* 3. 촬영 상품 및 상세 구성 */}
-        <div className="border border-[#D1D5DB] rounded-lg p-3.5 my-1 bg-[#FFFFFF]">
-          <div className="flex justify-between items-center border-b border-[#E5E7EB] pb-1.5 mb-2">
+        <div className="border border-[#D1D5DB] rounded-lg p-2.5 my-0.5 bg-[#FFFFFF]">
+          <div className="flex justify-between items-center border-b border-[#E5E7EB] pb-1 mb-1">
             <div className="flex items-center gap-2.5">
               <h3 className="font-bold text-[#111827] text-base">3. 촬영 상품 및 제공 구성</h3>
-              <span className="px-2.5 py-0.5 bg-[#111827] text-white rounded text-[13px] font-bold">
-                {product.name}
+              <span className="pdf-centered-label product-label inline-grid place-items-center text-center h-[27px] px-2.5 bg-[#111827] text-white rounded text-[13px] font-bold shrink-0">
+                <span>{product.name}</span>
               </span>
             </div>
             <span className="font-bold text-[#111827] text-[17px] tabular-nums">
@@ -152,23 +183,26 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
                 기념촬영 ~ 연회장 인사 (10~15분)
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-x-6 pt-0.5">
-              <div className="flex items-start">
-                <span className="font-bold text-[#111827] shrink-0">앨범 사양:&nbsp;</span>
-                <span className="whitespace-pre-line font-medium text-[#111827]">{product.albumSpec}</span>
+            <div className="grid grid-cols-1 gap-y-0.5 pt-0.5 leading-[1.25]">
+              <div className="pdf-album-spec flex items-center whitespace-nowrap gap-1 text-[12.5px] leading-5">
+                <span className="font-bold text-[#111827] shrink-0">앨범 사양:</span>
+                <span className="pdf-album-value font-medium text-[#111827] whitespace-nowrap">{product.albumSpec.replace(/\s*\n\s*/g, ' / ')}</span>
               </div>
-              <div>
-                <span className="font-bold text-[#111827]">보정 및 원본:</span> 정밀보정{' '}
-                <strong className="text-[#111827]">{product.retouchedCount}장</strong> / 원본{' '}
-                <strong className="text-[#111827]">{product.originalCount}</strong> 전체 제공
+              {/* 상품 수량 전체를 한 줄에 표시하여 "제공"만 다음 줄로 밀리지 않도록 합니다. */}
+              <div className="flex items-center whitespace-nowrap text-[13.5px] leading-[1.25]">
+                <span className="font-bold text-[#111827] shrink-0 mr-1">보정 및 원본:</span>
+                <span>
+                  정밀보정 <strong className="text-[#111827]">{product.retouchedCount}장</strong>
+                  {' '} / 원본 <strong className="text-[#111827]">{product.originalCount}</strong> 전체 제공
+                </span>
               </div>
             </div>
           </div>
         </div>
 
         {/* 4. 계약 금액 정산 내역 (영수증 / 명세서 스타일) */}
-        <div className="border-2 border-[#111827] rounded-lg p-3.5 bg-[#F9FAFB] my-1 text-[14px]">
-          <div className="flex justify-between items-center border-b border-[#D1D5DB] pb-1.5 mb-2">
+        <div className="contract-receipt border-2 border-[#111827] rounded-lg p-2.5 bg-[#F9FAFB] my-0.5 text-[14px]">
+          <div className="flex justify-between items-center border-b border-[#D1D5DB] pb-1 mb-1">
             <h3 className="font-bold text-[#111827] text-base">4. 계약 금액 정산 내역 (명세서)</h3>
             <span className="text-[12.5px] text-[#4B5563] font-medium">단위: 원 (VAT 포함)</span>
           </div>
@@ -248,7 +282,7 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
               )}
 
               {/* 지인 할인 / 대표 특약 조정 (할인 시 즉시 할인 행으로 표시) */}
-              {((data.manualAdjustment && data.manualAdjustment.amount !== 0) || (pricing.manualAdjustmentAmount && pricing.manualAdjustmentAmount !== 0)) && (() => {
+              {(((data.manualAdjustment?.amount ?? 0) !== 0) || ((pricing.manualAdjustmentAmount ?? 0) !== 0)) && (() => {
                 const adjAmount = data.manualAdjustment?.amount ?? pricing.manualAdjustmentAmount ?? 0;
                 const adjReason = (data.manualAdjustment?.reason || '').trim() || (pricing.breakdown?.find(b => b.category === 'manual_adjustment')?.name) || '지인 특별 할인';
                 const isDiscount = adjAmount < 0;
@@ -281,34 +315,42 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
           </table>
 
           {/* 결제 일정 카드 (계약금 & 잔금 2열 분할) */}
-          <div className="grid grid-cols-2 gap-3.5 mt-2.5 pt-2.5 border-t border-[#D1D5DB]">
-            <div className="p-3 bg-white rounded border border-[#D1D5DB] flex justify-between items-center shadow-xs">
+          <div className="grid grid-cols-2 gap-2.5 mt-1.5 pt-1.5 border-t border-[#D1D5DB]">
+            <div className="p-2 bg-white rounded border border-[#D1D5DB] flex justify-between items-center shadow-xs">
               <div>
                 <span className="text-[#4B5563] block text-[13px] font-medium">계약금 (신청 후 24시간 내)</span>
                 <span className="font-bold text-[#111827] text-[19px] tabular-nums mt-0.5 block">
                   {formatKRW(pricing.depositAmount)}
                 </span>
               </div>
-              <span className="text-[12.5px] text-[#374151] bg-[#F3F4F6] px-2.5 py-1 rounded font-semibold border border-[#E5E7EB]">
-                스케줄 확정
+              <span className="pdf-centered-label inline-flex items-center justify-center text-center h-[27px] text-[12.5px] text-[#374151] bg-[#F3F4F6] px-2.5 rounded font-semibold border border-[#E5E7EB] shrink-0">
+                <span>스케줄 확정</span>
               </span>
             </div>
-            <div className="p-3 bg-white rounded border border-[#D1D5DB] flex justify-between items-center shadow-xs">
+            <div className="p-2 bg-white rounded border border-[#D1D5DB] flex justify-between items-center shadow-xs">
               <div>
                 <span className="text-[#4B5563] block text-[13px] font-medium">잔금 (예식 1주 전 입금)</span>
                 <span className="font-bold text-[#111827] text-[19px] tabular-nums mt-0.5 block">
                   {formatKRW(pricing.balanceAmount)}
                 </span>
               </div>
-              <span className="text-[12.5px] text-[#374151] bg-[#F3F4F6] px-2.5 py-1 rounded font-semibold border border-[#E5E7EB]">
-                최종 정산
+              <span className="pdf-centered-label inline-flex items-center justify-center text-center h-[27px] text-[12.5px] text-[#374151] bg-[#F3F4F6] px-2.5 rounded font-semibold border border-[#E5E7EB] shrink-0">
+                <span>최종 정산</span>
               </span>
             </div>
           </div>
 
+          {/* 계좌 정보는 검증된 배포 설정이 있어야 번호를 노출합니다. */}
+          <div className="mt-1 rounded border border-[#D1D5DB] bg-white px-2 py-1 text-[12.5px] font-medium text-[#374151]">
+            <strong className="text-[#111827]">입금 계좌 안내: </strong>
+            {paymentAccount
+              ? `${paymentAccount.bankName} ${paymentAccount.accountNumber} (예금주: ${paymentAccount.accountHolder})`
+              : '계좌번호는 대표에게 별도로 확인해 주세요.'}
+          </div>
+
           {/* 후기 이벤트 별도 안내 */}
           {pricing.futureCashbackTotal > 0 && (
-            <div className="mt-2 p-2 bg-[#F3F4F6] rounded border border-[#E5E7EB] text-[13px] flex justify-between items-center text-[#374151]">
+            <div className="mt-1 p-1.5 bg-[#F3F4F6] rounded border border-[#E5E7EB] text-[12px] flex justify-between items-center text-[#374151]">
               <span className="font-medium">* 후기 이벤트: 잔금에서 차감 또는 후기 확인 후 페이백 적용</span>
               <span className="font-bold text-[#111827] tabular-nums text-[13.5px]">
                 최대 {formatKRW(pricing.futureCashbackTotal)} 혜택
@@ -318,20 +360,20 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
         </div>
 
         {/* 별첨 안내 문구 */}
-        <div className="p-2 bg-[#F9FAFB] rounded border border-[#E5E7EB] text-[12px] text-[#4B5563] text-center my-1 font-medium">
+        <div className="p-1.5 bg-[#F9FAFB] rounded border border-[#E5E7EB] text-[11.5px] text-[#4B5563] text-center my-0.5 font-medium">
           * 본 계약의 상세 약관 및 운영 정책은 <strong>[별첨. 본식스냅 촬영 약관 및 운영 정책]</strong>에 수록되어 있습니다.
         </div>
 
         {/* 5. 서명 및 날인 영역 */}
-        <div className="border-t border-[#D1D5DB] pt-3 mt-auto">
-          <p className="text-[13px] text-center text-[#374151] mb-2.5 font-medium">
+        <div className="border-t border-[#D1D5DB] pt-1.5">
+          <p className="text-[13px] text-center text-[#374151] mb-2 font-medium">
             위와 같이 본식스냅 촬영 계약을 체결하며, 상호 신뢰와 성실로 본 계약 내용을 확약합니다.
           </p>
 
           <div className="grid grid-cols-2 gap-4">
             {/* 신랑 · 신부 확인란 */}
-            <div className="p-3.5 bg-[#F9FAFB] rounded-lg border border-[#D1D5DB] flex items-center justify-between h-[68px]">
-              <div className="flex items-center gap-2.5">
+            <div className="p-2 bg-[#F9FAFB] rounded-lg border border-[#D1D5DB] flex items-center justify-center h-[58px]">
+              <div className="flex items-center justify-center gap-2.5">
                 <span className="text-[13.5px] text-[#4B5563] font-semibold">신랑 · 신부</span>
                 <span className="font-bold text-[#111827] text-[17px] ml-1">
                   {data.groomName} · {data.brideName}
@@ -340,7 +382,7 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
             </div>
 
             {/* 대표 서명 및 날인 */}
-            <div className="p-3.5 bg-[#F9FAFB] rounded-lg border border-[#D1D5DB] flex items-center justify-between h-[68px] relative">
+            <div className="p-2 bg-[#F9FAFB] rounded-lg border border-[#D1D5DB] flex items-center justify-between h-[58px] relative">
               <div className="flex items-center gap-2.5">
                 <span className="font-bold text-[#111827] text-[17px] tracking-wide">DEAR MEMORY</span>
                 <span className="text-[14px] font-semibold text-[#374151]">대표 한민규</span>
@@ -360,7 +402,7 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
           <div className="flex justify-between items-center text-[11px] text-[#6B7280] mt-2.5 pt-2 border-t border-[#E5E7EB]">
             <span>DEAR MEMORY FOR BOOKING &bull; OFFICIAL CONTRACT</span>
             <span className="font-semibold text-[#111827]">
-              1 / 2 Page &bull; 본식스냅 계약서 본문
+              본식스냅 계약서 본문
             </span>
           </div>
         </div>
@@ -458,7 +500,7 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
 
           <div className="flex justify-between items-center text-[11px] text-[#6B7280]">
             <span>DEAR MEMORY FOR BOOKING &bull; OFFICIAL CONTRACT POLICY</span>
-            <span className="font-semibold text-[#111827]">2 / 2 Page &bull; 본식스냅 촬영 약관 수록 완료</span>
+            <span className="font-semibold text-[#111827]">본식스냅 촬영 약관 수록 완료</span>
           </div>
         </div>
       </div>
