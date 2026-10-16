@@ -5,6 +5,7 @@ import { getOptionById } from '@/config/options';
 import { CONTRACT_POLICY_CONFIG } from '@/config/contractPolicy';
 import { formatKRW } from '@/lib/pricing';
 import { HANMINGYU_SEAL_BASE64 } from '@/assets/images';
+import { getPaymentAccountInfo } from '@/config/paymentAccount';
 
 export interface ContractDocumentProps {
   id?: string;
@@ -21,6 +22,8 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
   pricing,
 }) => {
   const product = getProductById(data.productId);
+  if (!product) throw new Error('계약서에 존재하지 않는 상품이 선택되었습니다.');
+  const paymentAccount = getPaymentAccountInfo();
 
   const selectedOptions = (data.optionIds || [])
     .map((optId) => getOptionById(optId))
@@ -53,7 +56,7 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
           width: '210mm',
           height: '297mm',
           maxHeight: '297mm',
-          padding: '11mm 15mm',
+          padding: '9mm 15mm',
           boxSizing: 'border-box',
           backgroundColor: '#FFFFFF',
           color: '#111827',
@@ -306,6 +309,14 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
             </div>
           </div>
 
+          {/* 계좌 정보는 검증된 배포 설정이 있어야 번호를 노출합니다. */}
+          <div className="mt-1.5 rounded border border-[#D1D5DB] bg-white px-2 py-1.5 text-[12.5px] font-medium text-[#374151]">
+            <strong className="text-[#111827]">입금 계좌 안내: </strong>
+            {paymentAccount
+              ? `${paymentAccount.bankName} ${paymentAccount.accountNumber} (예금주: ${paymentAccount.accountHolder})`
+              : '계좌번호는 대표에게 별도로 확인해 주세요.'}
+          </div>
+
           {/* 후기 이벤트 별도 안내 */}
           {pricing.futureCashbackTotal > 0 && (
             <div className="mt-2 p-2 bg-[#F3F4F6] rounded border border-[#E5E7EB] text-[13px] flex justify-between items-center text-[#374151]">
@@ -360,7 +371,7 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
           <div className="flex justify-between items-center text-[11px] text-[#6B7280] mt-2.5 pt-2 border-t border-[#E5E7EB]">
             <span>DEAR MEMORY FOR BOOKING &bull; OFFICIAL CONTRACT</span>
             <span className="font-semibold text-[#111827]">
-              1 / 2 Page &bull; 본식스냅 계약서 본문
+              본식스냅 계약서 본문
             </span>
           </div>
         </div>
@@ -458,7 +469,7 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
 
           <div className="flex justify-between items-center text-[11px] text-[#6B7280]">
             <span>DEAR MEMORY FOR BOOKING &bull; OFFICIAL CONTRACT POLICY</span>
-            <span className="font-semibold text-[#111827]">2 / 2 Page &bull; 본식스냅 촬영 약관 수록 완료</span>
+            <span className="font-semibold text-[#111827]">본식스냅 촬영 약관 수록 완료</span>
           </div>
         </div>
       </div>

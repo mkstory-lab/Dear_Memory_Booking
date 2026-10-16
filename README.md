@@ -83,3 +83,16 @@ GAS_WEBAPP_URL=  # 빈칸일 경우 MockBackendAdapter(데모 모드) 동작
 DEAR_MEMORY_REP_EMAIL=contact@dearmemory.kr
 DEAR_MEMORY_REP_PHONE=010-4822-2615
 ```
+
+
+## 계약서 PDF 안정화 (운영 반영 전 검토 필수)
+
+- 옵션 및 할인 행이 많아 계약서가 A4를 초과하면 다음 PDF 페이지로 이어서 생성합니다. 실제 디자인 검수는 별도로 수행해야 합니다.
+- 상품 구성: 실속형 보정 70장 / 원본 2,000장 이상, 화보형 보정 80장 / 원본 3,000장 이상. 앨범 70p/80p와 사진 보정 장수는 별개입니다.
+- 입금 계좌는 아래 NEXT_PUBLIC_ 환경변수를 세 개 모두 설정했을 때만 PDF에 표시합니다. 하나라도 빠지면 별도 확인 안내가 표시됩니다.
+  - NEXT_PUBLIC_DEAR_MEMORY_BANK_NAME: 은행명
+  - NEXT_PUBLIC_DEAR_MEMORY_ACCOUNT_NUMBER: 계좌번호
+  - NEXT_PUBLIC_DEAR_MEMORY_ACCOUNT_HOLDER: 예금주
+- 이 값들은 고객에게 보여주는 공개 정보입니다. 정확한 계좌를 확인한 뒤 배포 환경에서 설정하고 재빌드해야 반영됩니다.
+- 테스트 명령: npm run test:pdf-config / npm run test:acceptance / npx tsc --noEmit
+- 실제 운영 서비스 배포와 데이터 변경은 별도 승인 후 진행합니다.
