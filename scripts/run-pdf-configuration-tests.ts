@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { PRODUCTS_CONFIG } from '../src/config/products';
 import { getPaymentAccountInfo } from '../src/config/paymentAccount';
-import { assertPageFits, chooseSafePageCut } from '../src/lib/pdfGenerator';
+import { assertPageFits, fitRasterToA4 } from '../src/lib/pdfGenerator';
 
 const standard = PRODUCTS_CONFIG.find((item) => item.id === 'standard');
 const albumPlus = PRODUCTS_CONFIG.find((item) => item.id === 'album_plus');
@@ -35,6 +35,14 @@ assert.throws(() => assertPageFits({
 assert.throws(() => assertPageFits({
   scrollHeight: 100, clientHeight: 100, scrollWidth: 75, clientWidth: 70,
 }), /A4/);
-assert.equal(chooseSafePageCut(0, 1000, [200, 700, 850]), 850);
-assert.equal(chooseSafePageCut(0, 1000, [200, 400]), 1000);
+// No A4 content may be discarded. A 10% taller page must still fit on one page.
+const standardA4 = fitRasterToA4(2100, 2970);
+assert.equal(standardA4.widthMm, 210);
+assert.equal(standardA4.heightMm, 297);
+const dense = fitRasterToA4(2100, 3300);
+assert.ok(dense.scale > 0.89 && dense.scale < 0.91);
+assert.equal(dense.heightMm, 297);
+assert.ok(dense.xMm > 0);
+assert.throws(() => fitRasterToA4(2100, 4500), /너무 길어/);
+assert.throws(() => fitRasterToA4(0, 100), /크기/);
 console.log('PDF safety & product config checks: all passed');
