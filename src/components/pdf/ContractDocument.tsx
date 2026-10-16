@@ -45,19 +45,31 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
   return (
     <div id={id} className="space-y-8 select-none">
       <style>{`
-        /* Keep the first sheet at A4 width; reclaim excessive receipt row spacing. */
+        /* Add real separation between text and dividers; retain a clean two-page A4 layout. */
         .contract-main .contract-receipt table thead th {
-          padding-top: 2px !important;
-          padding-bottom: 2px !important;
+          padding-top: 5px !important;
+          padding-bottom: 5px !important;
+          line-height: 1.45 !important;
         }
         .contract-main .contract-receipt table tbody td {
-          padding-top: 2px !important;
-          padding-bottom: 2px !important;
-          line-height: 1.3;
+          padding-top: 5px !important;
+          padding-bottom: 7px !important;
+          line-height: 1.45 !important;
+          vertical-align: middle !important;
         }
         .contract-main .contract-receipt table tbody tr:last-child td {
-          padding-top: 4px !important;
-          padding-bottom: 4px !important;
+          padding-top: 7px !important;
+          padding-bottom: 7px !important;
+        }
+        /* Optical centering: Hangul ink is lower than its CSS line box (verified in raster PDF). */
+        .contract-main .pdf-centered-label > span {
+          position: relative;
+          top: -6px;
+          line-height: 1;
+          display: block;
+        }
+        .contract-main .pdf-centered-label.product-label > span {
+          top: -8px;
         }
       `}</style>
       {/* =========================================================================
@@ -155,8 +167,8 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
           <div className="flex justify-between items-center border-b border-[#E5E7EB] pb-1 mb-1">
             <div className="flex items-center gap-2.5">
               <h3 className="font-bold text-[#111827] text-base">3. 촬영 상품 및 제공 구성</h3>
-              <span className="inline-flex items-center justify-center text-center leading-none min-h-[26px] px-2.5 py-1 bg-[#111827] text-white rounded text-[13px] font-bold shrink-0">
-                {product.name}
+              <span className="pdf-centered-label product-label inline-flex items-center justify-center text-center h-[27px] px-2.5 bg-[#111827] text-white rounded text-[13px] font-bold shrink-0">
+                <span>{product.name}</span>
               </span>
             </div>
             <span className="font-bold text-[#111827] text-[17px] tabular-nums">
@@ -311,8 +323,8 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
                   {formatKRW(pricing.depositAmount)}
                 </span>
               </div>
-              <span className="inline-flex items-center justify-center text-center leading-none min-h-[26px] text-[12.5px] text-[#374151] bg-[#F3F4F6] px-2.5 py-1 rounded font-semibold border border-[#E5E7EB] shrink-0">
-                스케줄 확정
+              <span className="pdf-centered-label inline-flex items-center justify-center text-center h-[27px] text-[12.5px] text-[#374151] bg-[#F3F4F6] px-2.5 rounded font-semibold border border-[#E5E7EB] shrink-0">
+                <span>스케줄 확정</span>
               </span>
             </div>
             <div className="p-2 bg-white rounded border border-[#D1D5DB] flex justify-between items-center shadow-xs">
@@ -322,8 +334,8 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
                   {formatKRW(pricing.balanceAmount)}
                 </span>
               </div>
-              <span className="inline-flex items-center justify-center text-center leading-none min-h-[26px] text-[12.5px] text-[#374151] bg-[#F3F4F6] px-2.5 py-1 rounded font-semibold border border-[#E5E7EB] shrink-0">
-                최종 정산
+              <span className="pdf-centered-label inline-flex items-center justify-center text-center h-[27px] text-[12.5px] text-[#374151] bg-[#F3F4F6] px-2.5 rounded font-semibold border border-[#E5E7EB] shrink-0">
+                <span>최종 정산</span>
               </span>
             </div>
           </div>
@@ -353,7 +365,7 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
         </div>
 
         {/* 5. 서명 및 날인 영역 */}
-        <div className="border-t border-[#D1D5DB] pt-1.5 mt-auto">
+        <div className="border-t border-[#D1D5DB] pt-1.5">
           <p className="text-[13px] text-center text-[#374151] mb-2 font-medium">
             위와 같이 본식스냅 촬영 계약을 체결하며, 상호 신뢰와 성실로 본 계약 내용을 확약합니다.
           </p>
