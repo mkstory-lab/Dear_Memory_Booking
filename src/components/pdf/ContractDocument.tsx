@@ -61,7 +61,7 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
           padding-top: 7px !important;
           padding-bottom: 7px !important;
         }
-        /* Optical centering: Hangul ink is lower than its CSS line box (verified in raster PDF). */
+        /* Optical center measured in the exported PDF, not only in the browser DOM. */
         .contract-main .pdf-centered-label > span {
           position: relative;
           top: -6px;
@@ -167,7 +167,7 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
           <div className="flex justify-between items-center border-b border-[#E5E7EB] pb-1 mb-1">
             <div className="flex items-center gap-2.5">
               <h3 className="font-bold text-[#111827] text-base">3. 촬영 상품 및 제공 구성</h3>
-              <span className="pdf-centered-label product-label inline-flex items-center justify-center text-center h-[27px] px-2.5 bg-[#111827] text-white rounded text-[13px] font-bold shrink-0">
+              <span className="pdf-centered-label product-label inline-grid place-items-center text-center h-[27px] px-2.5 bg-[#111827] text-white rounded text-[13px] font-bold shrink-0">
                 <span>{product.name}</span>
               </span>
             </div>
@@ -184,9 +184,9 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
               </div>
             </div>
             <div className="grid grid-cols-1 gap-y-0.5 pt-0.5 leading-[1.25]">
-              <div className="flex items-start">
-                <span className="font-bold text-[#111827] shrink-0">앨범 사양:&nbsp;</span>
-                <span className="whitespace-pre-line font-medium text-[#111827]">{product.albumSpec}</span>
+              <div className="pdf-album-spec flex items-center whitespace-nowrap gap-1 text-[12.5px] leading-5">
+                <span className="font-bold text-[#111827] shrink-0">앨범 사양:</span>
+                <span className="pdf-album-value font-medium text-[#111827] whitespace-nowrap">{product.albumSpec.replace(/\s*\n\s*/g, ' / ')}</span>
               </div>
               {/* 상품 수량 전체를 한 줄에 표시하여 "제공"만 다음 줄로 밀리지 않도록 합니다. */}
               <div className="flex items-center whitespace-nowrap text-[13.5px] leading-[1.25]">
