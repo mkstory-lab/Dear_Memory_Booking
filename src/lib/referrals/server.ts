@@ -2,10 +2,10 @@ import { createHash } from 'node:crypto';
 import { createGasJournalTransport, GasReferralStore } from './gasStore';
 export function referralSettings() {
   const secret = process.env.REFERRAL_JOURNAL_SECRET || '';
-  const url = process.env.GAS_WEBAPP_URL || '';
+  const url = process.env.REFERRAL_GAS_WEBAPP_URL || process.env.GAS_WEBAPP_URL || '';
   const sessionSecret = process.env.REFERRAL_SESSION_SECRET || '';
   const hash = process.env.REFERRAL_ADMIN_PASSWORD_HASH || '';
-  if (process.env.REFERRALS_ENABLED !== 'true' || secret.length < 32 || sessionSecret.length < 32 || !hash || !url) throw new Error('추천 관리 기능의 운영 연결을 준비 중입니다.');
+  if (process.env.REFERRALS_ENABLED !== 'true' || secret.length < 32 || sessionSecret.length < 32 || !hash || !url) throw new Error('추천 관리 기능의 운영 연결을 준비 중입니다. [' + [process.env.REFERRALS_ENABLED !== 'true' ? 'enabled' : '', secret.length < 32 ? 'journal' : '', sessionSecret.length < 32 ? 'session' : '', !hash ? 'password' : '', !url ? 'url' : ''].filter(Boolean).join(',') + ']');
   return { secret, url, sessionSecret, hash };
 }
 export function referralStore() { const c = referralSettings(); return new GasReferralStore(createGasJournalTransport(c.url, c.secret)); }

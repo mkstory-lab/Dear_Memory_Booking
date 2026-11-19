@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic';
 const headers = { 'Cache-Control': 'no-store' };
 export async function GET(req: NextRequest) {
   try { const c = referralSettings(); return NextResponse.json({ authenticated: !!verifySession(req.cookies.get(SESSION_COOKIE)?.value, c.sessionSecret) }, { headers }); }
-  catch { return NextResponse.json({ authenticated: false, configured: false }, { headers }); }
+  catch (error) { return NextResponse.json({ authenticated: false, configured: false, configurationError: error instanceof Error ? error.message : 'configuration' }, { headers }); }
 }
 export async function POST(req: NextRequest) {
   if (!sameOrigin(req)) return NextResponse.json({ error: '허용되지 않은 요청입니다.' }, { status: 403, headers });
