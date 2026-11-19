@@ -77,7 +77,7 @@ test('sent contract relationship requires administrator with a reason',()=>{
 
 test('server generates one permanent code across serialized repeated requests',async()=>{
  const { issueCode } = await import('../src/lib/referrals/issuance');
- const f=fixture(); f.run({type:'deposit',contractId:'A'});
+ const f=fixture();
  let stored=f.history();
  const store={transaction:async <T>(operation:(events:Event[])=>{events:Event[];result:T})=>{
    const result=operation(stored); stored=[...stored,...result.events]; return result.result;
@@ -88,5 +88,7 @@ test('server generates one permanent code across serialized repeated requests',a
  assert.match(first.value,/^DM-[ABCDEFGHJKLMNPQRSTUVWXYZ23456789]{8}$/);
  assert.equal(first.value,second.value);
  assert.equal(Object.keys(project(stored).codes).length,1);
+ assert.equal(project(stored).contracts.A.paid, project(stored).contracts.A.deposit);
+ assert.equal(stored.filter(e=>e.type==='command' && e.data.type==='deposit').length,1);
  await assert.rejects(()=>issueCode(store,'A',{...context,role:'customer'}));
 });

@@ -16,7 +16,9 @@ function doPost(e) {
     const action = postData.action;
     const payload = postData.payload;
 
-    if (action === "submit_contract") {
+    if (action === "referral_journal") {
+      return createJsonResponse({ success: true, data: dmReferralJournal_(payload) });
+    } else if (action === "submit_contract") {
       return handleSubmitContract(payload);
     } else if (action === "approve_and_send") {
       return handleApproveAndSend(payload);
@@ -31,6 +33,7 @@ function doPost(e) {
 }
 
 function doGet(e) {
+  if (e && e.parameter && e.parameter.page === "referral-setup") return dmReferralSetupPage_();
   if (e && e.parameter && e.parameter.action === "validate_partner_code") {
     return handleValidatePartnerCode({ code: e.parameter.code });
   }

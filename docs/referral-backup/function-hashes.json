@@ -1,0 +1,22 @@
+{
+  "handleSubmitContract": "ccdd4b3e6994e5767931f4dbbe683565ecba1cf1c52c7c1ed3e2a6eefc8ac150",
+  "handleApproveAndSend": "75e53f5d4a25cbbc30f201e3f7f01525ed4d4de34e2d163a38e5d59c325a2ebb",
+  "saveContractToGoogleDrive": "f7b306642adcaccd964d898619e47bf96d19d3dd05cbe16d27b6030d4bbdb50a",
+  "getOrCreateSubFolder": "3a6a7e2bea067d97c05c8142c8df9618a7982b1555c9b04ce102bc4c42726309",
+  "getOrCreatePartnerSheet": "8f0b91e9af034b0f431ebaa17408435ec18858ebbf5bd13bc24611a80c3d2d05",
+  "handleValidatePartnerCode": "4c33b287de9f8ed703eada4f5c2cb1018426fbf910101868498e7d17236805e1",
+  "createJsonResponse": "9d648a290a5027d624b7cb250cf1df8b8a6e2027cbe0438f233c35aaaabff9fa",
+  "contractPdfPageImages": "c0b51466710976f6916aa8df59e539a546dad2d3885349bee0fc566f4f9c9d76",
+  "contractPdfAssertOpaque": "8320a06d150ca4b757dd0c6c82484f07fc3963c9c7d3f4384a7ec15454b1ee78",
+  "contractPdfPng": "200dc7440bab8b70dd92b6609f385d51d52e8c6603a75a42e429d7f518381a6f",
+  "contractExcelTemplate": "71ee77c94d3ad024f1afb2d4de3a0a2174ed81a45f1099546513fb0a0230223d",
+  "getContractExcelRows": "d4af7a96a82b357e5a640e7f5c6b27fb8e60dd73aa2a4f75a72fc0ecd38d0e23",
+  "contractExcelXmlEscape": "650b9328a0d4d83d9ee0f9f9e5729415c608a0c813f186cf08892409b4c38864",
+  "createContractExcelBlob": "eea9b515945e5bc7e85a2e53852aefaa18905ee67685f98391e4def584e54fe4",
+  "createContractExcelFromRows": "3216b511894c4510299bf214d83a32b1c1e73471689ee5006d0febc3917ab884",
+  "dmCalendarSpec_": "537f8d56bf45a09c6a7125241872e560184bee78a64a222efe77c02d3bf2956f",
+  "dmSyncCalendar_": "55ed0347962fdf4420aeea56fae3143ae12a89577e61b2c7a80b959bbe17a00a",
+  "dmAfterContractSent_": "a0afcb5f808a39fa3397642414a1fb12aa38103c4955271001bedf4b8c26a00e",
+  "dmCalendarPreflight": "7e54b5f601437424fee324fe1ef84deaa8ec325ab2a4b5ee7c8eca7bdc5d61cf",
+  "dmVerifyCalendar_": "1f127ec690f7cf6a9a6b750a4ba471ecaec16b537d6401ee5d7c1a830c4a43cc"
+}

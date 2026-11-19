@@ -27,7 +27,7 @@ export class GasReferralStore implements ReferralStore {
   }
 }
 /** Server-only use. Never expose this transport or its secret through a customer action. */
-export function createGasJournalTransport(url: string, secret: string): JournalTransport {
+export function createGasJournalTransport(url: string, secret: string): JournalTransport & { limit(key: string, maximum: number): Promise<{ allowed: boolean }> } {
   if (secret.length < 32 || !url.startsWith('https://script.google.com/macros/s/')) throw new Error('추천 저장소 설정을 확인해 주세요.');
   async function request<T>(operation: string, fields: object = {}): Promise<T> {
     const body = JSON.stringify({ ...fields, operation, timestamp: Date.now() });
@@ -42,5 +42,5 @@ export function createGasJournalTransport(url: string, secret: string): JournalT
     if (!result.success || !result.data) throw new Error('추천 저장소 요청이 거절되었습니다.');
     return result.data as T;
   }
-  return { read: () => request<Snapshot>('read'), append: (version, transactionId, events) => request<Commit>('append', { version, transactionId, events }) };
+  return { limit: (key, maximum) => request<{ allowed: boolean }>('limit', { key, maximum }), read: () => request<Snapshot>('read'), append: (version, transactionId, events) => request<Commit>('append', { version, transactionId, events }) };
 }

@@ -4,7 +4,7 @@ export type Contract = {
   id: string; coupleId: string; number: string; groom: string; bride: string;
   weddingDate: string; status: 'active' | 'completed' | 'cancelled';
   // Total BEFORE the new partner discount, but after all other existing discounts.
-  total: number; deposit: number; paid: number; depositConfirmedAt?: string; sentAt?: string;
+  total: number; deposit: number; paid: number; legacyPartnerDiscount?: boolean; depositConfirmedAt?: string; sentAt?: string;
 };
 export type Code = { value: string; contractId: string; coupleId: string; active: boolean; issuedAt: string };
 export type Referral = { id: string; contractId: string; ownerContractId: string; code: string;
@@ -98,6 +98,7 @@ export function execute(history: Event[], command: Command, ctx: Context): Event
   if (command.type === 'register') {
     const c = command.contract;
     requireThat(c.id && c.coupleId && !s.contracts[c.id], '기존 계약의 내부 ID를 유지해 주세요.');
+    requireThat(!Object.values(s.contracts).some(x => x.number === c.number), '이미 등록된 계약번호입니다. 기존 고객을 선택해 주세요.');
     requireThat(!Object.values(s.contracts).some(x => x.coupleId === c.coupleId), '이미 등록된 커플입니다. 기존 계약을 선택해 주세요.');
     requireThat(c.number !== 'DM-20270516-XJWF' || c.status === 'cancelled', '취소된 계약은 활성 등록할 수 없습니다.');
     requireThat(Number.isSafeInteger(c.total) && c.total >= 0 && Number.isSafeInteger(c.deposit) && c.deposit > 0 && c.deposit <= c.total, '계약금액을 확인해 주세요.');
@@ -142,6 +143,7 @@ export function execute(history: Event[], command: Command, ctx: Context): Event
         emit('code_issued', { value: command.candidate, contractId: c.id, coupleId: c.coupleId, active: true, issuedAt: ctx.at }); break;
       }
       case 'refer': {
+        requireThat(!c.legacyPartnerDiscount, '기존 수동 짝꿍 할인이 포함된 계약입니다. 중복 할인 방지를 위해 추천 관계를 별도 검토해 주세요.');
         const code = s.codes[normalizeCode(command.code)];
         requireThat(code?.active, '유효한 짝꿍코드를 입력해 주세요.');
         requireThat(code.coupleId !== c.coupleId, '자기 추천은 적용할 수 없습니다.');

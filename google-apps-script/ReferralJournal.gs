@@ -16,10 +16,27 @@ function dmReferralJournal_(request) {
   if (mismatch) throw new Error('인증 실패');
   const body = JSON.parse(request.body);
   if (!Number.isSafeInteger(body.timestamp) || Math.abs(Date.now() - body.timestamp) > 60000) throw new Error('요청 만료');
-  if (!['read', 'append'].includes(body.operation)) throw new Error('지원하지 않는 저장 요청');
+  if (!['read', 'append', 'limit'].includes(body.operation)) throw new Error('지원하지 않는 저장 요청');
   const lock = LockService.getScriptLock();
   lock.waitLock(20000);
   try {
+    if (body.operation === 'limit') {
+      if (!/^[a-f0-9]{64}$/.test(body.key) || !Number.isSafeInteger(body.maximum) || body.maximum < 1 || body.maximum > 30) throw new Error('잘못된 요청 제한');
+      const now = Date.now();
+      const key = 'DM_LIMIT_' + body.key;
+      const saved = JSON.parse(properties.getProperty(key) || '{"until":0,"count":0}');
+      const value = saved.until > now ? saved : { until: now + 60000, count: 0 };
+      if (value.count >= body.maximum) return { allowed: false };
+      value.count++;
+      // Remove expired counters so source-IP churn does not fill Script Properties forever.
+      const all = properties.getProperties();
+      Object.keys(all).filter(function(k) { return k.indexOf('DM_LIMIT_') === 0; }).forEach(function(k) {
+        if (JSON.parse(all[k]).until <= now) properties.deleteProperty(k);
+      });
+      if (Object.keys(all).filter(function(k) { return k.indexOf('DM_LIMIT_') === 0; }).length > 300 && !all[key]) return { allowed: false };
+      properties.setProperty(key, JSON.stringify(value));
+      return { allowed: true };
+    }
     const sheet = SpreadsheetApp.openById(sheetId).getSheetByName('ReferralJournal');
     if (!sheet) throw new Error('추천 이력 시트가 없습니다.');
     const rows = sheet.getDataRange().getValues();

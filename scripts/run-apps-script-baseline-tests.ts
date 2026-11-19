@@ -53,3 +53,11 @@ test('storage failure remains separate from customer email result', () => {
   assert.equal(result.driveSaved, false);
   assert.equal(result.calendarSaved, false);
 });
+test('all original mail, Drive, PDF, Excel and Calendar functions remain identical after normalizing line endings', async () => {
+  const ts = await import('typescript');
+  const expected = JSON.parse(readFileSync('docs/referral-backup/function-hashes.json', 'utf8'));
+  const ast = ts.createSourceFile('Code.js', source, ts.ScriptTarget.Latest, true, ts.ScriptKind.JS);
+  const actual: Record<string, string> = {};
+  ast.forEachChild(n => { if (ts.isFunctionDeclaration(n) && n.name) actual[n.name.text] = createHash('sha256').update(n.getText(ast)).digest('hex'); });
+  for (const [name, hash] of Object.entries(expected)) assert.equal(actual[name], hash, `${name} must be preserved`);
+});
