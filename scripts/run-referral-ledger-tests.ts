@@ -74,3 +74,19 @@ test('sent contract relationship requires administrator with a reason',()=>{
  assert.throws(()=>f.run({type:'refer',contractId:'B',code:'DM-A7K9M2Q8'},{reason:''}));
  f.run({type:'refer',contractId:'B',code:'DM-A7K9M2Q8'});
 });
+
+test('server generates one permanent code across serialized repeated requests',async()=>{
+ const { issueCode } = await import('../src/lib/referrals/issuance');
+ const f=fixture(); f.run({type:'deposit',contractId:'A'});
+ let stored=f.history();
+ const store={transaction:async <T>(operation:(events:Event[])=>{events:Event[];result:T})=>{
+   const result=operation(stored); stored=[...stored,...result.events]; return result.result;
+ }};
+ const context:Context={requestId:'issue-1',actor:'admin',role:'admin',at:'2026-11-19T00:00:00Z'};
+ const first=await issueCode(store,'A',context);
+ const second=await issueCode(store,'A',{...context,requestId:'issue-2'});
+ assert.match(first.value,/^DM-[ABCDEFGHJKLMNPQRSTUVWXYZ23456789]{8}$/);
+ assert.equal(first.value,second.value);
+ assert.equal(Object.keys(project(stored).codes).length,1);
+ await assert.rejects(()=>issueCode(store,'A',{...context,role:'customer'}));
+});
