@@ -5,7 +5,7 @@
 ## 확인한 기반
 
 - 저장소 main은 dd7f8daafe1840c024f3846bcb418f33d4c477ed입니다.
-- 현재 연결 가능한 Vercel 팀에는 dear-memory-quote만 있으며 계약서 프로젝트의 배포 버전을 확인하지 못했습니다.
+- mkstory-lab 계정 기기 인증 후 운영 Vercel 접근을 확인했습니다. 프로젝트 prj_HeK7cBNYqY9InIQ7Hgil2JHsjpcL, 운영 배포 dpl_53ZoDBnU373BcSQHGrsXuAg7HEPq입니다. 운영 웹 코드의 Git 커밋은 dd7f8daafe1840c024f3846bcb418f33d4c477ed로 저장소와 일치합니다.
 - 저장소 Apps Script에는 PDF/JPG 저장과 메일 발송, 수동 짝꿍코드 시트 조회가 있습니다.
 - Drive의 2026-11-02 적용소스에는 Excel 저장이 추가되어 있습니다. 현재 배포본과 동일한지는 미확인입니다.
 - Calendar 구현과 현재 실제 입금 관리 데이터는 미확인입니다.
@@ -25,7 +25,7 @@ src/lib/referrals/ledger.ts는 이벤트에서 상태를 재구성하는 계산 
 로컬 /workspace/work/referral-backup/repository-before.bundle에 기존 저장소의 Git 기록을 보관했습니다.
 같은 디렉터리의 drive-source-20261102.gs는 Drive 적용소스 사본입니다. 실제 운영 배포 및 데이터 백업으로 간주하지 않습니다.
 현재 변경은 feature/lifetime-referrals 로컬 브랜치에만 있습니다. 운영 롤백은 필요하지 않습니다.
-운영 반영 전 실제 Apps Script 배포 ID·버전·전체 코드·연결 시트 구조와 데이터 사본, Vercel 배포 ID·커밋을 기록해야 합니다.
+Vercel 운영 배포 ID·커밋·환경변수 메타데이터를 로컬 백업에 기록했습니다. 운영 반영 전 실제 Apps Script 배포 ID·버전·전체 코드·연결 시트 구조와 데이터 사본을 추가 확인해야 합니다. APP_SECRET 및 GAS_WEBAPP_URL이 production에 설정되어 있으므로 배포 설정 보존이 필요합니다.
 롤백은 이전 코드 배포 복원으로 수행하며, 이미 발생한 정산 이력은 삭제하지 않고 정정 이벤트로 처리해야 합니다.
 
 ## 검증 범위
