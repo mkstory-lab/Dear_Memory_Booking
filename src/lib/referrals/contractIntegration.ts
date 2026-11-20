@@ -4,7 +4,7 @@ import { calculateContractPrice } from '@/lib/pricing';
 import { generateContractNumber } from '@/lib/contractNumber';
 import { createApprovalToken, type DecodedApprovalPayload } from '@/lib/token';
 import { execute, normalizeCode, project, type Event } from './ledger';
-import type { ReferralStore } from './issuance';
+import type { ReferralStore } from './issuance';\nimport { buildBuddyReferralEvents, normalizeBuddyCode } from '@/lib/buddy/ledger';
 
 export function contactKeys(data: Pick<ContractFormData, 'groomPhone' | 'bridePhone'>, secret: string) {
   return [...new Set([data.groomPhone, data.bridePhone].map(p => (p || '').replace(/\D/g, '')).filter(p => p.length >= 9))]
@@ -65,6 +65,20 @@ export async function registerSubmission(store: ReferralStore, data: ContractFor
     const context = { actor: 'contract-service', role: 'admin' as const, at: new Date().toISOString(), requestId: id + ':register' };
     const events = execute(history, { type: 'register', contract: { id, coupleId: id, number, groom: data.groomName, bride: data.brideName, weddingDate: data.weddingDate, status: 'active', legacyPartnerDiscount: legacy, partnerText: finalData.partnerName, total: pricing.contractTotal, deposit: pricing.depositAmount, paid: 0, identityKeys: contactKeys(data, secret), reviewUrl } }, context);
     if (owner) events.push(...execute([...history, ...events], { type: 'refer', contractId: id, code: owner.value }, { ...context, requestId: id + ':refer' }));
+    const buddyCode = normalizeBuddyCode(data.partnerName || '');
+    if (buddyCode) {
+      events.push(...buildBuddyReferralEvents([...history, ...events], {
+        code: buddyCode,
+        referredBrideName: data.brideName,
+        referredWeddingDate: data.weddingDate,
+        sourceContractId: id,
+      }, {
+        requestId: id + ':buddy-referral',
+        actor: 'contract-service',
+        at: context.at,
+        reason: '계약서 짝꿍코드 자동 연결',
+      }));
+    }
     const result = { contractId: id, token, reviewUrl, fingerprint };
     events.push(event(id + ':submission', 'submission_registered', { contractId: id, fingerprint }));
     if (JSON.stringify(events).length > 40000) throw new Error('요청사항이 너무 깁니다. 내용을 줄인 뒤 제출해 주세요.');
