@@ -27,6 +27,7 @@ export type BuddyReferralStatus = 'valid' | 'cancelled' | 'invalid' | 'needs_rev
 export type BuddyReferral = {
   id: string;
   code: string;
+  enteredCode?: string;
   ownerCustomerId: string;
   referredBrideName: string;
   referredWeddingDate: string;
@@ -112,6 +113,52 @@ export function normalizeBuddyCode(value: string) {
 
 export function isBuddyCode(value: string) {
   return CODE_PATTERN.test(normalizeBuddyCode(value));
+}
+
+function compactBuddyCode(value: string) {
+  return normalizeBuddyCode(value).replace(/[^A-Z0-9]/g, '');
+}
+
+function editDistanceAtMostOne(left: string, right: string) {
+  if (Math.abs(left.length - right.length) > 1) return false;
+  if (left === right) return true;
+
+  if (left.length === right.length) {
+    let differences = 0;
+    for (let i = 0; i < left.length; i++) {
+      if (left[i] !== right[i] && ++differences > 1) return false;
+    }
+    return true;
+  }
+
+  const shorter = left.length < right.length ? left : right;
+  const longer = left.length < right.length ? right : left;
+  let i = 0;
+  let j = 0;
+  let skipped = false;
+  while (i < shorter.length && j < longer.length) {
+    if (shorter[i] === longer[j]) {
+      i++;
+      j++;
+      continue;
+    }
+    if (skipped) return false;
+    skipped = true;
+    j++;
+  }
+  return true;
+}
+
+function similarActiveCode(state: BuddyState, entered: string) {
+  const compact = compactBuddyCode(entered);
+  if (compact.length < 9 || compact.length > 11 || !/^\d{6}/.test(compact)) return undefined;
+
+  return Object.values(state.codes)
+    .filter(code => code.active)
+    .find(code => {
+      const known = compactBuddyCode(code.value);
+      return known.slice(0, 6) === compact.slice(0, 6) && editDistanceAtMostOne(known, compact);
+    });
 }
 
 export function projectBuddy(history: Event[]): BuddyState {
@@ -210,12 +257,14 @@ export function buildBuddyReferralEvents(history: Event[], input: {
   assertBrideAndDate(input.referredBrideName, input.referredWeddingDate);
   if (requestAlreadyApplied(history, ctx)) return [];
 
-  const codeValue = normalizeBuddyCode(input.code);
-  if (!isBuddyCode(codeValue)) return [];
-
+  const enteredCode = normalizeBuddyCode(input.code);
   const state = projectBuddy(history);
-  const code = state.codes[codeValue];
-  if (!code?.active) return [];
+  const exactCode = isBuddyCode(enteredCode) ? state.codes[enteredCode] : undefined;
+  const suggestedCode = exactCode?.active ? exactCode : similarActiveCode(state, enteredCode);
+  if (!suggestedCode) return [];
+
+  const codeValue = suggestedCode.value;
+  const exactActiveMatch = exactCode?.active === true && exactCode.value === codeValue;
 
   const duplicate = Object.values(state.referrals).some(r =>
     r.code === codeValue &&
@@ -225,22 +274,24 @@ export function buildBuddyReferralEvents(history: Event[], input: {
   );
   if (duplicate) return [];
 
-  const owner = state.customers[code.customerId];
+  const owner = state.customers[suggestedCode.customerId];
   if (!owner) return [];
 
   const selfReferral = cleanBrideName(owner.brideName) === cleanBrideName(input.referredBrideName) &&
     owner.weddingDate === input.referredWeddingDate;
 
+  const needsReview = !exactActiveMatch || selfReferral;
   const now = ctx.at;
   return [event(ctx, 'buddy_referral_recorded', {
     id: 'buddy_ref_' + randomUUID(),
     code: codeValue,
+    enteredCode,
     ownerCustomerId: owner.id,
     referredBrideName: cleanBrideName(input.referredBrideName),
     referredWeddingDate: input.referredWeddingDate,
     sourceContractId: input.sourceContractId,
     benefitAmount: BUDDY_REWARD_AMOUNT,
-    status: selfReferral ? 'needs_review' : 'valid',
+    status: needsReview ? 'needs_review' : 'valid',
     createdAt: now,
     updatedAt: now,
   })];
