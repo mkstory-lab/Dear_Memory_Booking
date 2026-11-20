@@ -10,7 +10,8 @@
     "test:acceptance": "tsx scripts/run-contract-acceptance-tests.ts",
     "test:pdf-config": "tsx scripts/run-pdf-configuration-tests.ts",
     "test:referrals": "tsx --test scripts/run-referral-*-tests.ts scripts/run-apps-script-baseline-tests.ts",
-    "test:buddy": "tsx --test scripts/run-buddy-simple-tests.ts"
+    "test:buddy": "tsx --test scripts/run-buddy-simple-tests.ts",
+    "test:admin": "tsx --test scripts/run-admin-crm-tests.ts"
   },
   "dependencies": {
     "html2canvas": "^1.4.1",

@@ -47,7 +47,7 @@ export function createApprovalToken(contractId: string, data: ContractFormData, 
 /**
  * 보안 승인 토큰 검증 및 복호화
  */
-export function verifyApprovalToken(token: string): DecodedApprovalPayload {
+function decodeApprovalToken(token: string, allowExpired: boolean): DecodedApprovalPayload {
   if (!token || !token.includes('.')) {
     throw new Error('유효하지 않은 토큰 형식입니다.');
   }
@@ -80,7 +80,7 @@ export function verifyApprovalToken(token: string): DecodedApprovalPayload {
     const payload: DecodedApprovalPayload = JSON.parse(decrypted.toString('utf8'));
 
     // 3. 유효기간 만료 검증
-    if (payload.exp && Date.now() > payload.exp) {
+    if (!allowExpired && payload.exp && Date.now() > payload.exp) {
       throw new Error('승인 링크의 유효 기간이 만료되었습니다. 대표에게 문의해 주세요.');
     }
 
@@ -89,4 +89,16 @@ export function verifyApprovalToken(token: string): DecodedApprovalPayload {
     if (err.message.includes('만료')) throw err;
     throw new Error(`토큰 복호화에 실패했습니다: ${err.message}`);
   }
+}
+
+export function verifyApprovalToken(token: string): DecodedApprovalPayload {
+  return decodeApprovalToken(token, false);
+}
+
+/**
+ * 관리자 원장에 이미 저장된 검토 URL을 읽기 위한 서버 전용 복호화 함수입니다.
+ * 링크의 실행 만료는 우회하지 않으며, 관리자 조회 API에서만 사용합니다.
+ */
+export function readApprovalTokenForAdmin(token: string): DecodedApprovalPayload {
+  return decodeApprovalToken(token, true);
 }
