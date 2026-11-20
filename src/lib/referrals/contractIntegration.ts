@@ -4,7 +4,8 @@ import { calculateContractPrice } from '@/lib/pricing';
 import { generateContractNumber } from '@/lib/contractNumber';
 import { createApprovalToken, type DecodedApprovalPayload } from '@/lib/token';
 import { execute, normalizeCode, project, type Event } from './ledger';
-import type { ReferralStore } from './issuance';\nimport { buildBuddyReferralEvents, normalizeBuddyCode } from '@/lib/buddy/ledger';
+import type { ReferralStore } from './issuance';
+import { buildBuddyReferralEvents, normalizeBuddyCode } from '@/lib/buddy/ledger';
 
 export function contactKeys(data: Pick<ContractFormData, 'groomPhone' | 'bridePhone'>, secret: string) {
   return [...new Set([data.groomPhone, data.bridePhone].map(p => (p || '').replace(/\D/g, '')).filter(p => p.length >= 9))]
