@@ -252,6 +252,7 @@ export default function BuddyAdmin() {
       const haystack = [
         row.customer.brideName,
         row.customer.weddingDate,
+        row.customer.memo || '',
         row.code?.value || '',
         ...referrals.map(r => r.referredBrideName),
       ].join(' ').toLowerCase();
@@ -445,7 +446,7 @@ export default function BuddyAdmin() {
                     <h2 className="text-lg font-semibold">고객 · 코드</h2>
                     <span className="text-xs text-[#8F7A56]">{rows.length}명</span>
                   </div>
-                  <input placeholder="신부명, 코드, 소개받은 신부명 검색" value={search} onChange={event => setSearch(event.target.value)} className="mt-4 h-11 w-full rounded-xl border border-[#DCCFBC] px-3 text-sm" />
+                  <input placeholder="신부명, 코드, 메모, 소개받은 신부명 검색" value={search} onChange={event => setSearch(event.target.value)} className="mt-4 h-11 w-full rounded-xl border border-[#DCCFBC] px-3 text-sm" />
                   <select value={filter} onChange={event => setFilter(event.target.value as typeof filter)} className="mt-2 h-11 w-full rounded-xl border border-[#DCCFBC] bg-white px-3 text-sm">
                     <option value="all">전체</option>
                     <option value="outstanding">미지급 있음</option>
@@ -465,6 +466,9 @@ export default function BuddyAdmin() {
                           <span className="text-xs text-[#8F7A56]">{row.customer.weddingDate}</span>
                         </div>
                         <p className="mt-1 font-mono text-sm tracking-wide">{row.code?.value || '코드 없음'}</p>
+                        {row.customer.memo && (
+                          <p className="mt-1 line-clamp-2 text-xs leading-5 text-[#6E5C3D]">메모: {row.customer.memo}</p>
+                        )}
                         <p className="mt-1 text-xs text-[#756446]">사용 {row.totals.validUseCount}회 · 혜택 {money(row.totals.totalBenefit)} · 미지급 {money(row.totals.outstanding)}</p>
                       </button>
                     ))}
@@ -492,6 +496,10 @@ export default function BuddyAdmin() {
                             )}
                           </div>
                           <p className="mt-1 text-sm text-[#8F7A56]">본식 {selected.customer.weddingDate}{weddingFinished(selected.customer.weddingDate) ? ' · 본식 종료' : ''}</p>
+                          <div className="mt-3 rounded-xl border border-[#E7DED2] bg-[#FAF8F5] px-3 py-2.5">
+                            <p className="text-xs font-semibold text-[#8F7A56]">관리자 메모</p>
+                            <p className="mt-1 whitespace-pre-wrap text-sm leading-6 text-[#4D402D]">{selected.customer.memo?.trim() || '등록된 메모가 없습니다.'}</p>
+                          </div>
                         </div>
                         <button onClick={() => void updateCustomer(selected)} className="rounded-xl border border-[#D8CDBD] px-3 py-2 text-sm">정보 수정</button>
                       </div>
