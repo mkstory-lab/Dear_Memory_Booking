@@ -578,6 +578,9 @@ export default function BuddyAdmin() {
                                   <td className="border-b border-[#F0E9DF] px-3 py-4">
                                     <strong>{referral.referredBrideName}</strong>
                                     {referral.sourceContractId && <p className="mt-1 text-[11px] text-[#9A8562]">계약서 자동 연결</p>}
+                                    {referral.enteredCode && referral.enteredCode !== referral.code && (
+                                      <p className="mt-1 text-[11px] leading-5 text-amber-700">입력 {referral.enteredCode} → 후보 {referral.code}</p>
+                                    )}
                                   </td>
                                   <td className="border-b border-[#F0E9DF] px-3 py-4">{referral.referredWeddingDate}</td>
                                   <td className="border-b border-[#F0E9DF] px-3 py-4">
