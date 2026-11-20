@@ -5,6 +5,7 @@ export type Contract = {
   weddingDate: string; status: 'active' | 'completed' | 'cancelled';
   // Total BEFORE the new partner discount, but after all other existing discounts.
   identityKeys?: string[]; reviewUrl?: string; partnerText?: string;
+  driveFolderUrl?: string; excelFileUrl?: string; contractFileUrl?: string;
   total: number; deposit: number; paid: number; legacyPartnerDiscount?: boolean; depositConfirmedAt?: string; sentAt?: string;
 };
 export type Code = { value: string; contractId: string; coupleId: string; active: boolean; issuedAt: string };
