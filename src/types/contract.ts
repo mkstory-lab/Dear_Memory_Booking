@@ -24,6 +24,7 @@ export interface ContractFormData {
   optionIds: string[]; // ['makeup_scene', 'second_shooter', 'pyebaek']
 
   // 할인 및 혜택
+  referralCode?: string; // 서버 검증한 평생 짝꿍코드 (할인은 계약금 확인 후 확정)
   partnerDiscount: boolean; // 짝꿍 할인 (즉시 -50,000원)
   partnerName: string; // 짝꿍 성함/예식일 (필수)
   sundayDiscount: boolean; // 일요일 식 할인 (즉시 -100,000원, 자동)

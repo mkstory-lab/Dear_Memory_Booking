@@ -143,7 +143,7 @@ export const FinalConfirmStep: React.FC<FinalConfirmStepProps> = ({
               )}
               {formData.partnerDiscount && (
                 <div className="flex justify-between items-start sm:items-center gap-2 text-[#B09A74]">
-                  <span className="break-keep">짝꿍 추천 할인 ({formData.partnerName})</span>
+                  <span className="break-keep">짝꿍 추천 할인{formData.referralCode ? ' 예정' : ''} ({formData.partnerName})</span>
                   <span className="font-semibold tabular-nums shrink-0 text-right">-50,000원</span>
                 </div>
               )}

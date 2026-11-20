@@ -239,7 +239,7 @@ export const RepresentativeReviewView: React.FC<RepresentativeReviewViewProps> =
         pdfBase64 = docResult.pdfBase64;
         jpgBase64 = docResult.jpgBase64 || '';
       } catch (docErr) {
-        console.warn('클라이언트 PDF 생성 경고 (백엔드 fallback 진행):', docErr);
+        throw new Error('계약서 PDF를 생성하지 못했습니다. 새로고침한 뒤 다시 시도해 주세요.');
       }
 
       // 2. 대표 최종 발송 API 호출 (POST)
@@ -273,6 +273,7 @@ export const RepresentativeReviewView: React.FC<RepresentativeReviewViewProps> =
       setIsAlreadySent(true);
       setSentAt(new Date().toISOString());
       setSendSuccess(true);
+      if (result.warning) setErrorMessage(result.warning);
     } catch (err: any) {
       setErrorMessage(err.message || '발송 처리 중 오류가 발생했습니다.');
     } finally {

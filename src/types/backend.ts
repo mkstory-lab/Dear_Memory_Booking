@@ -6,6 +6,9 @@ import { ContractFormData, ContractSnapshot } from './contract';
 
 export interface SubmitContractRequest {
   formData: ContractFormData;
+  contractId?: string;
+  approvalToken?: string;
+  reviewUrl?: string;
 }
 
 export interface ValidatePartnerCodeRequest {
@@ -42,6 +45,7 @@ export interface ReviewContractResponse {
 
 export interface ApproveAndSendRequest {
   token: string;
+  contractNumber?: string; // 서버가 고정한 계약번호
   updatedData?: ContractFormData; // 대표가 수정한 경우
   pdfBase64?: string; // 클라이언트에서 고품질 생성된 PDF
   jpgBase64?: string; // 클라이언트에서 생성된 JPG (선택적)

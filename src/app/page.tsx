@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import { Header } from '@/components/ui/Header';
 import { HomeLandingView } from '@/components/home/HomeLandingView';
 import { ProductCatalogView } from '@/components/catalog/ProductCatalogView';
@@ -24,6 +24,7 @@ type ViewMode = 'home' | 'catalog' | 'terms' | 'form' | 'confirm' | 'success';
 
 export default function CustomerContractPage() {
   // 화면 네비게이션 상태 (링크 접속 시 바로 약관 동의 페이지 노출)
+  const submission = useRef<{ fingerprint: string; id: string } | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>('terms');
 
   // 폼 상태
@@ -132,9 +133,7 @@ export default function CustomerContractPage() {
       errs.email = '올바른 이메일 형식이 아닙니다.';
     }
 
-    if (formData.partnerDiscount && (!formData.partnerName || !formData.partnerName.trim())) {
-      errs.partnerName = '짝꿍 할인을 선택하신 경우 추천인(짝꿍 날짜_성함)을 반드시 입력해 주세요.';
-    }
+    if (formData.partnerDiscount && !formData.referralCode) errs.partnerName = '짝꿍코드 확인 버튼을 눌러 주세요.';
 
     if (!formData.shootRequestNotes?.trim()) {
       errs.shootRequestNotes = '본식스냅 촬영 시 요청사항을 자세히 입력해 주세요.';
@@ -172,10 +171,17 @@ export default function CustomerContractPage() {
     setSubmitError(null);
 
     try {
+      const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(JSON.stringify(formData)));
+      const fingerprint = Array.from(new Uint8Array(digest), n => n.toString(16).padStart(2, '0')).join('');
+      if (!submission.current) {
+        try { submission.current = JSON.parse(sessionStorage.getItem('dm-submission') || 'null'); } catch { /* Storage can be unavailable in in-app browsers. */ }
+      }
+      if (submission.current?.fingerprint !== fingerprint) submission.current = { fingerprint, id: crypto.randomUUID() };
+      try { sessionStorage.setItem('dm-submission', JSON.stringify(submission.current)); } catch { /* Keep the in-memory request ID. */ }
       const res = await fetch('/api/submit-contract', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ ...formData, submissionId: submission.current.id }),
       });
 
       const data = await res.json();
@@ -373,6 +379,7 @@ export default function CustomerContractPage() {
                   isSunday={pricing.isSunday}
                   partnerDiscount={formData.partnerDiscount}
                   partnerName={formData.partnerName}
+                  referralCode={formData.referralCode || ''}
                   portfolioConsent={formData.portfolioConsent}
                   reviewContractCashback={formData.reviewContractCashback}
                   reviewMainCashback={formData.reviewMainCashback}

@@ -262,7 +262,7 @@ export const ContractDocument: React.FC<ContractDocumentProps> = ({
                 <tr>
                   <td className="py-1.5 text-[#B45309] font-semibold text-[14px]">즉시 할인</td>
                   <td className="py-1.5 text-[#B45309] font-medium text-[14px]">
-                    짝꿍 추천 할인 {data.partnerName ? `(추천인: ${data.partnerName})` : ''}
+                    짝꿍 추천 할인 {data.partnerName ? `(${data.referralCode ? '코드' : '추천인'}: ${data.partnerName})` : ''}{data.referralCode ? ' · 계약금 확인 후 확정' : ''}
                   </td>
                   <td className="py-1.5 text-right font-bold text-[#B45309] tabular-nums text-[15px]">
                     -50,000원

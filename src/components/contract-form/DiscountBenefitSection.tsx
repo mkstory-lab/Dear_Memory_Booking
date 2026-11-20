@@ -1,16 +1,18 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Tag, Gift, Check, UserCheck } from 'lucide-react';
 
 interface DiscountBenefitSectionProps {
   isSunday: boolean;
   partnerDiscount: boolean;
   partnerName: string;
+  referralCode?: string;
   portfolioConsent: boolean;
   reviewContractCashback: boolean;
   reviewMainCashback: boolean;
   onChange: (fields: Partial<{
     partnerDiscount: boolean;
     partnerName: string;
+    referralCode: string;
     portfolioConsent: boolean;
     reviewContractCashback: boolean;
     reviewMainCashback: boolean;
@@ -22,20 +24,37 @@ export const DiscountBenefitSection: React.FC<DiscountBenefitSectionProps> = ({
   isSunday,
   partnerDiscount,
   partnerName,
+  referralCode = '',
   portfolioConsent,
   reviewContractCashback,
   reviewMainCashback,
   onChange,
   errors = {},
 }) => {
-  // 짝꿍 코드/성함 입력 핸들러: 한 글자라도 입력 시 5만원 즉시 자동 차감, 내용 비우면 해제
-  const handlePartnerNameChange = (val: string) => {
-    const hasValue = val.trim().length > 0;
-    onChange({
-      partnerName: val,
-      partnerDiscount: hasValue,
-    });
-  };
+  const [draft, setDraft] = useState(referralCode);
+  const [checking, setChecking] = useState(false);
+  const [codeError, setCodeError] = useState('');
+  const sequence = useRef(0);
+  useEffect(() => () => { sequence.current++; }, []);
+  function editCode(value: string) {
+    sequence.current++; setChecking(false); setCodeError(''); setDraft(value.toUpperCase());
+    onChange({ partnerDiscount: false, partnerName: '', referralCode: '' });
+  }
+  async function verifyCode() {
+    const request = ++sequence.current;
+    setChecking(true); setCodeError('');
+    try {
+      const code = draft.trim().toUpperCase();
+      const response = await fetch('/api/referrals/validate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ code }) });
+      const result = await response.json();
+      if (request !== sequence.current) return;
+      if (!response.ok) throw new Error('지금은 확인할 수 없습니다. 잠시 후 다시 시도해 주세요.');
+      if (!result.valid) throw new Error('사용할 수 없는 코드입니다. 코드를 다시 확인해 주세요.');
+      setDraft(code); onChange({ partnerDiscount: true, partnerName: code, referralCode: code });
+    } catch (error) {
+      if (request === sequence.current) { onChange({ partnerDiscount: false, partnerName: '', referralCode: '' }); setCodeError((error as Error).message); }
+    } finally { if (request === sequence.current) setChecking(false); }
+  }
 
   return (
     <div className="space-y-6">
@@ -84,72 +103,20 @@ export const DiscountBenefitSection: React.FC<DiscountBenefitSectionProps> = ({
           </p>
         </div>
 
-        {/* 1-2. 짝꿍 할인 (복잡한 검증 없이 입력 즉시 5만원 자동 차감 복원) */}
-        <div
-          className={`p-4 sm:p-5 rounded-2xl border transition-all ${
-            partnerDiscount
-              ? 'bg-[#FFFFFF] border-2 border-[#322A1B] shadow-sm ring-2 ring-[#322A1B]/10'
-              : 'bg-[#FFFFFF] border-[#EBE3D5]'
-          }`}
-        >
-          <div className="flex items-start justify-between gap-3">
-            <div className="flex items-center gap-2.5">
-              <div
-                onClick={() => {
-                  if (partnerDiscount) {
-                    onChange({ partnerDiscount: false, partnerName: '' });
-                  } else {
-                    onChange({ partnerDiscount: true });
-                  }
-                }}
-                className={`w-5 h-5 rounded-md flex items-center justify-center border transition-colors shrink-0 cursor-pointer ${
-                  partnerDiscount
-                    ? 'bg-[#322A1B] border-[#322A1B] text-[#FAF8F5]'
-                    : 'border-[#DDD1BD] bg-white'
-                }`}
-              >
-                {partnerDiscount && <Check className="w-3.5 h-3.5 stroke-[3]" />}
-              </div>
-              <span className="text-sm sm:text-base font-semibold text-[#322A1B] break-keep flex items-center gap-2">
-                <UserCheck className="w-4 h-4 text-[#8F7A56]" />
-                <span>짝꿍 할인</span>
-                {partnerDiscount ? (
-                  <span className="text-xs px-2.5 py-0.5 rounded-full bg-[#322A1B] text-[#FAF8F5] font-semibold">
-                    5만원 할인 적용됨
-                  </span>
-                ) : (
-                  <span className="text-xs px-2 py-0.5 rounded-full bg-[#FAF8F5] border border-[#DDD1BD] text-[#8F7A56]">
-                    입력 시 5만원 자동 차감
-                  </span>
-                )}
-              </span>
-            </div>
-            <span className="text-base sm:text-lg font-bold text-[#B09A74] tabular-nums shrink-0 text-right">
-              -50,000원
-            </span>
+        <div className={`p-4 sm:p-5 rounded-2xl border ${partnerDiscount ? 'border-2 border-[#322A1B] bg-[#FAF8F5]' : 'border-[#EBE3D5] bg-white'}`}>
+          <div className="flex justify-between items-center gap-3">
+            <h4 className="text-base font-semibold text-[#322A1B] flex items-center gap-2"><UserCheck className="w-4 h-4" />짝꿍 추천 할인</h4>
+            <strong className="text-lg text-[#8F7A56] whitespace-nowrap">-50,000원</strong>
           </div>
-
-          <p className="text-xs sm:text-sm text-[#8F7A56] mt-2 pl-7.5 leading-relaxed break-keep">
-            아래 빈칸에 <strong>짝꿍 코드(또는 추천인 성함)</strong>를 입력하시면 <strong>50,000원 즉시 할인</strong>이 전체 금액에서 자동 차감됩니다.
-          </p>
-
-          {/* 짝꿍 코드/성함 입력 빈칸 (상시 노출) */}
-          <div className="mt-3.5 pt-3.5 border-t border-[#F5F1EA] pl-7.5 space-y-1.5">
-            <label className="block text-xs sm:text-sm font-semibold text-[#322A1B]">
-              짝꿍 코드 (또는 추천인 성함)
-            </label>
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="예: 261011김민수 (또는 추천인 성함 입력 시 자동 차감)"
-                value={partnerName}
-                onChange={(e) => handlePartnerNameChange(e.target.value)}
-                className="w-full h-12 px-3.5 bg-[#FAF8F5] border border-[#DDD1BD] focus:border-[#322A1B] rounded-xl text-sm sm:text-base text-[#322A1B] focus:outline-none focus:ring-2 focus:ring-[#322A1B]/10 transition-all placeholder:text-[#8F7A56]/70 font-medium"
-              />
-            </div>
-            {errors.partnerName && (
-              <p className="text-xs text-red-500 mt-1 font-medium">{errors.partnerName}</p>
-            )}
+          <p className="text-sm text-[#6E5C3D] mt-2 leading-relaxed">소개해 주신 분의 짝꿍코드를 확인하면 5만원 할인 예정액이 반영됩니다. 계약금 입금 확인 후 확정됩니다.</p>
+          <label htmlFor="referral-code" className="block text-sm font-semibold text-[#322A1B] mt-4 mb-2">짝꿍코드</label>
+          <div className="flex gap-2">
+            <input id="referral-code" value={draft} onChange={e => editCode(e.target.value)} maxLength={20} autoCapitalize="characters" autoCorrect="off" spellCheck={false} placeholder="DM-A7K9M2Q8" aria-describedby="referral-code-status" className="min-w-0 flex-1 h-12 px-3 bg-white border border-[#DDD1BD] rounded-xl text-base text-[#322A1B]" />
+            <button type="button" disabled={checking || !draft.trim()} onClick={() => void verifyCode()} className="px-4 rounded-xl bg-[#322A1B] text-white text-sm font-semibold disabled:opacity-50">{checking ? '확인 중' : '확인'}</button>
+          </div>
+          <div id="referral-code-status" aria-live="polite" className="text-sm mt-2 leading-relaxed">
+            {partnerDiscount && referralCode ? <p className="text-[#3F6547] font-semibold">확인 완료 · 50,000원 할인 예정 <button type="button" onClick={() => editCode('')} className="underline ml-3 text-[#6E5C3D]">해제</button></p> : <p className="text-[#8F7A56]">코드 확인 후 적용됩니다.</p>}
+            {(codeError || errors.partnerName) && <p role="alert" className="text-red-600">{codeError || errors.partnerName}</p>}
           </div>
         </div>
 

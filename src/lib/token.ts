@@ -9,6 +9,8 @@ const KEY_32 = crypto.createHash('sha256').update(SECRET_KEY).digest();
 
 export interface DecodedApprovalPayload {
   contractId: string;
+  managedReferral?: boolean;
+  contractNumber?: string;
   data: ContractFormData;
   iat: number;
   exp: number;
@@ -18,8 +20,9 @@ export interface DecodedApprovalPayload {
  * 보안 승인 토큰 생성 (AES-256-CBC 암호화 + HMAC-SHA256 무결성 서명)
  * URL에 고객 개인정보가 평문으로 노출되지 않도록 완전 암호화합니다.
  */
-export function createApprovalToken(contractId: string, data: ContractFormData, expiresInMs = 14 * 24 * 60 * 60 * 1000): string {
+export function createApprovalToken(contractId: string, data: ContractFormData, expiresInMs = 14 * 24 * 60 * 60 * 1000, metadata: { managedReferral?: boolean; contractNumber?: string } = {}): string {
   const payload: DecodedApprovalPayload = {
+    ...metadata,
     contractId,
     data,
     iat: Date.now(),

@@ -4,6 +4,7 @@ export type Contract = {
   id: string; coupleId: string; number: string; groom: string; bride: string;
   weddingDate: string; status: 'active' | 'completed' | 'cancelled';
   // Total BEFORE the new partner discount, but after all other existing discounts.
+  identityKeys?: string[]; reviewUrl?: string;
   total: number; deposit: number; paid: number; legacyPartnerDiscount?: boolean; depositConfirmedAt?: string; sentAt?: string;
 };
 export type Code = { value: string; contractId: string; coupleId: string; active: boolean; issuedAt: string };
@@ -100,6 +101,7 @@ export function execute(history: Event[], command: Command, ctx: Context): Event
     requireThat(c.id && c.coupleId && !s.contracts[c.id], '기존 계약의 내부 ID를 유지해 주세요.');
     requireThat(!Object.values(s.contracts).some(x => x.number === c.number), '이미 등록된 계약번호입니다. 기존 고객을 선택해 주세요.');
     requireThat(!Object.values(s.contracts).some(x => x.coupleId === c.coupleId), '이미 등록된 커플입니다. 기존 계약을 선택해 주세요.');
+    requireThat(!Object.values(s.contracts).some(x => (x.identityKeys || []).some(key => c.identityKeys?.includes(key))), '이미 등록된 고객 연락처입니다. 기존 계약을 선택해 주세요.');
     requireThat(c.number !== 'DM-20270516-XJWF' || c.status === 'cancelled', '취소된 계약은 활성 등록할 수 없습니다.');
     requireThat(Number.isSafeInteger(c.total) && c.total >= 0 && Number.isSafeInteger(c.deposit) && c.deposit > 0 && c.deposit <= c.total, '계약금액을 확인해 주세요.');
     requireThat(c.paid === 0 && !c.depositConfirmedAt, '입금은 별도 수동 확인으로 기록합니다.');
@@ -146,7 +148,7 @@ export function execute(history: Event[], command: Command, ctx: Context): Event
         requireThat(!c.legacyPartnerDiscount, '기존 수동 짝꿍 할인이 포함된 계약입니다. 중복 할인 방지를 위해 추천 관계를 별도 검토해 주세요.');
         const code = s.codes[normalizeCode(command.code)];
         requireThat(code?.active, '유효한 짝꿍코드를 입력해 주세요.');
-        requireThat(code.coupleId !== c.coupleId, '자기 추천은 적용할 수 없습니다.');
+        requireThat(code.coupleId !== c.coupleId && !(c.identityKeys || []).some(key => s.contracts[code.contractId].identityKeys?.includes(key)), '자기 추천은 적용할 수 없습니다.');
         requireThat(!c.depositConfirmedAt, '계약금 확인 후 추천 변경은 별도 정산 검토가 필요합니다.');
         if (c.sentAt) requireThat(ctx.role === 'admin' && ctx.reason, '발송 후에는 대표가 사유를 기록해야 합니다.');
         const old = currentReferral(c.id);

@@ -1,47 +1,23 @@
 import { NextRequest, NextResponse, after } from 'next/server';
 import { getBackendAdapter } from '@/services/googleAppsScriptAdapter';
-import { createApprovalToken } from '@/lib/token';
-
+import { customerData, registerSubmission, notifySubmission } from '@/lib/referrals/contractIntegration';
+import { rateLimit, referralSettings, referralStore } from '@/lib/referrals/server';
 export const dynamic = 'force-dynamic';
-
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
-    const contractId = `cnt_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
-    const token = createApprovalToken(contractId, body);
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://dear-memory-booking.vercel.app';
-    const reviewUrl = `${appUrl}/review?token=${token}`;
-
-    const adapter = getBackendAdapter();
-
-    // Next.js 15 after() 백그라운드 큐: 
-    // 사용자는 0.1초 만에 즉시 접수 완료 화면으로 전환되고,
-    // Google Apps Script 통신 및 대표 이메일 발송은 서버 백그라운드에서 신속하게 비동기 완료됩니다.
+    await rateLimit(req, 'lookup');
+    const text = await req.text();
+    if (text.length > 20000) throw new Error('입력 내용이 너무 깁니다.');
+    const body = JSON.parse(text);
+    const data = customerData(body), store = referralStore();
+    const registered = await registerSubmission(store, data, body.submissionId, referralSettings().secret);
     after(async () => {
       try {
-        await adapter.submitContract({ formData: body });
-      } catch (bgErr) {
-        console.error('Google Apps Script 백그라운드 전송 오류:', bgErr);
-      }
+        await notifySubmission(store, registered.contractId, () => getBackendAdapter().submitContract({ formData: data, contractId: registered.contractId, approvalToken: registered.token, reviewUrl: registered.reviewUrl }));
+      } catch { console.error('계약 접수 알림 처리 결과 확인 필요'); }
     });
-
-    return NextResponse.json(
-      {
-        success: true,
-        contractId,
-        approvalToken: token,
-        reviewUrl,
-        message: '계약정보가 성공적으로 접수되었습니다.',
-      },
-      { status: 200 }
-    );
-  } catch (err: any) {
-    return NextResponse.json(
-      {
-        success: false,
-        error: `계약정보 제출 중 서버 오류가 발생했습니다: ${err.message}`,
-      },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: true, contractId: registered.contractId, approvalToken: registered.token, reviewUrl: registered.reviewUrl, message: '계약정보가 성공적으로 접수되었습니다.' });
+  } catch (err) {
+    return NextResponse.json({ success: false, error: err instanceof Error ? err.message : '계약정보를 접수하지 못했습니다. 잠시 후 다시 시도해 주세요.' }, { status: 400 });
   }
 }

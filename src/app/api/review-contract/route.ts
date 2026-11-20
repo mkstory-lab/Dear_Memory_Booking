@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { referralStore } from '@/lib/referrals/server';
+import { managedReview } from '@/lib/referrals/contractIntegration';
 import { verifyApprovalToken } from '@/lib/token';
 import { calculateContractPrice } from '@/lib/pricing';
 import { isContractAlreadySent, getSentRecord } from '@/lib/idempotency';
@@ -57,7 +59,12 @@ export async function GET(req: NextRequest) {
 
     // 토큰 복호화 및 유효성 검증
     const decoded = verifyApprovalToken(token);
-    const { contractId, data } = decoded;
+    const { contractId } = decoded;
+    if (decoded.managedReferral) {
+      const view = await referralStore().transaction(history => ({ events: [], result: managedReview(history, decoded) }));
+      return NextResponse.json({ success: true, contractId, ...view, pricing: calculateContractPrice(view.data) }, { headers: { 'Cache-Control': 'no-store' } });
+    }
+    const { data } = decoded;
 
     // 중복 발송 여부 확인
     const alreadySent = isContractAlreadySent(contractId);

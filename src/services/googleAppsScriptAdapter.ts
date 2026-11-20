@@ -17,11 +17,11 @@ export class GoogleAppsScriptAdapter implements IBackendAdapter {
 
   async submitContract(req: SubmitContractRequest): Promise<SubmitContractResponse> {
     try {
-      const contractId = `cnt_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+      const contractId = req.contractId || `cnt_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
       const { createApprovalToken } = await import('@/lib/token');
-      const token = createApprovalToken(contractId, req.formData);
+      const token = req.approvalToken || createApprovalToken(contractId, req.formData);
       const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://dear-memory-booking.vercel.app';
-      const reviewUrl = `${appUrl}/review?token=${token}`;
+      const reviewUrl = req.reviewUrl || `${appUrl}/review?token=${token}`;
 
       const response = await fetch(this.webAppUrl, {
         method: 'POST',
@@ -62,7 +62,7 @@ export class GoogleAppsScriptAdapter implements IBackendAdapter {
   async approveAndSendContract(req: ApproveAndSendRequest): Promise<ApproveAndSendResponse> {
     try {
       const { generateContractNumber } = await import('@/lib/contractNumber');
-      const contractNumber = generateContractNumber(req.updatedData?.weddingDate);
+      const contractNumber = req.contractNumber || generateContractNumber(req.updatedData?.weddingDate);
 
       const response = await fetch(this.webAppUrl, {
         method: 'POST',
