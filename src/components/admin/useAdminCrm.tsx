@@ -1,9 +1,19 @@
 'use client';
 
-import { useCallback, useEffect, useState, useTransition } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, useTransition } from 'react';
 import type { AdminCrmSnapshot } from './types';
 
-export function useAdminCrm() {
+type AdminCrmContextValue = {
+  data: AdminCrmSnapshot | null;
+  error: string;
+  isPending: boolean;
+  refresh: () => Promise<void>;
+  mutate: (command: Record<string, unknown>) => Promise<AdminCrmSnapshot>;
+};
+
+const AdminCrmContext = createContext<AdminCrmContextValue | null>(null);
+
+export function AdminCrmProvider({ children }: { children: React.ReactNode }) {
   const [data, setData] = useState<AdminCrmSnapshot | null>(null);
   const [error, setError] = useState('');
   const [isPending, startTransition] = useTransition();
@@ -39,6 +49,13 @@ export function useAdminCrm() {
     return result as AdminCrmSnapshot;
   }, []);
 
-  return { data, error, isPending, refresh, mutate };
+  const value = useMemo(() => ({ data, error, isPending, refresh, mutate }), [data, error, isPending, refresh, mutate]);
+  return <AdminCrmContext.Provider value={value}>{children}</AdminCrmContext.Provider>;
+}
+
+export function useAdminCrm() {
+  const context = useContext(AdminCrmContext);
+  if (!context) throw new Error('관리자 데이터 Provider가 필요합니다.');
+  return context;
 }
 

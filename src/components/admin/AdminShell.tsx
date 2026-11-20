@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import { CalendarDays, FileText, HandCoins, LayoutDashboard, LogOut, Menu, Search, Settings, Users, X } from 'lucide-react';
-import type { AdminCrmSnapshot } from './types';
+import { AdminCrmProvider, useAdminCrm } from './useAdminCrm';
 
 const navigation = [
   { href: '/admin', label: '대시보드', icon: LayoutDashboard },
@@ -17,14 +17,10 @@ const navigation = [
 ];
 
 export default function AdminShell({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname();
   const [authenticated, setAuthenticated] = useState<boolean | null>(null);
   const [configured, setConfigured] = useState(true);
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [query, setQuery] = useState('');
-  const [snapshot, setSnapshot] = useState<AdminCrmSnapshot | null>(null);
 
   useEffect(() => {
     void (async () => {
@@ -40,30 +36,6 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
     })();
   }, []);
 
-  useEffect(() => {
-    setMenuOpen(false);
-    setQuery('');
-  }, [pathname]);
-
-  useEffect(() => {
-    if (!authenticated || snapshot) return;
-    void fetch('/api/referrals/admin/crm', { cache: 'no-store' })
-      .then(response => response.ok ? response.json() : null)
-      .then(result => { if (result) setSnapshot(result); });
-  }, [authenticated, snapshot]);
-
-  const matches = useMemo(() => {
-    const needle = query.trim().toLowerCase().replace(/\D/g, '');
-    const rawNeedle = query.trim().toLowerCase();
-    if (!rawNeedle || !snapshot) return [];
-    return snapshot.contracts.filter(contract => {
-      const words = [contract.groom, contract.bride, contract.number, contract.referralCode, contract.buddyCode]
-        .filter(Boolean).join(' ').toLowerCase();
-      const phones = `${contract.groomPhone}${contract.bridePhone}`.replace(/\D/g, '');
-      return words.includes(rawNeedle) || (needle.length >= 3 && phones.includes(needle));
-    }).slice(0, 6);
-  }, [query, snapshot]);
-
   async function login(event: React.FormEvent) {
     event.preventDefault();
     setError('');
@@ -74,12 +46,6 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
     setPassword('');
     if (!response.ok) { setError(result.error || '로그인할 수 없습니다.'); return; }
     setAuthenticated(true);
-  }
-
-  async function logout() {
-    await fetch('/api/referrals/admin/session', { method: 'DELETE' });
-    setAuthenticated(false);
-    setSnapshot(null);
   }
 
   if (authenticated === null) return <div className="admin-auth-screen"><div className="admin-spinner" /><p>관리자 화면을 준비하고 있습니다.</p></div>;
@@ -100,6 +66,37 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
     </main>
   );
 
+  return <AdminCrmProvider><AdminWorkspace onLogout={() => setAuthenticated(false)}>{children}</AdminWorkspace></AdminCrmProvider>;
+}
+
+function AdminWorkspace({ children, onLogout }: { children: React.ReactNode; onLogout: () => void }) {
+  const pathname = usePathname();
+  const { data } = useAdminCrm();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [query, setQuery] = useState('');
+
+  useEffect(() => {
+    setMenuOpen(false);
+    setQuery('');
+  }, [pathname]);
+
+  const matches = useMemo(() => {
+    const needle = query.trim().toLowerCase().replace(/\D/g, '');
+    const rawNeedle = query.trim().toLowerCase();
+    if (!rawNeedle || !data) return [];
+    return data.contracts.filter(contract => {
+      const words = [contract.groom, contract.bride, contract.number, contract.referralCode, contract.buddyCode]
+        .filter(Boolean).join(' ').toLowerCase();
+      const phones = `${contract.groomPhone}${contract.bridePhone}`.replace(/\D/g, '');
+      return words.includes(rawNeedle) || (needle.length >= 3 && phones.includes(needle));
+    }).slice(0, 6);
+  }, [query, data]);
+
+  async function logout() {
+    await fetch('/api/referrals/admin/session', { method: 'DELETE' });
+    onLogout();
+  }
+
   return (
     <div className="admin-app">
       <button className="admin-mobile-menu" onClick={() => setMenuOpen(value => !value)} aria-label="관리 메뉴 열기">{menuOpen ? <X /> : <Menu />}</button>
@@ -108,7 +105,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
         <nav aria-label="관리자 메뉴">
           {navigation.map(item => {
             const active = item.href === '/admin' ? pathname === item.href : pathname.startsWith(item.href);
-            return <Link key={item.href} href={item.href} className={active ? 'is-active' : ''}><item.icon size={18} /><span>{item.label}</span></Link>;
+            return <Link key={item.href} href={item.href} prefetch className={active ? 'is-active' : ''}><item.icon size={18} /><span>{item.label}</span></Link>;
           })}
         </nav>
         <button className="admin-logout" onClick={logout}><LogOut size={18} /> 로그아웃</button>
