@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React from 'react';
 import { Tag, Gift, Check, UserCheck } from 'lucide-react';
 
 interface DiscountBenefitSectionProps {
@@ -24,36 +24,14 @@ export const DiscountBenefitSection: React.FC<DiscountBenefitSectionProps> = ({
   isSunday,
   partnerDiscount,
   partnerName,
-  referralCode = '',
   portfolioConsent,
   reviewContractCashback,
   reviewMainCashback,
   onChange,
   errors = {},
 }) => {
-  const [draft, setDraft] = useState(referralCode);
-  const [checking, setChecking] = useState(false);
-  const [codeError, setCodeError] = useState('');
-  const sequence = useRef(0);
-  useEffect(() => () => { sequence.current++; }, []);
   function editCode(value: string) {
-    sequence.current++; setChecking(false); setCodeError(''); setDraft(value.toUpperCase());
-    onChange({ partnerDiscount: false, partnerName: '', referralCode: '' });
-  }
-  async function verifyCode() {
-    const request = ++sequence.current;
-    setChecking(true); setCodeError('');
-    try {
-      const code = draft.trim().toUpperCase();
-      const response = await fetch('/api/referrals/validate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ code }) });
-      const result = await response.json();
-      if (request !== sequence.current) return;
-      if (!response.ok) throw new Error('지금은 확인할 수 없습니다. 잠시 후 다시 시도해 주세요.');
-      if (!result.valid) throw new Error('사용할 수 없는 코드입니다. 코드를 다시 확인해 주세요.');
-      setDraft(code); onChange({ partnerDiscount: true, partnerName: code, referralCode: code });
-    } catch (error) {
-      if (request === sequence.current) { onChange({ partnerDiscount: false, partnerName: '', referralCode: '' }); setCodeError((error as Error).message); }
-    } finally { if (request === sequence.current) setChecking(false); }
+    onChange({ partnerName: value, partnerDiscount: !!value.trim(), referralCode: '' });
   }
 
   return (
@@ -108,15 +86,15 @@ export const DiscountBenefitSection: React.FC<DiscountBenefitSectionProps> = ({
             <h4 className="text-base font-semibold text-[#322A1B] flex items-center gap-2"><UserCheck className="w-4 h-4" />짝꿍 추천 할인</h4>
             <strong className="text-lg text-[#8F7A56] whitespace-nowrap">-50,000원</strong>
           </div>
-          <p className="text-sm text-[#6E5C3D] mt-2 leading-relaxed">소개해 주신 분의 짝꿍코드를 확인하면 5만원 할인 예정액이 반영됩니다. 계약금 입금 확인 후 확정됩니다.</p>
-          <label htmlFor="referral-code" className="block text-sm font-semibold text-[#322A1B] mt-4 mb-2">짝꿍코드</label>
+          <p className="text-sm text-[#6E5C3D] mt-2 leading-relaxed">전달받으신 짝꿍코드 또는 추천인 정보를 입력하면 5만원 할인이 바로 반영됩니다. 기존에 안내받으신 코드도 입력하실 수 있습니다.</p>
+          <label htmlFor="referral-code" className="block text-sm font-semibold text-[#322A1B] mt-4 mb-2">짝꿍코드 또는 추천인 정보</label>
           <div className="flex gap-2">
-            <input id="referral-code" value={draft} onChange={e => editCode(e.target.value)} maxLength={20} autoCapitalize="characters" autoCorrect="off" spellCheck={false} placeholder="DM-A7K9M2Q8" aria-describedby="referral-code-status" className="min-w-0 flex-1 h-12 px-3 bg-white border border-[#DDD1BD] rounded-xl text-base text-[#322A1B]" />
-            <button type="button" disabled={checking || !draft.trim()} onClick={() => void verifyCode()} className="px-4 rounded-xl bg-[#322A1B] text-white text-sm font-semibold disabled:opacity-50">{checking ? '확인 중' : '확인'}</button>
+            <input id="referral-code" value={partnerName} onChange={e => editCode(e.target.value)} maxLength={200} autoCapitalize="off" autoCorrect="off" spellCheck={false} placeholder="전달받은 코드 또는 추천인 정보를 입력해 주세요" aria-describedby="referral-code-status" className="min-w-0 flex-1 h-12 px-3 bg-white border border-[#DDD1BD] rounded-xl text-base text-[#322A1B]" />
+
           </div>
           <div id="referral-code-status" aria-live="polite" className="text-sm mt-2 leading-relaxed">
-            {partnerDiscount && referralCode ? <p className="text-[#3F6547] font-semibold">확인 완료 · 50,000원 할인 예정 <button type="button" onClick={() => editCode('')} className="underline ml-3 text-[#6E5C3D]">해제</button></p> : <p className="text-[#8F7A56]">코드 확인 후 적용됩니다.</p>}
-            {(codeError || errors.partnerName) && <p role="alert" className="text-red-600">{codeError || errors.partnerName}</p>}
+            {partnerDiscount ? <p className="text-[#3F6547] font-semibold">50,000원 할인 적용됨 <button type="button" onClick={() => editCode('')} className="underline ml-3 text-[#6E5C3D]">해제</button></p> : <p className="text-[#8F7A56]">입력 시 50,000원이 자동 차감됩니다.</p>}
+            {errors.partnerName && <p role="alert" className="text-red-600">{errors.partnerName}</p>}
           </div>
         </div>
 

@@ -133,7 +133,7 @@ export default function CustomerContractPage() {
       errs.email = '올바른 이메일 형식이 아닙니다.';
     }
 
-    if (formData.partnerDiscount && !formData.referralCode) errs.partnerName = '짝꿍코드 확인 버튼을 눌러 주세요.';
+    if (formData.partnerDiscount && !formData.partnerName.trim()) errs.partnerName = '짝꿍코드 또는 추천인 정보를 입력해 주세요.';
 
     if (!formData.shootRequestNotes?.trim()) {
       errs.shootRequestNotes = '본식스냅 촬영 시 요청사항을 자세히 입력해 주세요.';

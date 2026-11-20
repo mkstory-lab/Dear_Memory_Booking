@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse, after } from 'next/server';
+import { verifyApprovalToken } from '@/lib/token';
 import { getBackendAdapter } from '@/services/googleAppsScriptAdapter';
 import { customerData, registerSubmission, notifySubmission } from '@/lib/referrals/contractIntegration';
 import { rateLimit, referralSettings, referralStore } from '@/lib/referrals/server';
@@ -13,7 +14,7 @@ export async function POST(req: NextRequest) {
     const registered = await registerSubmission(store, data, body.submissionId, referralSettings().secret);
     after(async () => {
       try {
-        await notifySubmission(store, registered.contractId, () => getBackendAdapter().submitContract({ formData: data, contractId: registered.contractId, approvalToken: registered.token, reviewUrl: registered.reviewUrl }));
+        await notifySubmission(store, registered.contractId, () => getBackendAdapter().submitContract({ formData: verifyApprovalToken(registered.token).data, contractId: registered.contractId, approvalToken: registered.token, reviewUrl: registered.reviewUrl }));
       } catch { console.error('계약 접수 알림 처리 결과 확인 필요'); }
     });
     return NextResponse.json({ success: true, contractId: registered.contractId, approvalToken: registered.token, reviewUrl: registered.reviewUrl, message: '계약정보가 성공적으로 접수되었습니다.' });

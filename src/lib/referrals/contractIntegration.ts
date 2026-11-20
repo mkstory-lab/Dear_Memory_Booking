@@ -24,13 +24,14 @@ export function customerData(body: any): ContractFormData {
   data.optionIds = [...new Set(body.optionIds)];
   for (const key of ['portfolioConsent','reviewContractCashback','reviewMainCashback','termsAgreed']) data[key] = body[key] === true;
   if (!data.termsAgreed) throw new Error('약관 동의가 필요합니다.');
-  if (body.referralCode !== undefined && typeof body.referralCode !== 'string') throw new Error('짝꿍코드를 확인해 주세요.');
-  data.referralCode = normalizeCode(body.referralCode || '');
-  if (data.referralCode && !/^DM-[ABCDEFGHJKLMNPQRSTUVWXYZ23456789]{8}$/.test(data.referralCode)) throw new Error('짝꿍코드를 확인한 뒤 다시 제출해 주세요.');
-  // A public request cannot activate the old manual discount or a manual adjustment.
-  if (!data.referralCode && body.partnerDiscount) throw new Error('짝꿍코드 확인 후 할인을 적용해 주세요.');
-  data.partnerDiscount = !!data.referralCode;
-  data.partnerName = data.referralCode;
+  const input = body.partnerName || body.referralCode || '';
+  if (typeof input !== 'string' || input.length > 200) throw new Error('짝꿍코드 또는 추천인 정보는 200자 이내로 입력해 주세요.');
+  // Compatibility policy: any nonblank text activates one 50k discount.
+  // Only an active code in the server journal can create a referral/reward.
+  data.partnerName = input.trim();
+  data.partnerDiscount = !!data.partnerName;
+  const candidate = normalizeCode(data.partnerName);
+  data.referralCode = /^DM-[ABCDEFGHJKLMNPQRSTUVWXYZ23456789]{8}$/.test(candidate) ? candidate : '';
   data.sundayDiscount = calculateContractPrice(data).isSunday;
   return data;
 }
@@ -52,16 +53,18 @@ export async function registerSubmission(store: ReferralStore, data: ContractFor
     if (data.groomName === '이송현' && data.brideName === '이수정' && data.weddingDate === '2027-05-16') throw new Error('취소 계약은 새로 등록할 수 없습니다. 대표님께 문의해 주세요.');
     const s = project(history);
     const keys = contactKeys(data, secret);
-    const owner = data.referralCode && s.codes[data.referralCode];
+    const owner = data.referralCode && s.codes[data.referralCode]?.active ? s.codes[data.referralCode] : undefined;
+    const legacy = data.partnerDiscount && !owner;
+    const finalData = { ...data, referralCode: owner ? owner.value : '', partnerName: owner ? owner.value : data.partnerName };
     if (owner && (s.contracts[owner.contractId].identityKeys || []).some(k => keys.includes(k))) throw new Error('자기 추천은 적용할 수 없습니다.');
     let number = proposedNumber;
     while (Object.values(s.contracts).some(c => c.number === number)) number = generateContractNumber(data.weddingDate);
-    const token = createApprovalToken(id, data, undefined, { managedReferral: true, contractNumber: number });
+    const token = createApprovalToken(id, finalData, undefined, { managedReferral: true, contractNumber: number });
     const reviewUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://dear-memory-booking.vercel.app'}/review?token=${token}`;
-    const pricing = calculateContractPrice({ ...data, partnerDiscount: false });
+    const pricing = calculateContractPrice({ ...finalData, partnerDiscount: legacy });
     const context = { actor: 'contract-service', role: 'admin' as const, at: new Date().toISOString(), requestId: id + ':register' };
-    const events = execute(history, { type: 'register', contract: { id, coupleId: id, number, groom: data.groomName, bride: data.brideName, weddingDate: data.weddingDate, status: 'active', total: pricing.contractTotal, deposit: pricing.depositAmount, paid: 0, identityKeys: contactKeys(data, secret), reviewUrl } }, context);
-    if (data.referralCode) events.push(...execute([...history, ...events], { type: 'refer', contractId: id, code: data.referralCode }, { ...context, requestId: id + ':refer' }));
+    const events = execute(history, { type: 'register', contract: { id, coupleId: id, number, groom: data.groomName, bride: data.brideName, weddingDate: data.weddingDate, status: 'active', legacyPartnerDiscount: legacy, partnerText: finalData.partnerName, total: pricing.contractTotal, deposit: pricing.depositAmount, paid: 0, identityKeys: contactKeys(data, secret), reviewUrl } }, context);
+    if (owner) events.push(...execute([...history, ...events], { type: 'refer', contractId: id, code: owner.value }, { ...context, requestId: id + ':refer' }));
     const result = { contractId: id, token, reviewUrl, fingerprint };
     events.push(event(id + ':submission', 'submission_registered', { contractId: id, fingerprint }));
     if (JSON.stringify(events).length > 40000) throw new Error('요청사항이 너무 깁니다. 내용을 줄인 뒤 제출해 주세요.');
@@ -84,7 +87,8 @@ export function managedReview(history: Event[], decoded: DecodedApprovalPayload)
   if (!c || c.status === 'cancelled') throw new Error('취소되었거나 확인할 수 없는 계약입니다.');
   const referral = Object.values(s.referrals).find(r => r.contractId === c.id && !r.cancelledAt);
   const dispatched = history.find(e => e.type === 'contract_delivery_started' && e.data.contractId === c.id);
-  const data = { ...(dispatched?.data.finalData || decoded.data), referralCode: referral?.code || '', partnerName: referral?.code || '', partnerDiscount: !!referral };
+  const source = dispatched?.data.finalData || decoded.data;
+  const data = { ...source, referralCode: referral?.code || '', partnerName: referral?.code || (c.legacyPartnerDiscount ? source.partnerName : ''), partnerDiscount: !!referral || !!c.legacyPartnerDiscount };
   const delivery = history.find(e => e.type === 'contract_delivery_result' && e.data.contractId === c.id);
   const started = history.some(e => e.type === 'contract_delivery_started' && e.data.contractId === c.id);
   return { data, contractNumber: c.number, isAlreadySent: !!delivery?.data.result.customerEmailSent, sentAt: c.sentAt, deliveryPending: started && !delivery?.data.result.customerEmailSent };
@@ -99,7 +103,7 @@ export async function sendManagedContract(store: ReferralStore, decoded: Decoded
     if (view.deliveryPending) throw new Error('발송 처리 중이거나 결과 확인이 필요합니다. 중복 발송하지 말고 고객 메일과 처리 이력을 확인해 주세요.');
     if (!!proposedData.partnerDiscount !== view.data.partnerDiscount || normalizeCode(proposedData.referralCode || '') !== view.data.referralCode || (proposedData.partnerDiscount && proposedData.partnerName !== view.data.partnerName)) throw new Error('추천 정보가 변경되었습니다. 검토 페이지를 새로고침해 주세요.');
     const finalData = { ...proposedData, referralCode: view.data.referralCode, partnerDiscount: view.data.partnerDiscount, partnerName: view.data.partnerName };
-    const pricing = calculateContractPrice({ ...finalData, partnerDiscount: false });
+    const pricing = calculateContractPrice({ ...finalData, partnerDiscount: !!c.legacyPartnerDiscount });
     if (c.depositConfirmedAt && pricing.contractTotal !== c.total) throw new Error('입금 확인 후 금액 변경은 별도 정산 확인이 필요합니다.');
     const events = [event(attempt, 'contract_updated', { id: c.id, before: c, patch: { groom: finalData.groomName, bride: finalData.brideName, weddingDate: finalData.weddingDate, total: pricing.contractTotal } })];
     events.push(event(attempt, 'contract_delivery_started', { contractId: c.id, number: c.number, amount: calculateContractPrice(finalData).contractTotal, finalData }));
