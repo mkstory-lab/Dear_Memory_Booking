@@ -134,13 +134,24 @@ test('지급은 추천 건별 남은 금액까지만 기록하고 페이백을 �
   assert.equal(totals.outstanding, 0);
 });
 
-test('코드는 공백 제거/대문자 변환만 허용하고 다른 오타는 자동 연결하지 않는다', () => {
+test('공백/소문자는 정상 연결하고 유사 코드는 자동 승인하지 않고 확인필요로 남긴다', () => {
   const f = fixture();
   f.run({ type: 'create_customer', brideName: 'A', weddingDate: '2027-01-01' });
   const code = Object.values(f.state().codes)[0];
 
   assert.equal(f.referral({ code: '  ' + code.value.toLowerCase() + '  ', referredBrideName: 'B', referredWeddingDate: '2027-02-01' }).length, 1);
-  assert.equal(f.referral({ code: code.value.replace('-', ''), referredBrideName: 'C', referredWeddingDate: '2027-03-01' }).length, 0);
+  const missingHyphen = f.referral({ code: code.value.replace('-', ''), referredBrideName: 'C', referredWeddingDate: '2027-03-01' });
+  assert.equal(missingHyphen.length, 1);
+  assert.equal(Object.values(f.state().referrals).find(r => r.referredBrideName === 'C')?.status, 'needs_review');
+
+  const suffix = code.value.slice(-4);
+  const replacement = suffix[0] === 'A' ? 'B' : 'A';
+  const typo = code.value.slice(0, -4) + replacement + suffix.slice(1);
+  f.referral({ code: typo, referredBrideName: 'D', referredWeddingDate: '2027-04-01' });
+  const typoReferral = Object.values(f.state().referrals).find(r => r.referredBrideName === 'D');
+  assert.equal(typoReferral?.status, 'needs_review');
+  assert.equal(typoReferral?.code, code.value);
+  assert.equal(typoReferral?.enteredCode, typo);
 });
 
 test('동일 코드·신부명·본식일 중복 사용은 한 번만 기록한다', () => {
