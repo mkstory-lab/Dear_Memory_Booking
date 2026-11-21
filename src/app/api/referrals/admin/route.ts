@@ -3,12 +3,14 @@ import { SESSION_COOKIE, sameOrigin, verifySession } from '@/lib/referrals/admin
 import { referralSettings, referralStore } from '@/lib/referrals/server';
 import { execute, project } from '@/lib/referrals/ledger';
 import { contactKeys } from '@/lib/referrals/contractIntegration';
-import { issueCode } from '@/lib/referrals/issuance';
+import { buildIssueCodeEvents } from '@/lib/referrals/issuance';
 import { adminInput } from '@/lib/referrals/input';
 export const dynamic = 'force-dynamic';
 const headers = { 'Cache-Control': 'no-store' };
 function actor(req: NextRequest) { return verifySession(req.cookies.get(SESSION_COOKIE)?.value, referralSettings().sessionSecret)?.actor; }
-async function snapshot() { return referralStore().transaction(history => ({ events: [], result: { state: project(history), audit: history.filter(e => ['command','submission_registered','submission_notification_started','submission_notification_result','contract_delivery_started','contract_delivery_result'].includes(e.type)) } })); }
+const auditTypes = new Set(['command','submission_registered','submission_notification_started','submission_notification_result','contract_delivery_started','contract_delivery_result']);
+function snapshotFromHistory(history: Parameters<typeof project>[0]) { return { state: project(history), audit: history.filter(e => auditTypes.has(e.type)) }; }
+async function snapshot() { return referralStore().transaction(history => ({ events: [], result: snapshotFromHistory(history) })); }
 export async function GET(req: NextRequest) {
   try {
     if (!actor(req)) return NextResponse.json({ error: '관리자 로그인이 필요합니다.' }, { status: 401, headers });
@@ -29,9 +31,13 @@ export async function POST(req: NextRequest) {
     }
     const context = { requestId, reason, actor: user, role: 'admin' as const, at: new Date().toISOString() };
     const store = referralStore();
-    if (command.type === 'issue_code') await issueCode(store, command.contractId, context);
-    else await store.transaction(history => ({ events: execute(history, command, context), result: true }));
-    return NextResponse.json(await snapshot(), { headers });
+    const result = await store.transaction(history => {
+      const events = command.type === 'issue_code'
+        ? buildIssueCodeEvents(history, command.contractId, context).events
+        : execute(history, command, context);
+      return { events, result: snapshotFromHistory([...history, ...events]) };
+    });
+    return NextResponse.json(result, { headers });
   } catch (error) {
     // Business messages contain no secrets or provider responses; transport wraps its errors.
     return NextResponse.json({ error: error instanceof Error ? error.message : '저장에 실패했습니다.' }, { status: 400, headers });
