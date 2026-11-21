@@ -1,6 +1,7 @@
 import { readApprovalTokenForAdmin } from '@/lib/token';
 import { amounts, project, remainingBalance, type Event, type State } from '@/lib/referrals/ledger';
 import { ownerTotals, projectBuddy } from '@/lib/buddy/ledger';
+import { projectStaff } from '@/lib/admin/staff';
 import type { ContractFormData } from '@/types/contract';
 
 export const CUSTOMER_STAGES = [
@@ -60,10 +61,11 @@ export type AdminBuddyUsage = {
 export type AdminCrmSnapshot = {
   contracts: AdminContract[];
   buddyUsages: AdminBuddyUsage[];
+  staffAssignments: Record<string, string[]>;
   generatedAt: string;
 };
 
-type CrmMeta = { stage?: CustomerStage; memo?: string; groomPhone?: string; bridePhone?: string; weddingVenue?: string; weddingHall?: string; updatedAt: string };
+type CrmMeta = { stage?: CustomerStage; memo?: string; groomPhone?: string; bridePhone?: string; weddingTime?: string; weddingVenue?: string; weddingHall?: string; updatedAt: string };
 
 function eventDate(event: Event | undefined) {
   return event?.at || new Date(0).toISOString();
@@ -94,6 +96,7 @@ function crmMeta(events: Event[], contractId: string): CrmMeta {
     if (typeof event.data.memo === 'string') meta.memo = event.data.memo;
     if (typeof event.data.groomPhone === 'string') meta.groomPhone = event.data.groomPhone;
     if (typeof event.data.bridePhone === 'string') meta.bridePhone = event.data.bridePhone;
+    if (typeof event.data.weddingTime === 'string') meta.weddingTime = event.data.weddingTime;
     if (typeof event.data.weddingVenue === 'string') meta.weddingVenue = event.data.weddingVenue;
     if (typeof event.data.weddingHall === 'string') meta.weddingHall = event.data.weddingHall;
     meta.updatedAt = event.at;
@@ -122,6 +125,7 @@ function defaultStage(weddingDate: string, status: string): CustomerStage {
 export function projectAdminCrm(events: Event[]): AdminCrmSnapshot {
   const state = project(events);
   const buddy = projectBuddy(events);
+  const staffState = projectStaff(events);
   const buddyCodeByContract = new Map(
     Object.values(buddy.referrals)
       .filter(referral => referral.sourceContractId)
@@ -153,7 +157,7 @@ export function projectAdminCrm(events: Event[]): AdminCrmSnapshot {
       bridePhone: meta.bridePhone ?? data.bridePhone ?? contract.crmData?.bridePhone ?? '',
       email: data.email || contract.crmData?.email || '',
       weddingDate: contract.weddingDate,
-      weddingTime: data.weddingTime || contract.crmData?.weddingTime || '',
+      weddingTime: meta.weddingTime ?? data.weddingTime ?? contract.crmData?.weddingTime ?? '',
       weddingVenue: meta.weddingVenue ?? data.weddingVenue ?? contract.crmData?.weddingVenue ?? '',
       weddingHall: meta.weddingHall ?? data.weddingHall ?? contract.crmData?.weddingHall ?? '',
       productId: data.productId || contract.crmData?.productId || '',
@@ -196,6 +200,7 @@ export function projectAdminCrm(events: Event[]): AdminCrmSnapshot {
     };
   }).sort((left, right) => right.createdAt.localeCompare(left.createdAt));
 
-  return { contracts, buddyUsages, generatedAt: new Date().toISOString() };
+  const staffAssignments = Object.fromEntries(Object.values(staffState.assignments).map(assignment => [assignment.contractId, assignment.staffIds.map(id => staffState.staff[id]?.displayName).filter((name): name is string => !!name)]));
+  return { contracts, buddyUsages, staffAssignments, generatedAt: new Date().toISOString() };
 }
 
