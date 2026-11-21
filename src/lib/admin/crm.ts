@@ -1,7 +1,7 @@
 import { readApprovalTokenForAdmin } from '@/lib/token';
 import { amounts, project, remainingBalance, type Event, type State } from '@/lib/referrals/ledger';
 import { ownerTotals, projectBuddy } from '@/lib/buddy/ledger';
-import { projectStaff } from '@/lib/admin/staff';
+import { projectStaff, publicStaff } from '@/lib/admin/staff';
 import type { ContractFormData } from '@/types/contract';
 
 export const CUSTOMER_STAGES = [
@@ -62,6 +62,8 @@ export type AdminCrmSnapshot = {
   contracts: AdminContract[];
   buddyUsages: AdminBuddyUsage[];
   staffAssignments: Record<string, string[]>;
+  staff: Array<{ id: string; username: string; displayName: string; active: boolean; createdAt: string; updatedAt: string }>;
+  manualSchedules: Array<{ id: string; title: string; date: string; time: string; venue: string; details: string; contact: string; staffIds: string[]; active: boolean; createdAt: string; updatedAt: string }>;
   generatedAt: string;
 };
 
@@ -201,6 +203,8 @@ export function projectAdminCrm(events: Event[]): AdminCrmSnapshot {
   }).sort((left, right) => right.createdAt.localeCompare(left.createdAt));
 
   const staffAssignments = Object.fromEntries(Object.values(staffState.assignments).map(assignment => [assignment.contractId, assignment.staffIds.map(id => staffState.staff[id]?.displayName).filter((name): name is string => !!name)]));
-  return { contracts, buddyUsages, staffAssignments, generatedAt: new Date().toISOString() };
+  const staff = publicStaff(staffState);
+  const manualSchedules = Object.values(staffState.manualSchedules).filter(item => item.active).sort((a, b) => `${a.date} ${a.time}`.localeCompare(`${b.date} ${b.time}`));
+  return { contracts, buddyUsages, staffAssignments, staff, manualSchedules, generatedAt: new Date().toISOString() };
 }
 
