@@ -19,7 +19,7 @@ export type AdminBuddyUsage = {
   status: string; createdAt: string;
 };
 
-export type AdminCrmSnapshot = { contracts: AdminContract[]; buddyUsages: AdminBuddyUsage[]; generatedAt: string };
+export type AdminCrmSnapshot = { contracts: AdminContract[]; buddyUsages: AdminBuddyUsage[]; staffAssignments: Record<string, string[]>; generatedAt: string };
 
 export const money = (value: number) => `${value.toLocaleString('ko-KR')}원`;
 export const productName = (id: string) => id === 'album_plus' ? '화보형' : id === 'standard' ? '실속형' : '확인 필요';

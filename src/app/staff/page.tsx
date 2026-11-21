@@ -38,14 +38,13 @@ export default function StaffPage() {
     setStaff(result.staff); setSchedules(result.schedules); setAuth(true);
   }
   useEffect(() => {
-    void (async () => {
-      try {
-        const response = await fetch('/api/staff/session', { cache: 'no-store' });
-        const result = await response.json();
-        if (!result.authenticated) { setAuth(false); return; }
-        await loadSchedule();
-      } catch { setAuth(false); }
-    })();
+    // /api/staff/schedule already validates the staff session, so avoid a second
+    // sequential session request on every refresh.
+    void loadSchedule().catch(cause => {
+      const message = cause instanceof Error ? cause.message : '';
+      if (message.includes('로그인')) setAuth(false);
+      else { setError(message || '스케줄을 불러오지 못했습니다.'); setAuth(false); }
+    });
   }, []);
 
   async function login(event: React.FormEvent) {
