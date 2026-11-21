@@ -63,7 +63,7 @@ export type AdminCrmSnapshot = {
   generatedAt: string;
 };
 
-type CrmMeta = { stage?: CustomerStage; memo?: string; updatedAt: string };
+type CrmMeta = { stage?: CustomerStage; memo?: string; groomPhone?: string; bridePhone?: string; weddingVenue?: string; weddingHall?: string; updatedAt: string };
 
 function eventDate(event: Event | undefined) {
   return event?.at || new Date(0).toISOString();
@@ -92,6 +92,10 @@ function crmMeta(events: Event[], contractId: string): CrmMeta {
     if (event.type !== 'crm_customer_updated' || event.data?.contractId !== contractId) continue;
     if (CUSTOMER_STAGES.includes(event.data.stage)) meta.stage = event.data.stage;
     if (typeof event.data.memo === 'string') meta.memo = event.data.memo;
+    if (typeof event.data.groomPhone === 'string') meta.groomPhone = event.data.groomPhone;
+    if (typeof event.data.bridePhone === 'string') meta.bridePhone = event.data.bridePhone;
+    if (typeof event.data.weddingVenue === 'string') meta.weddingVenue = event.data.weddingVenue;
+    if (typeof event.data.weddingHall === 'string') meta.weddingHall = event.data.weddingHall;
     meta.updatedAt = event.at;
   }
   return meta;
@@ -145,15 +149,15 @@ export function projectAdminCrm(events: Event[]): AdminCrmSnapshot {
       number: contract.number,
       groom: contract.groom,
       bride: contract.bride,
-      groomPhone: data.groomPhone || '',
-      bridePhone: data.bridePhone || '',
-      email: data.email || '',
+      groomPhone: meta.groomPhone ?? data.groomPhone ?? contract.crmData?.groomPhone ?? '',
+      bridePhone: meta.bridePhone ?? data.bridePhone ?? contract.crmData?.bridePhone ?? '',
+      email: data.email || contract.crmData?.email || '',
       weddingDate: contract.weddingDate,
-      weddingTime: data.weddingTime || '',
-      weddingVenue: data.weddingVenue || '',
-      weddingHall: data.weddingHall || '',
-      productId: data.productId || '',
-      optionIds: data.optionIds || [],
+      weddingTime: data.weddingTime || contract.crmData?.weddingTime || '',
+      weddingVenue: meta.weddingVenue ?? data.weddingVenue ?? contract.crmData?.weddingVenue ?? '',
+      weddingHall: meta.weddingHall ?? data.weddingHall ?? contract.crmData?.weddingHall ?? '',
+      productId: data.productId || contract.crmData?.productId || '',
+      optionIds: data.optionIds || contract.crmData?.optionIds || [],
       total: contract.total,
       deposit: contract.deposit,
       paid: contract.paid,

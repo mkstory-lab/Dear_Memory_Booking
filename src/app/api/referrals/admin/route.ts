@@ -25,9 +25,13 @@ export async function POST(req: NextRequest) {
     const body = JSON.parse(text);
     const { command, requestId, reason } = adminInput(body);
     if (command.type === 'register') {
-      const phone = body.command?.contract?.contactPhone;
-      if (typeof phone !== 'string' || !/^0[0-9]{8,10}$/.test(phone.replace(/\D/g, ''))) throw new Error('자기 추천 확인을 위해 신랑 또는 신부 연락처를 입력해 주세요.');
-      command.contract.identityKeys = contactKeys({ groomPhone: phone, bridePhone: '' }, referralSettings().secret);
+      const raw = body.command?.contract || {};
+      const groomPhone = typeof raw.groomPhone === 'string' ? raw.groomPhone : '';
+      const bridePhone = typeof raw.bridePhone === 'string' ? raw.bridePhone : '';
+      const fallbackPhone = typeof raw.contactPhone === 'string' ? raw.contactPhone : '';
+      const phone = bridePhone || groomPhone || fallbackPhone;
+      if (!/^0[0-9]{8,10}$/.test(phone.replace(/\D/g, ''))) throw new Error('자기 추천 확인을 위해 신랑 또는 신부 연락처를 입력해 주세요.');
+      command.contract.identityKeys = contactKeys({ groomPhone: groomPhone || fallbackPhone, bridePhone }, referralSettings().secret);
     }
     const context = { requestId, reason, actor: user, role: 'admin' as const, at: new Date().toISOString() };
     const store = referralStore();
