@@ -63,11 +63,12 @@ export async function POST(request: NextRequest) {
         const memo = String(command.memo || '').trim();
         const groomPhone = String(command.groomPhone || '').trim().slice(0, 40);
         const bridePhone = String(command.bridePhone || '').trim().slice(0, 40);
+        const weddingTime = String(command.weddingTime || '').trim().slice(0, 40);
         const weddingVenue = String(command.weddingVenue || '').trim().slice(0, 200);
         const weddingHall = String(command.weddingHall || '').trim().slice(0, 200);
         if (!CUSTOMER_STAGES.includes(stage as (typeof CUSTOMER_STAGES)[number])) throw new Error('진행 단계를 확인해 주세요.');
         if (memo.length > 2_000) throw new Error('관리자 메모는 2,000자 이내로 입력해 주세요.');
-        const data = { contractId: targetId, stage, memo, groomPhone, bridePhone, weddingVenue, weddingHall };
+        const data = { contractId: targetId, stage, memo, groomPhone, bridePhone, weddingTime, weddingVenue, weddingHall };
         const previous = history.find(event => event.requestId === id && event.type === 'crm_customer_updated');
         if (previous) {
           if (JSON.stringify(previous.data) !== JSON.stringify(data)) throw new Error('같은 요청 ID에 다른 작업을 사용할 수 없습니다.');
