@@ -53,13 +53,10 @@ export async function POST(request: NextRequest) {
     const id = requestId(body.requestId);
     const command = body.command as Record<string, unknown> | undefined;
     if (!command) throw new Error('작업 내용을 확인해 주세요.');
-    const targetId = contractId(command.contractId);
     const at = new Date().toISOString();
     const store = referralStore();
 
     await store.transaction(history => {
-      const contract = project(history).contracts[targetId];
-      if (!contract) throw new Error('계약을 찾을 수 없습니다.');
       if (command.type === 'create_manual_schedule') {
         const staffState = projectStaff(history);
         const title = String(command.title || '').trim();
@@ -99,7 +96,10 @@ export async function POST(request: NextRequest) {
         };
         return { events: [event], result: true };
       }
-            if (command.type === 'update_customer') {
+      const targetId = contractId(command.contractId);
+      const contract = project(history).contracts[targetId];
+      if (!contract) throw new Error('계약을 찾을 수 없습니다.');
+      if (command.type === 'update_customer') {
         const stage = String(command.stage || '');
         const memo = String(command.memo || '').trim();
         const groomPhone = String(command.groomPhone || '').trim().slice(0, 40);
