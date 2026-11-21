@@ -64,7 +64,17 @@ export async function registerSubmission(store: ReferralStore, data: ContractFor
     const reviewUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://dear-memory-booking.vercel.app'}/review?token=${token}`;
     const pricing = calculateContractPrice({ ...finalData, partnerDiscount: legacy });
     const context = { actor: 'contract-service', role: 'admin' as const, at: new Date().toISOString(), requestId: id + ':register' };
-    const events = execute(history, { type: 'register', contract: { id, coupleId: id, number, groom: data.groomName, bride: data.brideName, weddingDate: data.weddingDate, status: 'active', legacyPartnerDiscount: legacy, partnerText: finalData.partnerName, total: pricing.contractTotal, deposit: pricing.depositAmount, paid: 0, identityKeys: contactKeys(data, secret), reviewUrl } }, context);
+    const events = execute(history, { type: 'register', contract: {
+      id, coupleId: id, number, groom: data.groomName, bride: data.brideName, weddingDate: data.weddingDate,
+      status: 'active', legacyPartnerDiscount: legacy, partnerText: finalData.partnerName,
+      total: pricing.contractTotal, deposit: pricing.depositAmount, paid: 0,
+      identityKeys: contactKeys(data, secret), reviewUrl,
+      crmData: {
+        groomPhone: data.groomPhone, bridePhone: data.bridePhone, email: data.email,
+        weddingTime: data.weddingTime, weddingVenue: data.weddingVenue, weddingHall: data.weddingHall,
+        productId: data.productId, optionIds: data.optionIds,
+      },
+    } }, context);
     if (owner) events.push(...execute([...history, ...events], { type: 'refer', contractId: id, code: owner.value }, { ...context, requestId: id + ':refer' }));
     const buddyCode = normalizeBuddyCode(data.partnerName || '');
     if (buddyCode) {
@@ -120,7 +130,14 @@ export async function sendManagedContract(store: ReferralStore, decoded: Decoded
     const finalData = { ...proposedData, referralCode: view.data.referralCode, partnerDiscount: view.data.partnerDiscount, partnerName: view.data.partnerName };
     const pricing = calculateContractPrice({ ...finalData, partnerDiscount: !!c.legacyPartnerDiscount });
     if (c.depositConfirmedAt && pricing.contractTotal !== c.total) throw new Error('입금 확인 후 금액 변경은 별도 정산 확인이 필요합니다.');
-    const events = [event(attempt, 'contract_updated', { id: c.id, before: c, patch: { groom: finalData.groomName, bride: finalData.brideName, weddingDate: finalData.weddingDate, total: pricing.contractTotal } })];
+    const events = [event(attempt, 'contract_updated', { id: c.id, before: c, patch: {
+      groom: finalData.groomName, bride: finalData.brideName, weddingDate: finalData.weddingDate, total: pricing.contractTotal,
+      crmData: {
+        groomPhone: finalData.groomPhone, bridePhone: finalData.bridePhone, email: finalData.email,
+        weddingTime: finalData.weddingTime, weddingVenue: finalData.weddingVenue, weddingHall: finalData.weddingHall,
+        productId: finalData.productId, optionIds: finalData.optionIds,
+      },
+    } })];
     events.push(event(attempt, 'contract_delivery_started', { contractId: c.id, number: c.number, amount: calculateContractPrice(finalData).contractTotal, finalData }));
     return { events, result: { cached: null, data: finalData, number: c.number } };
   });
