@@ -124,14 +124,32 @@ export default function CalendarPage() {
           const contracts = contractsByDate.get(date) || [];
           const manuals = manualByDate.get(date) || [];
           const count = contracts.length + manuals.length;
-          return <div className={`admin-calendar-day ${count > 1 ? 'is-double' : ''}`} key={date} style={{ textAlign: 'left' }}>
-            <button type="button" onClick={() => openCreate(date)} style={{ border: 0, background: 'transparent', padding: 0, cursor: 'pointer' }}>
-              <span className="admin-calendar-number">{day}{count > 1 ? ` · ${count}건` : ''}</span>
-            </button>
+          return <div
+            className={`admin-calendar-day ${count > 1 ? 'is-double' : ''}`}
+            key={date}
+            role="button"
+            tabIndex={0}
+            aria-label={`${date} 수동 일정 추가`}
+            onClick={() => openCreate(date)}
+            onKeyDown={event => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                openCreate(date);
+              }
+            }}
+            style={{ textAlign: 'left', cursor: 'pointer' }}
+          >
+            <span className="admin-calendar-number">{day}{count > 1 ? ` · ${count}건` : ''}</span>
 
             {contracts.map(contract => {
               const names = assignees(contract.id);
-              return <button type="button" className="admin-calendar-event" key={contract.id} onClick={() => openEdit(contract)} style={{ width: '100%', border: 0, cursor: 'pointer', textAlign: 'left' }}>
+              return <button
+                type="button"
+                className="admin-calendar-event"
+                key={contract.id}
+                onClick={event => { event.stopPropagation(); openEdit(contract); }}
+                style={{ width: '100%', border: 0, cursor: 'pointer', textAlign: 'left' }}
+              >
                 <strong>{contract.groom} · {contract.bride}</strong>
                 <span>{contract.weddingTime || '시간 확인'} · {contract.weddingVenue || '장소 확인'}</span>
                 <small style={{ display: 'block', marginTop: 3, fontWeight: 700 }}>{names.length ? `작가: ${names.join(', ')}` : '작가 미배정'}</small>
@@ -140,7 +158,13 @@ export default function CalendarPage() {
 
             {manuals.map(item => {
               const names = manualAssignees(item);
-              return <button type="button" className="admin-calendar-event" key={item.id} onClick={() => setManualDetail(item)} style={{ width: '100%', border: 0, cursor: 'pointer', textAlign: 'left', opacity: .88 }}>
+              return <button
+                type="button"
+                className="admin-calendar-event"
+                key={item.id}
+                onClick={event => { event.stopPropagation(); setManualDetail(item); }}
+                style={{ width: '100%', border: 0, cursor: 'pointer', textAlign: 'left', opacity: .88 }}
+              >
                 <strong>[수동] {item.title}</strong>
                 <span>{item.time || '시간 미입력'} · {item.venue || '장소 미입력'}</span>
                 <small style={{ display: 'block', marginTop: 3, fontWeight: 700 }}>{names.length ? `작가: ${names.join(', ')}` : '작가 미배정'}</small>
