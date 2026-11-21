@@ -25,7 +25,17 @@ export function adminInput(body: any): { requestId: string; reason: string; comm
   let command: Command | { type: 'issue_code'; contractId: string };
   if (c.type === 'register') {
     const d = c.contract || {};
-    const contract: Contract = { id: identifier(d.id), coupleId: identifier(d.coupleId), number: text(d.number, 100), groom: text(d.groom, 80), bride: text(d.bride, 80), weddingDate: date(d.weddingDate), status: 'active', total: amount(d.total), deposit: amount(d.deposit), paid: 0 };
+    const contract: Contract = {
+      id: identifier(d.id), coupleId: identifier(d.coupleId), number: text(d.number, 100),
+      groom: text(d.groom, 80), bride: text(d.bride, 80), weddingDate: date(d.weddingDate),
+      status: 'active', total: amount(d.total), deposit: amount(d.deposit), paid: 0,
+      crmData: {
+        groomPhone: text(d.groomPhone, 40, true),
+        bridePhone: text(d.bridePhone, 40, true),
+        weddingVenue: text(d.weddingVenue, 200, true),
+        weddingHall: text(d.weddingHall, 200, true),
+      },
+    };
     command = { type: 'register', contract };
   } else if (c.type === 'code_status') {
     if (typeof c.active !== 'boolean') throw new Error('코드 상태를 확인해 주세요.');
