@@ -5,7 +5,8 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 type Staff = { id: string; username: string; displayName: string; active: boolean; createdAt: string; updatedAt: string };
 type Assignment = { contractId: string; staffIds: string[]; updatedAt: string };
 type Contract = { id: string; number: string; groom: string; bride: string; weddingDate: string; weddingTime: string; weddingVenue: string; weddingHall: string; status: string };
-type StaffData = { staff: Staff[]; assignments: Record<string, Assignment>; contracts: Contract[] };
+type ManualSchedule = { id: string; title: string; date: string; time: string; venue: string; details: string; contact: string; staffIds: string[]; active: boolean; createdAt: string; updatedAt: string };
+type StaffData = { staff: Staff[]; assignments: Record<string, Assignment>; manualSchedules: ManualSchedule[]; contracts: Contract[] };
 
 export default function StaffAdminPage() {
   const [data, setData] = useState<StaffData | null>(null);
@@ -15,6 +16,7 @@ export default function StaffAdminPage() {
   const [displayName, setDisplayName] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [manual, setManual] = useState({ title: '', date: '', time: '', venue: '', details: '', contact: '', staffIds: [] as string[] });
 
   const load = useCallback(async () => {
     const response = await fetch('/api/referrals/admin/staff', { cache: 'no-store' });
@@ -49,6 +51,9 @@ export default function StaffAdminPage() {
     for (const assignment of Object.values(data.assignments)) {
       for (const id of assignment.staffIds) counts.set(id, (counts.get(id) || 0) + 1);
     }
+    for (const schedule of data.manualSchedules || []) {
+      for (const id of schedule.staffIds) counts.set(id, (counts.get(id) || 0) + 1);
+    }
     return counts;
   }, [data]);
 
@@ -82,6 +87,32 @@ export default function StaffAdminPage() {
           </div></td>
         </tr>)}
       </tbody></table>{!data ? <p className="admin-empty">불러오는 중입니다.</p> : !data.staff.length ? <p className="admin-empty">아직 등록한 작가가 없습니다.</p> : null}</div>
+    </section>
+    <section className="admin-card" style={{ marginTop: 18 }}>
+      <div className="admin-card-header"><h2>수동 스케줄 추가</h2><span className="admin-badge">계약/Drive 자료 없어도 등록</span></div>
+      <div className="admin-toolbar">
+        <label className="admin-field">일정 제목<input value={manual.title} onChange={e => setManual(v => ({ ...v, title: e.target.value }))} placeholder="예: 영등포 웨딩 서브 촬영" /></label>
+        <label className="admin-field">날짜<input type="date" value={manual.date} onChange={e => setManual(v => ({ ...v, date: e.target.value }))} /></label>
+        <label className="admin-field">시간<input value={manual.time} onChange={e => setManual(v => ({ ...v, time: e.target.value }))} placeholder="예: 12:30" /></label>
+        <label className="admin-field">장소<input value={manual.venue} onChange={e => setManual(v => ({ ...v, venue: e.target.value }))} placeholder="예: 영등포 ○○웨딩홀" /></label>
+        <label className="admin-field">연락처<input value={manual.contact} onChange={e => setManual(v => ({ ...v, contact: e.target.value }))} placeholder="현장 담당자 연락처 등" /></label>
+      </div>
+      <label className="admin-field" style={{ marginTop: 12 }}>상세 메모<textarea value={manual.details} onChange={e => setManual(v => ({ ...v, details: e.target.value }))} placeholder="도착 시간, 촬영 범위, 페이, 준비물 등" /></label>
+      <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginTop: 14 }}>
+        {(data?.staff || []).filter(staff => staff.active).map(staff => <label key={staff.id} style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+          <input type="checkbox" checked={manual.staffIds.includes(staff.id)} onChange={e => setManual(v => ({ ...v, staffIds: e.target.checked ? [...v.staffIds, staff.id] : v.staffIds.filter(id => id !== staff.id) }))} />{staff.displayName}
+        </label>)}
+      </div>
+      <button className="admin-button primary" style={{ marginTop: 14 }} disabled={pending || !manual.title || !manual.date || !manual.staffIds.length} onClick={async () => {
+        if (await mutate({ type: 'create_manual_schedule', ...manual })) setManual({ title: '', date: '', time: '', venue: '', details: '', contact: '', staffIds: [] });
+      }}>수동 일정 등록</button>
+    </section>
+    <section className="admin-card" style={{ marginTop: 18 }}>
+      <div className="admin-card-header"><h2>수동 일정 목록</h2><span className="admin-badge">{data?.manualSchedules?.length || 0}건</span></div>
+      <div className="admin-list">{(data?.manualSchedules || []).map(schedule => <div className="admin-list-item" key={schedule.id}>
+        <div><strong>{schedule.date} {schedule.time} · {schedule.title}</strong><span>{schedule.venue || '장소 미입력'} · 배정: {schedule.staffIds.map(id => data?.staff.find(s => s.id === id)?.displayName).filter(Boolean).join(', ') || '-'}</span>{schedule.details ? <small>{schedule.details}</small> : null}</div>
+        <button className="admin-button" disabled={pending} onClick={() => { if (confirm('이 수동 일정을 삭제할까요?')) void mutate({ type: 'delete_manual_schedule', id: schedule.id }); }}>삭제</button>
+      </div>)}{data && !data.manualSchedules.length ? <p className="admin-empty">수동 등록 일정이 없습니다.</p> : null}</div>
     </section>
     <section className="admin-card" style={{ marginTop: 18 }}>
       <div className="admin-card-header"><h2>촬영 스케줄 배정</h2><span className="admin-badge">계약별 다중 배정 가능</span></div>

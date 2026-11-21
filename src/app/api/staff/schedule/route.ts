@@ -21,11 +21,13 @@ export async function GET(request: NextRequest) {
       const assignedIds = new Set(Object.values(staffState.assignments)
         .filter(item => item.staffIds.includes(staff.id))
         .map(item => item.contractId));
-      const schedules = crm.contracts
+      const contractSchedules = crm.contracts
         .filter(contract => assignedIds.has(contract.id) && contract.status !== 'cancelled')
         .map(contract => ({
           id: contract.id,
+          source: 'contract' as const,
           number: contract.number,
+          title: `${contract.groom} · ${contract.bride}`,
           groom: contract.groom,
           bride: contract.bride,
           groomPhone: contract.groomPhone,
@@ -37,7 +39,31 @@ export async function GET(request: NextRequest) {
           productId: contract.productId,
           stage: contract.stage,
           memo: contract.memo,
-        }))
+          details: '',
+          contact: '',
+        }));
+      const manualSchedules = Object.values(staffState.manualSchedules)
+        .filter(item => item.active && item.staffIds.includes(staff.id))
+        .map(item => ({
+          id: item.id,
+          source: 'manual' as const,
+          number: '',
+          title: item.title,
+          groom: '',
+          bride: '',
+          groomPhone: '',
+          bridePhone: '',
+          weddingDate: item.date,
+          weddingTime: item.time,
+          weddingVenue: item.venue,
+          weddingHall: '',
+          productId: '',
+          stage: '수동 일정',
+          memo: '',
+          details: item.details,
+          contact: item.contact,
+        }));
+      const schedules = [...contractSchedules, ...manualSchedules]
         .sort((a, b) => `${a.weddingDate} ${a.weddingTime}`.localeCompare(`${b.weddingDate} ${b.weddingTime}`));
       return { events: [], result: { staff: { id: staff.id, username: staff.username, displayName: staff.displayName }, schedules } };
     });

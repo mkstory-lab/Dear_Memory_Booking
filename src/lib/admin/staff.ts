@@ -17,9 +17,24 @@ export type StaffAssignment = {
   updatedAt: string;
 };
 
+export type ManualStaffSchedule = {
+  id: string;
+  title: string;
+  date: string;
+  time: string;
+  venue: string;
+  details: string;
+  contact: string;
+  staffIds: string[];
+  active: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
+
 export type StaffState = {
   staff: Record<string, StaffRecord>;
   assignments: Record<string, StaffAssignment>;
+  manualSchedules: Record<string, ManualStaffSchedule>;
 };
 
 export function normalizeStaffUsername(value: string) {
@@ -47,7 +62,7 @@ export function staffPasswordMatches(password: unknown, stored: string) {
 }
 
 export function projectStaff(events: Event[]): StaffState {
-  const state: StaffState = { staff: {}, assignments: {} };
+  const state: StaffState = { staff: {}, assignments: {}, manualSchedules: {} };
   for (const event of events) {
     const data = event.data || {};
     if (event.type === 'crm_staff_created') {
@@ -75,6 +90,35 @@ export function projectStaff(events: Event[]): StaffState {
         staffIds: Array.isArray(data.staffIds) ? [...new Set(data.staffIds.map(String))] : [],
         updatedAt: event.at,
       };
+    } else if (event.type === 'crm_staff_manual_schedule_created') {
+      state.manualSchedules[data.id] = {
+        id: data.id,
+        title: data.title,
+        date: data.date,
+        time: data.time || '',
+        venue: data.venue || '',
+        details: data.details || '',
+        contact: data.contact || '',
+        staffIds: Array.isArray(data.staffIds) ? [...new Set(data.staffIds.map(String))] : [],
+        active: true,
+        createdAt: event.at,
+        updatedAt: event.at,
+      };
+    } else if (event.type === 'crm_staff_manual_schedule_updated' && state.manualSchedules[data.id]) {
+      state.manualSchedules[data.id] = {
+        ...state.manualSchedules[data.id],
+        title: data.title,
+        date: data.date,
+        time: data.time || '',
+        venue: data.venue || '',
+        details: data.details || '',
+        contact: data.contact || '',
+        staffIds: Array.isArray(data.staffIds) ? [...new Set(data.staffIds.map(String))] : [],
+        updatedAt: event.at,
+      };
+    } else if (event.type === 'crm_staff_manual_schedule_status' && state.manualSchedules[data.id]) {
+      state.manualSchedules[data.id].active = !!data.active;
+      state.manualSchedules[data.id].updatedAt = event.at;
     }
   }
   return state;

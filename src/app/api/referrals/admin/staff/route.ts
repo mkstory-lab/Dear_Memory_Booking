@@ -19,6 +19,7 @@ function snapshot(history: Event[]) {
   return {
     staff: publicStaff(staffState),
     assignments: staffState.assignments,
+    manualSchedules: Object.values(staffState.manualSchedules).filter(item => item.active).sort((a,b) => `${a.date} ${a.time}`.localeCompare(`${b.date} ${b.time}`)),
     contracts: crm.contracts.map(contract => ({
       id: contract.id,
       number: contract.number,
@@ -89,6 +90,29 @@ export async function POST(request: NextRequest) {
         if (!staff) throw new Error('작가 계정을 찾을 수 없습니다.');
         if (!displayName || displayName.length > 40) throw new Error('작가 이름을 확인해 주세요.');
         emit('crm_staff_name_changed', { staffId: staff.id, displayName });
+      } else if (command.type === 'create_manual_schedule' || command.type === 'update_manual_schedule') {
+        const title = String(command.title || '').trim();
+        const date = String(command.date || '').trim();
+        const time = String(command.time || '').trim().slice(0, 40);
+        const venue = String(command.venue || '').trim().slice(0, 200);
+        const details = String(command.details || '').trim().slice(0, 2000);
+        const contact = String(command.contact || '').trim().slice(0, 100);
+        const staffIds = Array.isArray(command.staffIds) ? [...new Set(command.staffIds.map(String))] : [];
+        if (!title || title.length > 120) throw new Error('일정 제목은 1~120자로 입력해 주세요.');
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !Number.isFinite(Date.parse(date))) throw new Error('일정 날짜를 확인해 주세요.');
+        if (!staffIds.length) throw new Error('일정을 배정할 작가를 한 명 이상 선택해 주세요.');
+        if (staffIds.some(id => !state.staff[id] || !state.staff[id].active)) throw new Error('활성 상태인 작가만 배정할 수 있습니다.');
+        if (command.type === 'create_manual_schedule') {
+          emit('crm_staff_manual_schedule_created', { id: 'manual_' + randomUUID().replace(/-/g, '').slice(0, 20), title, date, time, venue, details, contact, staffIds });
+        } else {
+          const schedule = state.manualSchedules[String(command.id || '')];
+          if (!schedule?.active) throw new Error('수정할 수동 일정을 찾을 수 없습니다.');
+          emit('crm_staff_manual_schedule_updated', { id: schedule.id, title, date, time, venue, details, contact, staffIds });
+        }
+      } else if (command.type === 'delete_manual_schedule') {
+        const schedule = state.manualSchedules[String(command.id || '')];
+        if (!schedule?.active) throw new Error('삭제할 수동 일정을 찾을 수 없습니다.');
+        emit('crm_staff_manual_schedule_status', { id: schedule.id, active: false });
       } else if (command.type === 'assign_contract') {
         const contractId = String(command.contractId || '');
         if (!crm.contracts.some(contract => contract.id === contractId)) throw new Error('계약을 찾을 수 없습니다.');
