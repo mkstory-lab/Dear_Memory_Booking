@@ -6,6 +6,10 @@ export type Contract = {
   // Total BEFORE the new partner discount, but after all other existing discounts.
   identityKeys?: string[]; reviewUrl?: string; partnerText?: string;
   driveFolderUrl?: string; excelFileUrl?: string; contractFileUrl?: string;
+  crmData?: {
+    groomPhone?: string; bridePhone?: string; email?: string; weddingTime?: string;
+    weddingVenue?: string; weddingHall?: string; productId?: string; optionIds?: string[];
+  };
   total: number; deposit: number; paid: number; legacyPartnerDiscount?: boolean; depositConfirmedAt?: string; sentAt?: string;
 };
 export type Code = { value: string; contractId: string; coupleId: string; active: boolean; issuedAt: string };
