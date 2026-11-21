@@ -64,6 +64,17 @@ export default function StaffPage() {
   const firstDay = new Date(Date.UTC(year, monthNumber - 1, 1)).getUTCDay();
   const days = new Date(Date.UTC(year, monthNumber, 0)).getUTCDate();
   const monthSchedules = useMemo(() => schedules.filter(item => item.weddingDate.startsWith(month)), [schedules, month]);
+  const allScheduleGroups = useMemo(() => {
+    const sorted = [...schedules].sort((a, b) => `${a.weddingDate} ${a.weddingTime}`.localeCompare(`${b.weddingDate} ${b.weddingTime}`));
+    const groups: Array<{ month: string; items: Schedule[] }> = [];
+    for (const item of sorted) {
+      const key = item.weddingDate.slice(0, 7);
+      const last = groups[groups.length - 1];
+      if (!last || last.month !== key) groups.push({ month: key, items: [item] });
+      else last.items.push(item);
+    }
+    return groups;
+  }, [schedules]);
   const byDate = useMemo(() => {
     const map = new Map<string, Schedule[]>();
     for (const item of monthSchedules) map.set(item.weddingDate, [...(map.get(item.weddingDate) || []), item]);
@@ -87,7 +98,19 @@ export default function StaffPage() {
         return <div className="staff-day" key={date}><span className="staff-date">{day}</span>{items.map(item=><button key={item.id} onClick={()=>setSelectedId(item.id)}><strong>{item.weddingTime || '시간 확인'}</strong><span>{item.source === 'manual' ? item.title : item.bride + ' 신부'}</span><small>{item.weddingVenue || '장소 확인'}</small></button>)}</div>;
       })}</div>
     </section>
-    <section className="staff-list"><h2>이번 달 배정 일정</h2>{monthSchedules.length ? monthSchedules.map(item=><button key={item.id} onClick={()=>setSelectedId(item.id)}><div><strong>{item.weddingDate} {item.weddingTime}</strong><span>{item.source === 'manual' ? item.title : item.groom + ' · ' + item.bride}</span></div><span>{item.weddingVenue} {item.weddingHall}</span></button>) : <p>이번 달 배정 일정이 없습니다.</p>}</section>
+    <section className="staff-list">
+      <h2>전체 배정 일정</h2>
+      {allScheduleGroups.length ? allScheduleGroups.map(group => {
+        const [groupYear, groupMonth] = group.month.split('-');
+        return <div key={group.month} className="staff-month-group">
+          <h3>{groupYear}년 {Number(groupMonth)}월 <span>{group.items.length}건</span></h3>
+          {group.items.map(item => <button key={item.id} onClick={()=>setSelectedId(item.id)}>
+            <div><strong>{item.weddingDate} {item.weddingTime || ''}</strong><span>{item.source === 'manual' ? item.title : item.groom + ' · ' + item.bride}</span></div>
+            <span>{item.weddingVenue} {item.weddingHall}</span>
+          </button>)}
+        </div>;
+      }) : <p>배정된 일정이 없습니다.</p>}
+    </section>
     {selected ? <div className="staff-modal-backdrop" onClick={()=>setSelectedId('')}><section className="staff-modal" onClick={e=>e.stopPropagation()}><button className="staff-close" onClick={()=>setSelectedId('')}>×</button><p className="staff-kicker">{selected.source === 'manual' ? 'MANUAL SCHEDULE' : 'SHOOT DETAIL'}</p><h2>{selected.source === 'manual' ? selected.title : selected.groom + ' · ' + selected.bride}</h2><dl><div><dt>일시</dt><dd>{selected.weddingDate} {selected.weddingTime || '-'}</dd></div><div><dt>장소</dt><dd>{selected.weddingVenue || '-'} {selected.weddingHall}</dd></div>{selected.source === 'manual' ? <><div><dt>연락처</dt><dd>{selected.contact || '-'}</dd></div>{selected.details ? <div><dt>상세 메모</dt><dd>{selected.details}</dd></div> : null}</> : <><div><dt>신부 연락처</dt><dd>{selected.bridePhone || '-'}</dd></div><div><dt>신랑 연락처</dt><dd>{selected.groomPhone || '-'}</dd></div><div><dt>상품</dt><dd>{productName(selected.productId)}</dd></div><div><dt>진행 상태</dt><dd>{selected.stage}</dd></div>{selected.memo ? <div><dt>대표 메모</dt><dd>{selected.memo}</dd></div>:null}</>}</dl></section></div>:null}
   </main>;
 }
