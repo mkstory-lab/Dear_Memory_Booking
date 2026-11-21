@@ -5,8 +5,8 @@ import { CalendarDays, LogOut } from 'lucide-react';
 import './staff.css';
 
 type Schedule = {
-  id: string; number: string; groom: string; bride: string; groomPhone: string; bridePhone: string;
-  weddingDate: string; weddingTime: string; weddingVenue: string; weddingHall: string; productId: string; stage: string; memo: string;
+  id: string; source: 'contract' | 'manual'; number: string; title: string; groom: string; bride: string; groomPhone: string; bridePhone: string;
+  weddingDate: string; weddingTime: string; weddingVenue: string; weddingHall: string; productId: string; stage: string; memo: string; details: string; contact: string;
 };
 type Staff = { id: string; username: string; displayName: string };
 const weekdays = ['일','월','화','수','목','금','토'];
@@ -84,10 +84,10 @@ export default function StaffPage() {
         if(!day) return <div className="staff-day empty" key={`empty-${index}`}/>;
         const date=`${month}-${String(day).padStart(2,'0')}`;
         const items=byDate.get(date)||[];
-        return <div className="staff-day" key={date}><span className="staff-date">{day}</span>{items.map(item=><button key={item.id} onClick={()=>setSelectedId(item.id)}><strong>{item.weddingTime || '시간 확인'}</strong><span>{item.bride} 신부</span><small>{item.weddingVenue || '장소 확인'}</small></button>)}</div>;
+        return <div className="staff-day" key={date}><span className="staff-date">{day}</span>{items.map(item=><button key={item.id} onClick={()=>setSelectedId(item.id)}><strong>{item.weddingTime || '시간 확인'}</strong><span>{item.source === 'manual' ? item.title : item.bride + ' 신부'}</span><small>{item.weddingVenue || '장소 확인'}</small></button>)}</div>;
       })}</div>
     </section>
-    <section className="staff-list"><h2>이번 달 배정 일정</h2>{monthSchedules.length ? monthSchedules.map(item=><button key={item.id} onClick={()=>setSelectedId(item.id)}><div><strong>{item.weddingDate} {item.weddingTime}</strong><span>{item.groom} · {item.bride}</span></div><span>{item.weddingVenue} {item.weddingHall}</span></button>) : <p>이번 달 배정 일정이 없습니다.</p>}</section>
-    {selected ? <div className="staff-modal-backdrop" onClick={()=>setSelectedId('')}><section className="staff-modal" onClick={e=>e.stopPropagation()}><button className="staff-close" onClick={()=>setSelectedId('')}>×</button><p className="staff-kicker">SHOOT DETAIL</p><h2>{selected.groom} · {selected.bride}</h2><dl><div><dt>예식 일시</dt><dd>{selected.weddingDate} {selected.weddingTime || '-'}</dd></div><div><dt>예식장</dt><dd>{selected.weddingVenue} {selected.weddingHall}</dd></div><div><dt>신부 연락처</dt><dd>{selected.bridePhone || '-'}</dd></div><div><dt>신랑 연락처</dt><dd>{selected.groomPhone || '-'}</dd></div><div><dt>상품</dt><dd>{productName(selected.productId)}</dd></div><div><dt>진행 상태</dt><dd>{selected.stage}</dd></div>{selected.memo ? <div><dt>대표 메모</dt><dd>{selected.memo}</dd></div>:null}</dl></section></div>:null}
+    <section className="staff-list"><h2>이번 달 배정 일정</h2>{monthSchedules.length ? monthSchedules.map(item=><button key={item.id} onClick={()=>setSelectedId(item.id)}><div><strong>{item.weddingDate} {item.weddingTime}</strong><span>{item.source === 'manual' ? item.title : item.groom + ' · ' + item.bride}</span></div><span>{item.weddingVenue} {item.weddingHall}</span></button>) : <p>이번 달 배정 일정이 없습니다.</p>}</section>
+    {selected ? <div className="staff-modal-backdrop" onClick={()=>setSelectedId('')}><section className="staff-modal" onClick={e=>e.stopPropagation()}><button className="staff-close" onClick={()=>setSelectedId('')}>×</button><p className="staff-kicker">{selected.source === 'manual' ? 'MANUAL SCHEDULE' : 'SHOOT DETAIL'}</p><h2>{selected.source === 'manual' ? selected.title : selected.groom + ' · ' + selected.bride}</h2><dl><div><dt>일시</dt><dd>{selected.weddingDate} {selected.weddingTime || '-'}</dd></div><div><dt>장소</dt><dd>{selected.weddingVenue || '-'} {selected.weddingHall}</dd></div>{selected.source === 'manual' ? <><div><dt>연락처</dt><dd>{selected.contact || '-'}</dd></div>{selected.details ? <div><dt>상세 메모</dt><dd>{selected.details}</dd></div> : null}</> : <><div><dt>신부 연락처</dt><dd>{selected.bridePhone || '-'}</dd></div><div><dt>신랑 연락처</dt><dd>{selected.groomPhone || '-'}</dd></div><div><dt>상품</dt><dd>{productName(selected.productId)}</dd></div><div><dt>진행 상태</dt><dd>{selected.stage}</dd></div>{selected.memo ? <div><dt>대표 메모</dt><dd>{selected.memo}</dd></div>:null}</>}</dl></section></div>:null}
   </main>;
 }
