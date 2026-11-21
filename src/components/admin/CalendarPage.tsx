@@ -20,7 +20,7 @@ export default function CalendarPage() {
   const [editing, setEditing] = useState<AdminContract | null>(null);
   const [manualDetail, setManualDetail] = useState<AdminManualSchedule | null>(null);
   const [createDate, setCreateDate] = useState('');
-  const [form, setForm] = useState({ weddingTime: '', weddingVenue: '', weddingHall: '', groomPhone: '', bridePhone: '' });
+  const [form, setForm] = useState({ weddingTime: '', weddingVenue: '', weddingHall: '', groomPhone: '', bridePhone: '', staffIds: [] as string[] });
   const [manual, setManual] = useState({ title: '', time: '', venue: '', contact: '', details: '', staffIds: [] as string[] });
   const [message, setMessage] = useState('');
 
@@ -60,6 +60,7 @@ export default function CalendarPage() {
       weddingHall: contract.weddingHall,
       groomPhone: contract.groomPhone,
       bridePhone: contract.bridePhone,
+      staffIds: (data?.staff || []).filter(staff => assignees(contract.id).includes(staff.displayName)).map(staff => staff.id),
     });
   }
 
@@ -82,7 +83,12 @@ export default function CalendarPage() {
       groomPhone: form.groomPhone,
       bridePhone: form.bridePhone,
     });
-    setMessage('수정 내용을 저장했습니다.');
+    await mutate({
+      type: 'assign_contract',
+      contractId: editing.id,
+      staffIds: form.staffIds,
+    });
+    setMessage('상세 내용과 작가 배정을 저장했습니다.');
   }
 
   async function saveManual() {
@@ -162,7 +168,11 @@ export default function CalendarPage() {
                 type="button"
                 className="admin-calendar-event"
                 key={item.id}
-                onClick={event => { event.stopPropagation(); setManualDetail(item); }}
+                onClick={event => {
+                  event.stopPropagation();
+                  setManualDetail(item);
+                  setManual({ title: item.title, time: item.time, venue: item.venue, contact: item.contact, details: item.details, staffIds: [...item.staffIds] });
+                }}
                 style={{ width: '100%', border: 0, cursor: 'pointer', textAlign: 'left', opacity: .88 }}
               >
                 <strong>[수동] {item.title}</strong>
@@ -210,6 +220,15 @@ export default function CalendarPage() {
           <label className="admin-field">신부 연락처<input value={form.bridePhone} onChange={e => setForm(value => ({ ...value, bridePhone: e.target.value }))} placeholder="010-0000-0000" /></label>
           <label className="admin-field">신랑 연락처<input value={form.groomPhone} onChange={e => setForm(value => ({ ...value, groomPhone: e.target.value }))} placeholder="010-0000-0000" /></label>
         </div>
+        <div style={{ marginTop: 14 }}>
+          <strong style={{ display: 'block', marginBottom: 8 }}>배정 작가</strong>
+          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+            {(data?.staff || []).filter(staff => staff.active).map(staff => <label key={staff.id} style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+              <input type="checkbox" checked={form.staffIds.includes(staff.id)} onChange={e => setForm(v => ({ ...v, staffIds: e.target.checked ? [...v.staffIds, staff.id] : v.staffIds.filter(id => id !== staff.id) }))} />
+              {staff.displayName}
+            </label>)}
+          </div>
+        </div>
         <div style={{ display: 'flex', gap: 10, marginTop: 18, alignItems: 'center' }}>
           <button className="admin-button primary" disabled={isPending} onClick={() => void saveEdit()}>{isPending ? '저장 중' : '수정 저장'}</button>
           <Link className="admin-button" href={`/admin/customers/${editing.id}`}>고객 상세</Link>
@@ -219,16 +238,30 @@ export default function CalendarPage() {
     </div> : null}
 
     {manualDetail ? <div onClick={() => setManualDetail(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.45)', display: 'grid', placeItems: 'center', padding: 18, zIndex: 80 }}>
-      <section className="admin-card" onClick={event => event.stopPropagation()} style={{ width: 'min(540px, 100%)', position: 'relative' }}>
+      <section className="admin-card" onClick={event => event.stopPropagation()} style={{ width: 'min(640px, 100%)', maxHeight: '90vh', overflow: 'auto', position: 'relative' }}>
         <button onClick={() => setManualDetail(null)} aria-label="닫기" style={{ position: 'absolute', right: 18, top: 18, border: 0, background: 'transparent', cursor: 'pointer' }}><X size={22} /></button>
         <p className="admin-kicker">MANUAL SCHEDULE</p>
-        <h2>{manualDetail.title}</h2>
-        <p>{manualDetail.date} {manualDetail.time || ''}</p>
-        <p>{manualDetail.venue || '장소 미입력'}</p>
-        {manualDetail.contact ? <p>연락처: {manualDetail.contact}</p> : null}
-        {manualDetail.details ? <p style={{ whiteSpace: 'pre-wrap' }}>{manualDetail.details}</p> : null}
-        <p>배정 작가: {manualAssignees(manualDetail).join(', ') || '-'}</p>
-        <button className="admin-button" style={{ marginTop: 14 }} disabled={isPending} onClick={() => void deleteManual()}>수동 일정 삭제</button>
+        <h2>{manualDetail.date} 수동 일정 수정</h2>
+        <div className="admin-toolbar" style={{ marginTop: 18 }}>
+          <label className="admin-field">일정 제목<input value={manual.title} onChange={e => setManual(v => ({ ...v, title: e.target.value }))} /></label>
+          <label className="admin-field">시간<input value={manual.time} onChange={e => setManual(v => ({ ...v, time: e.target.value }))} placeholder="예: 13:00" /></label>
+          <label className="admin-field">장소<input value={manual.venue} onChange={e => setManual(v => ({ ...v, venue: e.target.value }))} /></label>
+          <label className="admin-field">연락처<input value={manual.contact} onChange={e => setManual(v => ({ ...v, contact: e.target.value }))} /></label>
+        </div>
+        <label className="admin-field" style={{ marginTop: 12 }}>상세 메모<textarea value={manual.details} onChange={e => setManual(v => ({ ...v, details: e.target.value }))} /></label>
+        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginTop: 14 }}>
+          {(data?.staff || []).filter(staff => staff.active).map(staff => <label key={staff.id} style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+            <input type="checkbox" checked={manual.staffIds.includes(staff.id)} onChange={e => setManual(v => ({ ...v, staffIds: e.target.checked ? [...v.staffIds, staff.id] : v.staffIds.filter(id => id !== staff.id) }))} />
+            {staff.displayName}
+          </label>)}
+        </div>
+        <div style={{ display: 'flex', gap: 10, marginTop: 18, flexWrap: 'wrap' }}>
+          <button className="admin-button primary" disabled={isPending || !manual.title || !manual.staffIds.length} onClick={async () => {
+            await mutate({ type: 'update_manual_schedule', id: manualDetail.id, date: manualDetail.date, ...manual });
+            setManualDetail(null);
+          }}>{isPending ? '저장 중' : '수정 저장'}</button>
+          <button className="admin-button" disabled={isPending} onClick={() => void deleteManual()}>삭제</button>
+        </div>
       </section>
     </div> : null}
   </main>;

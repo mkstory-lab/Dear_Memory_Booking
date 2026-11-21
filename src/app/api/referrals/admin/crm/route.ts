@@ -81,6 +81,33 @@ export async function POST(request: NextRequest) {
         };
         return { events: [event], result: true };
       }
+      if (command.type === 'update_manual_schedule') {
+        const staffState = projectStaff(history);
+        const manualId = String(command.id || '');
+        const current = staffState.manualSchedules[manualId];
+        if (!current?.active) throw new Error('수정할 수동 일정을 찾을 수 없습니다.');
+        const title = String(command.title || '').trim();
+        const date = String(command.date || '').trim();
+        const time = String(command.time || '').trim().slice(0, 40);
+        const venue = String(command.venue || '').trim().slice(0, 200);
+        const details = String(command.details || '').trim().slice(0, 2000);
+        const contact = String(command.contact || '').trim().slice(0, 100);
+        const staffIds = Array.isArray(command.staffIds) ? [...new Set(command.staffIds.map(String))] : [];
+        if (!title || title.length > 120) throw new Error('일정 제목은 1~120자로 입력해 주세요.');
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !Number.isFinite(Date.parse(date))) throw new Error('일정 날짜를 확인해 주세요.');
+        if (!staffIds.length) throw new Error('일정을 배정할 작가를 한 명 이상 선택해 주세요.');
+        if (staffIds.some(id => !staffState.staff[id] || !staffState.staff[id].active)) throw new Error('활성 상태인 작가만 배정할 수 있습니다.');
+        const event: Event = {
+          id: `${id}:manual-update`,
+          requestId: id,
+          actor: user,
+          at,
+          reason: '통합 관리자 달력에서 수동 일정 수정',
+          type: 'crm_staff_manual_schedule_updated',
+          data: { id: manualId, title, date, time, venue, details, contact, staffIds },
+        };
+        return { events: [event], result: true };
+      }
       if (command.type === 'delete_manual_schedule') {
         const staffState = projectStaff(history);
         const manualId = String(command.id || '');
@@ -99,6 +126,21 @@ export async function POST(request: NextRequest) {
       const targetId = contractId(command.contractId);
       const contract = project(history).contracts[targetId];
       if (!contract) throw new Error('계약을 찾을 수 없습니다.');
+      if (command.type === 'assign_contract') {
+        const staffState = projectStaff(history);
+        const staffIds = Array.isArray(command.staffIds) ? [...new Set(command.staffIds.map(String))] : [];
+        if (staffIds.some(id => !staffState.staff[id] || !staffState.staff[id].active)) throw new Error('활성 상태인 작가만 배정할 수 있습니다.');
+        const event: Event = {
+          id: `${id}:staff-assignment`,
+          requestId: id,
+          actor: user,
+          at,
+          reason: '통합 관리자 달력에서 작가 배정 수정',
+          type: 'crm_staff_assignment_set',
+          data: { contractId: targetId, staffIds },
+        };
+        return { events: [event], result: true };
+      }
       if (command.type === 'update_customer') {
         const stage = String(command.stage || '');
         const memo = String(command.memo || '').trim();
