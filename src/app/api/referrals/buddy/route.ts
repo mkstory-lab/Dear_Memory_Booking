@@ -32,6 +32,7 @@ function commandFrom(input: unknown): BuddyCommand {
       weddingDate: String(value.weddingDate || ''),
       memo: typeof value.memo === 'string' ? value.memo : '',
       force: value.force === true,
+      manualCode: typeof value.manualCode === 'string' ? value.manualCode : undefined,
     };
   }
 

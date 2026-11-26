@@ -66,7 +66,7 @@ export type BuddyContext = {
 };
 
 export type BuddyCommand =
-  | { type: 'create_customer'; brideName: string; weddingDate: string; memo?: string; force?: boolean }
+  | { type: 'create_customer'; brideName: string; weddingDate: string; memo?: string; force?: boolean; manualCode?: string }
   | { type: 'update_customer'; customerId: string; brideName?: string; weddingDate?: string; memo?: string }
   | { type: 'code_status'; code: string; active: boolean }
   | { type: 'manual_referral'; code: string; referredBrideName: string; referredWeddingDate: string }
@@ -108,11 +108,14 @@ function assertBrideAndDate(brideName: string, weddingDate: string) {
 }
 
 export function normalizeBuddyCode(value: string) {
-  return value.trim().toUpperCase();
+  const trimmed = value.trim().toUpperCase();
+  const legacy = trimmed.match(/^(\d{6})[ _-]*([가-힣]{1,30})$/u);
+  return legacy ? legacy[1] + '_' + legacy[2] : trimmed;
 }
 
 export function isBuddyCode(value: string) {
-  return CODE_PATTERN.test(normalizeBuddyCode(value));
+  const code = normalizeBuddyCode(value);
+  return code.length >= 1 && code.length <= 80 && !/[\p{Cc}\p{Cf}]/u.test(code) && !/^DM-[ABCDEFGHJKLMNPQRSTUVWXYZ23456789]{8}$/.test(code);
 }
 
 function compactBuddyCode(value: string) {
@@ -154,7 +157,7 @@ function similarActiveCode(state: BuddyState, entered: string) {
   if (compact.length < 9 || compact.length > 11 || !/^\d{6}/.test(compact)) return undefined;
 
   return Object.values(state.codes)
-    .filter(code => code.active)
+    .filter(code => code.active && CODE_PATTERN.test(code.value))
     .find(code => {
       const known = compactBuddyCode(code.value);
       return known.slice(0, 6) === compact.slice(0, 6) && editDistanceAtMostOne(known, compact);
@@ -260,7 +263,7 @@ export function buildBuddyReferralEvents(history: Event[], input: {
   const enteredCode = normalizeBuddyCode(input.code);
   const state = projectBuddy(history);
   const exactCode = isBuddyCode(enteredCode) ? state.codes[enteredCode] : undefined;
-  const suggestedCode = exactCode?.active ? exactCode : similarActiveCode(state, enteredCode);
+  const suggestedCode = exactCode ? (exactCode.active ? exactCode : undefined) : (/^[0-9]{6}[-A-Z0-9]{3,6}$/.test(enteredCode) ? similarActiveCode(state, enteredCode) : undefined);
   if (!suggestedCode) return [];
 
   const codeValue = suggestedCode.value;
@@ -316,7 +319,9 @@ export function applyBuddyCommand(history: Event[], command: BuddyCommand, ctx: 
     }
 
     const id = 'buddy_customer_' + randomUUID();
-    const code = generateBuddyCode(command.weddingDate, state);
+    const code = command.manualCode?.trim() ? normalizeBuddyCode(command.manualCode) : generateBuddyCode(command.weddingDate, state);
+    if (!isBuddyCode(code)) throw new Error('코드는 1~80자로 입력해 주세요. 기존 DM 추천코드 형식은 사용할 수 없습니다.');
+    if (state.codes[code]) throw new Error('이미 등록된 짝꿍코드입니다.');
     return [
       event(ctx, 'buddy_customer_created', {
         id,

@@ -172,3 +172,32 @@ test('자기 추천으로 보이는 동일 신부명·본식일은 자동 유효
   f.referral({ code: code.value, referredBrideName: '요닝', referredWeddingDate: '2027-11-13' });
   assert.equal(Object.values(f.state().referrals)[0].status, 'needs_review');
 });
+
+test('기존 한글 코드 수동 등록 및 구분자 변형, 중복 방지, 비활성 차단', () => {
+  const f = fixture();
+  f.run({ type: 'create_customer', brideName: 'A', weddingDate: '2027-11-13', manualCode: '271113_테스트' });
+  const code = '271113_테스트';
+  const owner = Object.values(f.state().customers)[0];
+  assert.equal(f.state().codes[code].active, true);
+  assert.throws(() => f.run({ type: 'create_customer', brideName: 'Z', weddingDate: '2027-11-13', manualCode: '271113테스트' }), /이미 등록된 짝꿍코드/);
+  for (const [i, alias] of [code, '271113테스트', '271113 테스트'].entries()) {
+    const input = { code: alias, referredBrideName: 'B' + i, referredWeddingDate: '2027-01-01' };
+    f.referral(input);
+    f.referral(input);
+  }
+  assert.equal(ownerTotals(f.state(), owner.id).totalBenefit, 150000);
+  assert.equal(f.referral({ code: '271113_다른별명', referredBrideName: 'X', referredWeddingDate: '2027-01-01' }).length, 0);
+  f.run({ type: 'code_status', code, active: false });
+  assert.equal(f.referral({ code, referredBrideName: 'Y', referredWeddingDate: '2027-01-01' }).length, 0);
+});
+
+test('날짜 없는 임의 한글 및 영문 기존 코드도 등록하며 미등록 코드는 적립하지 않는다', () => {
+  const f = fixture();
+  f.run({ type: 'create_customer', brideName: 'A', weddingDate: '2027-11-13', manualCode: '기존닉네임' });
+  f.run({ type: 'create_customer', brideName: 'C', weddingDate: '2027-11-14', manualCode: 'Old-code_123' });
+  f.referral({ code: '기존닉네임', referredBrideName: 'B', referredWeddingDate: '2027-01-01' });
+  f.referral({ code: 'old-code_123', referredBrideName: 'D', referredWeddingDate: '2027-01-02' });
+  assert.equal(Object.values(f.state().referrals).length, 2);
+  assert.equal(f.referral({ code: '기존닉네임오타', referredBrideName: 'E', referredWeddingDate: '2027-01-03' }).length, 0);
+  assert.throws(() => f.run({ type: 'create_customer', brideName: 'F', weddingDate: '2027-11-15', manualCode: 'DM-ABCDEFGH' }));
+});

@@ -51,7 +51,7 @@ type Snapshot = {
 };
 
 type Command =
-  | { type: 'create_customer'; brideName: string; weddingDate: string; memo?: string; force?: boolean }
+  | { type: 'create_customer'; brideName: string; weddingDate: string; memo?: string; force?: boolean; manualCode?: string }
   | { type: 'update_customer'; customerId: string; brideName?: string; weddingDate?: string; memo?: string }
   | { type: 'code_status'; code: string; active: boolean }
   | { type: 'manual_referral'; code: string; referredBrideName: string; referredWeddingDate: string }
@@ -104,6 +104,7 @@ export default function BuddyAdmin() {
   const [brideName, setBrideName] = useState('');
   const [weddingDate, setWeddingDate] = useState('');
   const [memo, setMemo] = useState('');
+  const [manualCode, setManualCode] = useState('');
   const [manualBride, setManualBride] = useState('');
   const [manualWeddingDate, setManualWeddingDate] = useState('');
   const retries = useRef(new Map<string, string>());
@@ -218,7 +219,7 @@ export default function BuddyAdmin() {
     }
 
     const result = await mutate(
-      { type: 'create_customer', brideName: normalizedName, weddingDate, memo, force },
+      { type: 'create_customer', brideName: normalizedName, weddingDate, memo, force, manualCode: manualCode.trim() || undefined },
       '관리자 수동 짝꿍코드 발급',
     );
 
@@ -230,6 +231,7 @@ export default function BuddyAdmin() {
       setBrideName('');
       setWeddingDate('');
       setMemo('');
+      setManualCode('');
       setMessage('짝꿍코드를 생성했습니다. 코드를 복사해 고객에게 전달해 주세요.');
     }
   }
@@ -425,7 +427,7 @@ export default function BuddyAdmin() {
               <div className="space-y-5">
                 <form onSubmit={createCustomer} className="rounded-2xl border border-[#E5DCCE] bg-white p-5 shadow-sm">
                   <h2 className="text-lg font-semibold">새 짝꿍코드 생성</h2>
-                  <p className="mt-1 text-xs leading-5 text-[#8F7A56]">신부 성함과 본식 날짜만 입력하면 YYMMDD-XXXX 형식으로 발급됩니다.</p>
+                  <p className="mt-1 text-xs leading-5 text-[#8F7A56]">기존 코드를 입력하면 그대로 등록됩니다. 비워두면 YYMMDD-XXXX 형식으로 자동 발급됩니다.</p>
                   <label className="mt-4 block text-sm font-semibold">
                     신부 성함
                     <input value={brideName} onChange={event => setBrideName(event.target.value)} required maxLength={80} className="mt-2 h-11 w-full rounded-xl border border-[#DCCFBC] px-3" />
@@ -435,10 +437,14 @@ export default function BuddyAdmin() {
                     <input type="date" value={weddingDate} onChange={event => setWeddingDate(event.target.value)} required className="mt-2 h-11 w-full rounded-xl border border-[#DCCFBC] px-3" />
                   </label>
                   <label className="mt-3 block text-sm font-semibold">
+                    기존 짝꿍코드 수동 등록 (선택)
+                    <input value={manualCode} onChange={event => setManualCode(event.target.value)} maxLength={80} placeholder="예: 271113_별명, 기존 닉네임" className="mt-2 h-11 w-full rounded-xl border border-[#DCCFBC] px-3" />
+                  </label>
+                  <label className="mt-3 block text-sm font-semibold">
                     메모 <span className="font-normal text-[#9A8562]">(선택)</span>
                     <textarea value={memo} onChange={event => setMemo(event.target.value)} maxLength={500} className="mt-2 min-h-20 w-full rounded-xl border border-[#DCCFBC] p-3" />
                   </label>
-                  <button disabled={loading} className="mt-4 h-11 w-full rounded-xl bg-[#322A1B] font-semibold text-white disabled:opacity-40">짝꿍코드 생성</button>
+                  <button disabled={loading} className="mt-4 h-11 w-full rounded-xl bg-[#322A1B] font-semibold text-white disabled:opacity-40">{manualCode.trim() ? "기존 코드 등록" : "짝꿍코드 생성"}</button>
                 </form>
 
                 <section className="rounded-2xl border border-[#E5DCCE] bg-white p-5">
