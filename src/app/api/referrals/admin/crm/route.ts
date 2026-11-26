@@ -58,6 +58,40 @@ export async function POST(request: NextRequest) {
     const at = new Date().toISOString();
     const store = referralStore();
 
+    if (command.type === 'recover_verified_original_rows') {
+      if (!Array.isArray(command.originals) || command.originals.length < 1 || command.originals.length > 10) throw new Error('검증된 원본은 한 번에 1~10건을 입력해 주세요.');
+      const fields = ['계약번호','신랑 성명','신부 성명','예식일','예식장','홀','예식시간','신랑 연락처','신부 연락처','고객 이메일','선택상품','추가옵션'];
+      const originals = command.originals.map((raw:unknown)=>{
+        if(!raw || typeof raw!=='object' || Array.isArray(raw)) throw new Error('원본 입력 형식을 확인해 주세요.');
+        const row=raw as Record<string,unknown>;
+        const targetId=contractId(row.contractId);
+        if(!row.rows || typeof row.rows!=='object' || Array.isArray(row.rows)) throw new Error('원본 항목을 확인해 주세요.');
+        const rows:OriginalRows={};
+        for(const [key,value] of Object.entries(row.rows as Record<string,unknown>)) {
+          if(!fields.includes(key) || typeof value!=='string' || value.length>200) throw new Error('허용되지 않는 원본 입력 항목입니다.');
+          rows[key]=value;
+        }
+        return {contractId:targetId,rows};
+      });
+      if(new Set(originals.map(x=>x.contractId)).size!==originals.length) throw new Error('중복된 계약이 있습니다.');
+      const report=await store.transaction(history=>{
+        const events:Event[]=[];
+        const result:Array<{number:string;fields:string[];error?:string}>=[];
+        for(const original of originals) {
+          const current=projectAdminCrm([...history,...events]).contracts.find(c=>c.id===original.contractId);
+          if(!current || !recoverable(current)) {result.push({number:original.rows['계약번호']||original.contractId,fields:[],error:'복구 대상 아님'});continue;}
+          try {
+            const next=recoveryEvents([...history,...events],original.contractId,original.rows,{requestId:id,actor:user,at});
+            for(const event of next)event.reason='관리자가 보관 원본 이미지 또는 엑셀과 대조한 누락 정보 복구';
+            events.push(...next);
+            result.push({number:current.number,fields:Object.keys(next.find(e=>e.type==='crm_import_metadata_recovered')?.data.patch||{})});
+          }catch(e){result.push({number:current.number,fields:[],error:e instanceof Error?e.message:'원본 대조 실패'});}
+        }
+        return {events,result};
+      });
+      return NextResponse.json({...await snapshot(),recoveryReport:report},{headers:responseHeaders});
+    }
+
     if (command.type === 'recover_imported_metadata') {
       if (!Array.isArray(command.contractIds) || command.contractIds.length < 1 || command.contractIds.length > 4) throw new Error('복구 대상은 한 번에 1~4건으로 지정해 주세요.');
       const ids = [...new Set(command.contractIds.map(contractId))];
