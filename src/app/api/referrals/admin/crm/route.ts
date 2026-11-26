@@ -1,4 +1,5 @@
 import { createHmac, randomUUID } from 'node:crypto';
+import { deliveryEligible, validateDeliveryDate, seoulDay } from '@/lib/admin/delivery';
 import { recoverable, recoveryEvents, type OriginalRows } from '@/lib/admin/recoverMetadata';
 import { NextRequest, NextResponse } from 'next/server';
 import { CUSTOMER_STAGES, projectAdminCrm } from '@/lib/admin/crm';
@@ -192,6 +193,15 @@ export async function POST(request: NextRequest) {
       const targetId = contractId(command.contractId);
       const contract = project(history).contracts[targetId];
       if (!contract) throw new Error('계약을 찾을 수 없습니다.');
+      if (command.type === 'set_delivery_date') {
+        if (!deliveryEligible(contract)) throw new Error('납품 관리 대상 계약이 아닙니다.');
+        const {key,date} = validateDeliveryDate(command.key,command.date,contract.weddingDate,seoulDay(at));
+        const data = {contractId:targetId,key,date};
+        const prior=history.find(e=>e.type==='crm_delivery_date_set'&&e.requestId===id);
+        if(prior){if(JSON.stringify(prior.data)!==JSON.stringify(data))throw new Error('같은 요청 ID를 다시 사용할 수 없습니다.');return {events:[],result:true};}
+        const event:Event={id:id+':delivery',requestId:id,actor:user,at,reason:'관리자 납품 발송일 확인',type:'crm_delivery_date_set',data};
+        return {events:[event],result:true};
+      }
       if (command.type === 'assign_contract') {
         const staffState = projectStaff(history);
         const staffIds = Array.isArray(command.staffIds) ? [...new Set(command.staffIds.map(String))] : [];

@@ -1,3 +1,5 @@
+import type { DeliveryDates } from '@/lib/admin/delivery';
+
 export const CUSTOMER_STAGES = [
   '계약', '사전안내', '촬영', '촬영완료', '사진 셀렉', '보정', '수정요청', '앨범제작', '출고완료',
 ] as const;
@@ -8,6 +10,7 @@ export type AdminContract = {
   id: string; number: string; groom: string; bride: string; groomPhone: string; bridePhone: string;
   email: string; weddingDate: string; weddingTime: string; weddingVenue: string; weddingHall: string;
   productId: string; optionIds: string[]; total: number; deposit: number; paid: number; balance: number;
+  deliveryDates: DeliveryDates;
   depositConfirmedAt?: string; balanceConfirmedAt?: string; sentAt?: string; createdAt: string; updatedAt: string;
   status: 'active' | 'completed' | 'cancelled'; stage: CustomerStage; memo: string; reviewUrl?: string;
   driveFolderUrl?: string; excelFileUrl?: string; calendarEventId?: string; calendarSaved: boolean;

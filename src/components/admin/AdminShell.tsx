@@ -13,6 +13,7 @@ const navigation = [
   { href: '/admin/customers', label: '고객 관리', icon: Users },
   { href: '/admin/calendar', label: '캘린더', icon: CalendarDays },
   { href: '/admin/payments', label: '매출 / 입금 관리', icon: HandCoins },
+  { href: '/admin/delivery', label: '납품 관리', icon: FileText },
   { href: '/admin/staff', label: '작가 · 스케줄', icon: Users },
   { href: '/admin/buddy', label: '짝꿍코드 관리', icon: Users },
   { href: '/admin/referrals', label: '기존 추천 관리', icon: Settings },

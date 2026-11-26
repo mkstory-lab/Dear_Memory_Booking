@@ -3,6 +3,7 @@ import { amounts, project, remainingBalance, type Event, type State } from '@/li
 import { ownerTotals, projectBuddy } from '@/lib/buddy/ledger';
 import { projectStaff, publicStaff } from '@/lib/admin/staff';
 import type { ContractFormData } from '@/types/contract';
+import { DELIVERY_KEYS, type DeliveryDates } from './delivery';
 
 export const CUSTOMER_STAGES = [
   '계약', '사전안내', '촬영', '촬영완료', '사진 셀렉', '보정', '수정요청', '앨범제작', '출고완료',
@@ -30,6 +31,7 @@ export type AdminContract = {
   balance: number;
   depositConfirmedAt?: string;
   balanceConfirmedAt?: string;
+  deliveryDates: DeliveryDates;
   sentAt?: string;
   createdAt: string;
   updatedAt: string;
@@ -162,6 +164,8 @@ export function projectAdminCrm(events: Event[]): AdminCrmSnapshot {
       event.type === 'command' && event.data?.type === 'payment' && event.data?.contractId === contract.id && balance === 0,
     );
     const result = delivery?.data?.result || {};
+    const deliveryDates: DeliveryDates = {};
+    for (const e of events) { if (e.type !== 'crm_delivery_date_set' || e.data?.contractId !== contract.id || !DELIVERY_KEYS.includes(e.data.key)) continue; if (e.data.date) deliveryDates[e.data.key as keyof DeliveryDates] = e.data.date; else delete deliveryDates[e.data.key as keyof DeliveryDates]; }
 
     return {
       id: contract.id,
@@ -183,6 +187,7 @@ export function projectAdminCrm(events: Event[]): AdminCrmSnapshot {
       balance,
       depositConfirmedAt: contract.depositConfirmedAt,
       balanceConfirmedAt: balanceEvent?.at,
+      deliveryDates,
       sentAt: contract.sentAt,
       createdAt: eventDate(registered),
       updatedAt: meta.updatedAt > eventDate(lastContractEvent) ? meta.updatedAt : eventDate(lastContractEvent),

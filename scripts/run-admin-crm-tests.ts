@@ -77,3 +77,29 @@ test('Drive metadata repair fills blanks without changing money or existing manu
  assert.equal(recoveryEvents([...history,...events],id,rows,ctx).length,0);
  assert.throws(()=>recoveryEvents(history,id,{...rows,'신부 성명':'다름'},ctx));
 });
+
+
+import { balanceDue, addMonths, taskRows, taskInfo, validateDeliveryDate } from '../src/lib/admin/delivery';
+test('납품 기한은 금요일, 14일, 3~5개월이며 취소·미래 발송을 제외',()=>{
+ assert.equal(balanceDue('2026-11-29'),'2026-11-27');
+ assert.equal(balanceDue('2026-11-27'),'2026-11-27');
+ assert.equal(balanceDue('2026-11-26'),'2026-11-20');
+ assert.equal(addMonths('2027-01-31',3),'2027-04-30');
+ const c={id:'live',status:'active',weddingDate:'2026-11-14',balance:1000000};
+ assert.equal(taskInfo(c,'raw','2026-11-28').late,false);
+ assert.equal(taskInfo(c,'raw','2026-11-29').late,true);
+ assert.equal(taskInfo(c,'edited','2027-04-15').late,true);
+ assert.equal(taskRows([{...c,weddingDate:'2027-01-01'}],'raw','2026-11-26').length,0);
+ assert.equal(taskRows([{...c,status:'cancelled'}],'raw','2026-11-26').length,0);
+ assert.throws(()=>validateDeliveryDate('raw','2026-11-31',c.weddingDate,'2026-12-01'));
+ assert.throws(()=>validateDeliveryDate('raw','2026-11-27',c.weddingDate,'2026-11-26'));
+ assert.deepEqual(validateDeliveryDate('raw','2026-11-26',c.weddingDate,'2026-11-26'),{key:'raw',date:'2026-11-26'});
+});
+test('납품 체크 기록과 취소는 입금 및 기존 계약 정보와 독립',()=>{
+ const base=event('register','contract_registered',{id:'c',coupleId:'c',number:'DM-test',groom:'A',bride:'B',weddingDate:'2026-11-14',status:'active',total:1200000,deposit:300000,paid:300000});
+ const sent=event('sent','crm_delivery_date_set',{contractId:'c',key:'raw',date:'2026-11-22'});
+ const edit=event('edit','crm_delivery_date_set',{contractId:'c',key:'edited',date:'2026-11-23'});
+ const undo=event('undo','crm_delivery_date_set',{contractId:'c',key:'raw',date:null});
+ const c=projectAdminCrm([base,sent,edit,undo]).contracts[0];
+ assert.deepEqual(c.deliveryDates,{edited:'2026-11-23'});assert.equal(c.balance,900000);assert.equal(c.paid,300000);
+});

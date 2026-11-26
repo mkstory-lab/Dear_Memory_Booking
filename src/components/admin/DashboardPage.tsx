@@ -4,15 +4,14 @@ import Link from 'next/link';
 import { useMemo } from 'react';
 import { useAdminCrm } from './useAdminCrm';
 import { money, productName, seoulToday } from './types';
+import { TASKS, taskRows, taskInfo, balanceDue, validDay } from '@/lib/admin/delivery';
 
 function seoulDate(iso: string) {
   return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Seoul' }).format(new Date(iso));
 }
 
 function dueDate(weddingDate: string) {
-  const date = new Date(`${weddingDate}T00:00:00+09:00`);
-  date.setDate(date.getDate() - 7);
-  return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Seoul' }).format(date);
+  return validDay(weddingDate) ? balanceDue(weddingDate) : '';
 }
 
 export default function DashboardPage() {
@@ -49,6 +48,7 @@ export default function DashboardPage() {
   return <main className="admin-page">
     <div className="admin-page-heading"><div><p className="admin-kicker">OVERVIEW</p><h1>안녕하세요, 대표님</h1><p>{today.replaceAll('-', '.')} 기준 디어메모리 운영 현황입니다.</p></div><Link className="admin-button primary" href="/admin/contracts">전체 계약 보기</Link></div>
     <section className="admin-stats" aria-label="이번 달 주요 통계">{stats.map(([label, value]) => <article className="admin-stat" key={label}><span>{label}</span><strong>{value}</strong></article>)}</section>
+    <section className="admin-card delivery-dashboard"><div className="admin-card-header"><h2>업무 처리 현황</h2><Link href="/admin/delivery">납품 관리 →</Link></div><div className="delivery-summary">{TASKS.map(t=>{const rows=taskRows(data.contracts,t.key,today);const overdue=rows.filter(c=>taskInfo(c,t.key,today).late).length;return <Link className="admin-stat delivery-tile" href={'/admin/delivery?filter='+t.key} key={t.key}><span>{t.label}</span><strong>{rows.length}팀</strong><small className={overdue?'delivery-late':''}>{t.rule}{overdue?' · 지연 '+overdue+'팀':''}</small></Link>})}</div><p className="delivery-note">잔금은 7일 이내 기한 및 지연 건 · 발송은 본식일 이후 고객 기준</p></section>
     <div className="admin-grid">
       <section className="admin-card"><div className="admin-card-header"><h2>오늘 / 가까운 촬영 일정</h2><Link href="/admin/calendar">캘린더 보기</Link></div><div className="admin-list">{view.upcoming.map(contract => <Link className="admin-list-item" key={contract.id} href={`/admin/customers/${contract.id}`}><div><strong>{contract.groom} · {contract.bride}</strong><span>{contract.weddingVenue || '예식장 확인 필요'} · {contract.weddingTime || '시간 확인 필요'}</span></div><span><b>{contract.weddingDate}</b><small>{productName(contract.productId)}</small></span></Link>)}{!view.upcoming.length ? <p className="admin-empty">예정된 촬영이 없습니다.</p> : null}</div></section>
       <section className="admin-card"><div className="admin-card-header"><h2>입금 확인 필요</h2><Link href="/admin/payments">입금 관리</Link></div><div className="admin-list">{view.attention.map(contract => <Link className="admin-list-item" key={contract.id} href={`/admin/customers/${contract.id}`}><div><strong>{contract.groom} · {contract.bride}</strong><span>{contract.number}</span></div><span className={`admin-badge ${contract.depositConfirmedAt ? 'orange' : 'red'}`}>{contract.depositConfirmedAt ? `잔금 ${money(contract.balance)}` : '계약금 미확인'}</span></Link>)}{!view.attention.length ? <p className="admin-empty">확인이 필요한 입금이 없습니다.</p> : null}</div></section>
