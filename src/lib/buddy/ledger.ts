@@ -70,6 +70,7 @@ export type BuddyCommand =
   | { type: 'update_customer'; customerId: string; brideName?: string; weddingDate?: string; memo?: string }
   | { type: 'code_status'; code: string; active: boolean }
   | { type: 'manual_referral'; code: string; referredBrideName: string; referredWeddingDate: string }
+  | { type: 'manual_referrals'; code: string; rows: Array<{ referredBrideName: string; referredWeddingDate: string }> }
   | { type: 'referral_status'; referralId: string; status: Exclude<BuddyReferralStatus, 'needs_review'> }
   | { type: 'record_payment'; referralId: string; amount: number; method: BuddyPaymentMethod; paidAt: string; memo?: string };
 
@@ -364,6 +365,21 @@ export function applyBuddyCommand(history: Event[], command: BuddyCommand, ctx: 
     if (!code) throw new Error('짝꿍코드를 찾을 수 없습니다.');
     if (code.active === command.active) return [];
     return [event(ctx, 'buddy_code_status', { code: codeValue, active: command.active })];
+  }
+
+  if (command.type === 'manual_referrals') {
+    const code = state.codes[normalizeBuddyCode(command.code)];
+    if (!code?.active) throw new Error('활성 짝꿍코드를 선택해 주세요.');
+    if (!command.rows.length || command.rows.length > 20) throw new Error('한 번에 1~20건을 등록해 주세요.');
+    const result: Event[] = [];
+    for (const [index, row] of command.rows.entries()) {
+      assertBrideAndDate(row.referredBrideName, row.referredWeddingDate);
+      const owner = state.customers[code.customerId];
+      if (cleanBrideName(row.referredBrideName) === cleanBrideName(owner.brideName) && row.referredWeddingDate === owner.weddingDate) throw new Error('자기 추천은 등록할 수 없습니다.');
+      const events = buildBuddyReferralEvents([...history, ...result], { code: code.value, ...row }, { ...ctx, requestId: ctx.requestId + ':batch:' + index });
+      result.push(...events);
+    }
+    return result;
   }
 
   if (command.type === 'manual_referral') {

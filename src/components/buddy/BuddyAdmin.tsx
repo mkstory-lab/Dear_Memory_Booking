@@ -56,6 +56,7 @@ type Command =
   | { type: 'update_customer'; customerId: string; brideName?: string; weddingDate?: string; memo?: string }
   | { type: 'code_status'; code: string; active: boolean }
   | { type: 'manual_referral'; code: string; referredBrideName: string; referredWeddingDate: string }
+  | { type: 'manual_referrals'; code: string; rows: Array<{ referredBrideName: string; referredWeddingDate: string }> }
   | { type: 'referral_status'; referralId: string; status: Exclude<BuddyReferralStatus, 'needs_review'> }
   | { type: 'record_payment'; referralId: string; amount: number; method: BuddyPaymentMethod; paidAt: string; memo?: string };
 
@@ -109,6 +110,7 @@ export default function BuddyAdmin() {
   const [manualCode, setManualCode] = useState('');
   const [manualBride, setManualBride] = useState('');
   const [manualWeddingDate, setManualWeddingDate] = useState('');
+  const [bulkText, setBulkText] = useState('');
   const retries = useRef(new Map<string, string>());
 
   useEffect(() => {
@@ -335,6 +337,21 @@ export default function BuddyAdmin() {
       paidAt,
       memo: paymentMemo,
     }, '짝꿍 혜택 지급 처리');
+  }
+
+  async function addBulkReferrals(event: FormEvent) {
+    event.preventDefault();
+    if (!selected?.code?.active) return;
+    try {
+      const rows = bulkText.split(/\r?\n/).map(line => line.trim()).filter(Boolean).map(line => {
+        const match = line.match(/^(.+?)[,\t ]+([0-9]{4}-[0-9]{2}-[0-9]{2})$/);
+        if (!match) throw new Error('각 줄을 신부 성함, YYYY-MM-DD 형식으로 입력해 주세요.');
+        return { referredBrideName: match[1].trim(), referredWeddingDate: match[2] };
+      });
+      if (!rows.length || rows.length > 20) throw new Error('한 번에 1~20건을 등록해 주세요.');
+      const result = await mutate({ type: 'manual_referrals', code: selected.code.value, rows }, '관리자 과거 짝꿍코드 사용 이력 일괄 등록');
+      if (result) { setBulkText(''); setMessage('사용 이력 일괄 등록을 완료했습니다. 기존 중복 이력은 유지됩니다.'); }
+    } catch (cause) { setError(cause instanceof Error ? cause.message : '입력 내용을 확인해 주세요.'); }
   }
 
   async function addManualReferral(event: FormEvent) {
@@ -569,6 +586,14 @@ export default function BuddyAdmin() {
                       </form>
                     )}
 
+                    {selected.code?.active && (
+                      <form onSubmit={addBulkReferrals} className="rounded-2xl border border-[#E5DCCE] bg-white p-5">
+                        <h3 className="font-semibold">과거 사용 이력 일괄 등록</h3>
+                        <p className="mt-1 text-xs text-[#8F7A56]">한 줄에 신부 성함, YYYY-MM-DD 형식으로 입력 (최대 20건). 중복 적립은 방지됩니다.</p>
+                        <textarea aria-label="일괄 등록 고객 목록" value={bulkText} onChange={event => setBulkText(event.target.value)} required maxLength={4000} rows={4} placeholder="신부 성함, 2027-01-01" className="mt-3 w-full rounded-xl border border-[#DCCFBC] p-3 text-sm" />
+                        <button disabled={loading} className="mt-2 h-11 rounded-xl border border-[#322A1B] px-4 text-sm font-semibold">사용 이력 일괄 등록</button>
+                      </form>
+                    )}
                     <section className="rounded-2xl border border-[#E5DCCE] bg-white p-5">
                       <div className="flex items-center justify-between gap-3">
                         <div>

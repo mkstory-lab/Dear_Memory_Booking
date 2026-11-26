@@ -201,3 +201,16 @@ test('날짜 없는 임의 한글 및 영문 기존 코드도 등록하며 미�
   assert.equal(f.referral({ code: '기존닉네임오타', referredBrideName: 'E', referredWeddingDate: '2027-01-03' }).length, 0);
   assert.throws(() => f.run({ type: 'create_customer', brideName: 'F', weddingDate: '2027-11-15', manualCode: 'DM-ABCDEFGH' }));
 });
+
+test('과거 사용 일괄 등록은 중복 없이 유효 건만 추가한다', () => {
+  const f = fixture();
+  f.run({ type: 'create_customer', brideName: 'A', weddingDate: '2027-01-01', manualCode: '기존코드' });
+  const code = Object.values(f.state().codes)[0].value;
+  const owner = Object.values(f.state().customers)[0];
+  const rows = [{ referredBrideName: 'B', referredWeddingDate: '2027-02-01' }, { referredBrideName: 'C', referredWeddingDate: '2027-03-01' }];
+  f.run({ type: 'manual_referrals', code, rows: [...rows, rows[0]] });
+  f.run({ type: 'manual_referrals', code, rows });
+  assert.equal(ownerTotals(f.state(), owner.id).totalBenefit, 100000);
+  assert.throws(() => f.run({ type: 'manual_referrals', code, rows: [{ referredBrideName: 'D', referredWeddingDate: 'invalid' }] }));
+  assert.throws(() => f.run({ type: 'manual_referrals', code, rows: [{ referredBrideName: 'A', referredWeddingDate: '2027-01-01' }] }));
+});

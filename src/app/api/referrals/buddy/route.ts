@@ -50,6 +50,14 @@ function commandFrom(input: unknown): BuddyCommand {
     return { type, code: String(value.code || ''), active: value.active === true };
   }
 
+  if (type === 'manual_referrals') {
+    if (!Array.isArray(value.rows) || !value.rows.length || value.rows.length > 20) throw new Error('한 번에 1~20건을 등록해 주세요.');
+    return { type, code: String(value.code || ''), rows: value.rows.map(row => {
+      if (!row || typeof row !== 'object' || typeof row.referredBrideName !== 'string' || typeof row.referredWeddingDate !== 'string') throw new Error('신부 성함과 본식 날짜를 확인해 주세요.');
+      return { referredBrideName: row.referredBrideName, referredWeddingDate: row.referredWeddingDate };
+    }) };
+  }
+
   if (type === 'manual_referral') {
     return {
       type,
