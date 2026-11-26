@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
+import { findBuddyOwners } from '../src/lib/admin/buddySearch';
 import { projectAdminCrm } from '../src/lib/admin/crm';
 import type { Event } from '../src/lib/referrals/ledger';
 
@@ -41,3 +42,16 @@ test('keeps every contract on the same wedding date', () => {
   assert.equal(contracts.filter(contract => contract.weddingDate === '2027-05-01').length, 2);
 });
 
+
+test('registered buddy owner is searchable before any referrals exist', () => {
+  const events = [
+    event('owner', 'buddy_customer_created', { id: 'owner1', brideName: '테스트신부', weddingDate: '2027-11-13', memo: '예전 별명' }),
+    event('code', 'buddy_code_issued', { value: '271113_테스트', customerId: 'owner1', active: true }),
+  ];
+  const snapshot = projectAdminCrm(events);
+  assert.equal(snapshot.buddyUsages.length, 0);
+  for (const query of ['테스트', '271113테스트', '테스트신부', '예전 별명']) {
+    assert.equal(findBuddyOwners(snapshot.buddyOwners, query)[0]?.id, 'owner1');
+  }
+  assert.equal(findBuddyOwners(snapshot.buddyOwners, '존재하지않음').length, 0);
+});

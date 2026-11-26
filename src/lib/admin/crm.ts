@@ -61,6 +61,7 @@ export type AdminBuddyUsage = {
 export type AdminCrmSnapshot = {
   contracts: AdminContract[];
   buddyUsages: AdminBuddyUsage[];
+  buddyOwners: Array<{ id: string; brideName: string; weddingDate: string; code: string; memo: string; active: boolean }>;
   staffAssignments: Record<string, string[]>;
   staff: Array<{ id: string; username: string; displayName: string; active: boolean; createdAt: string; updatedAt: string }>;
   manualSchedules: Array<{ id: string; title: string; date: string; time: string; venue: string; details: string; contact: string; staffIds: string[]; active: boolean; createdAt: string; updatedAt: string }>;
@@ -207,6 +208,10 @@ export function projectAdminCrm(events: Event[]): AdminCrmSnapshot {
   const staffAssignments = Object.fromEntries(Object.values(staffState.assignments).map(assignment => [assignment.contractId, assignment.staffIds.map(id => staffState.staff[id]?.displayName).filter((name): name is string => !!name)]));
   const staff = publicStaff(staffState);
   const manualSchedules = Object.values(staffState.manualSchedules).filter(item => item.active).sort((a, b) => `${a.date} ${a.time}`.localeCompare(`${b.date} ${b.time}`));
-  return { contracts, buddyUsages, staffAssignments, staff, manualSchedules, generatedAt: new Date().toISOString() };
+  const buddyOwners = Object.values(buddy.codes).flatMap(code => {
+    const owner = buddy.customers[code.customerId];
+    return owner ? [{ id: owner.id, brideName: owner.brideName, weddingDate: owner.weddingDate, code: code.value, memo: owner.memo || '', active: code.active }] : [];
+  });
+  return { contracts, buddyUsages, buddyOwners, staffAssignments, staff, manualSchedules, generatedAt: new Date().toISOString() };
 }
 

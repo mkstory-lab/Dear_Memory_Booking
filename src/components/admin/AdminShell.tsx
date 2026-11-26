@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import { CalendarDays, FileText, HandCoins, LayoutDashboard, LogOut, Menu, Search, Settings, Users, X } from 'lucide-react';
 import { AdminCrmProvider, useAdminCrm } from './useAdminCrm';
+import { findBuddyOwners } from '@/lib/admin/buddySearch';
 
 const navigation = [
   { href: '/admin', label: '대시보드', icon: LayoutDashboard },
@@ -93,6 +94,8 @@ function AdminWorkspace({ children, onLogout }: { children: React.ReactNode; onL
     }).slice(0, 6);
   }, [query, data]);
 
+  const buddyMatches = useMemo(() => findBuddyOwners(data?.buddyOwners || [], query), [data, query]);
+
   async function logout() {
     await fetch('/api/referrals/admin/session', { method: 'DELETE' });
     onLogout();
@@ -117,9 +120,11 @@ function AdminWorkspace({ children, onLogout }: { children: React.ReactNode; onL
           <div className="admin-global-search">
             <Search size={18} />
             <input value={query} onChange={event => setQuery(event.target.value)} placeholder="이름, 연락처, 계약번호, 짝꿍코드 검색" aria-label="통합 고객 검색" />
-            {query ? <div className="admin-search-results">{matches.length ? matches.map(contract => (
-              <Link key={contract.id} href={`/admin/customers/${contract.id}`}><strong>{contract.groom} · {contract.bride}</strong><span>{contract.number} · {contract.weddingDate}</span></Link>
-            )) : <p>검색 결과가 없습니다.</p>}</div> : null}
+            {query.trim() ? <div className="admin-search-results">
+              {buddyMatches.map(owner => <a key={'buddy:' + owner.code} href={`/admin/buddy?customer=${encodeURIComponent(owner.id)}`}><strong>{owner.brideName} · {owner.code}</strong><span>짝꿍코드 · {owner.weddingDate}{owner.active ? '' : ' · 비활성'}</span></a>)}
+              {matches.map(contract => <Link key={contract.id} href={`/admin/customers/${contract.id}`}><strong>{contract.groom} · {contract.bride}</strong><span>{contract.number} · {contract.weddingDate}</span></Link>)}
+              {!buddyMatches.length && !matches.length && <p>{data ? '검색 결과가 없습니다.' : '검색 데이터를 불러오는 중입니다.'}</p>}
+            </div> : null}
           </div>
           <div className="admin-owner"><span>대표 관리자</span><small>Owner</small></div>
         </header>

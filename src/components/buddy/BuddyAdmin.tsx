@@ -1,6 +1,7 @@
 'use client';
 
 import { FormEvent, useEffect, useMemo, useRef, useState } from 'react';
+import { useAdminCrm } from '@/components/admin/useAdminCrm';
 import type {
   BuddyCode,
   BuddyCustomer,
@@ -91,6 +92,7 @@ function referralStatusLabel(status: BuddyReferralStatus) {
 }
 
 export default function BuddyAdmin() {
+  const { refresh: refreshCrm } = useAdminCrm();
   const [authenticated, setAuthenticated] = useState(false);
   const [configured, setConfigured] = useState(true);
   const [password, setPassword] = useState('');
@@ -108,6 +110,11 @@ export default function BuddyAdmin() {
   const [manualBride, setManualBride] = useState('');
   const [manualWeddingDate, setManualWeddingDate] = useState('');
   const retries = useRef(new Map<string, string>());
+
+  useEffect(() => {
+    const customer = new URLSearchParams(window.location.search).get('customer');
+    if (customer) setSelectedId(customer);
+  }, []);
 
   async function load() {
     setLoading(true);
@@ -188,6 +195,7 @@ export default function BuddyAdmin() {
       if (!response.ok) throw new Error(payload.error || '저장하지 못했습니다.');
       retries.current.delete(key);
       setData(payload);
+      void refreshCrm();
       setMessage('저장했습니다.');
       return payload as Snapshot;
     } catch (cause) {

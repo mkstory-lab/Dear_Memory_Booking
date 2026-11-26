@@ -21,7 +21,7 @@ export type AdminBuddyUsage = {
 
 export type AdminStaff = { id: string; username: string; displayName: string; active: boolean; createdAt: string; updatedAt: string };
 export type AdminManualSchedule = { id: string; title: string; date: string; time: string; venue: string; details: string; contact: string; staffIds: string[]; active: boolean; createdAt: string; updatedAt: string };
-export type AdminCrmSnapshot = { contracts: AdminContract[]; buddyUsages: AdminBuddyUsage[]; staffAssignments: Record<string, string[]>; staff: AdminStaff[]; manualSchedules: AdminManualSchedule[]; generatedAt: string };
+export type AdminCrmSnapshot = { contracts: AdminContract[]; buddyUsages: AdminBuddyUsage[]; buddyOwners: Array<{ id: string; brideName: string; weddingDate: string; code: string; memo: string; active: boolean }>; staffAssignments: Record<string, string[]>; staff: AdminStaff[]; manualSchedules: AdminManualSchedule[]; generatedAt: string };
 
 export const money = (value: number) => `${value.toLocaleString('ko-KR')}원`;
 export const productName = (id: string) => id === 'album_plus' ? '화보형' : id === 'standard' ? '실속형' : '확인 필요';
