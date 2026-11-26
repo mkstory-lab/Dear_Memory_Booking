@@ -62,3 +62,18 @@ test('Drive-imported contract can be edited from structured original with existi
   assert.equal(next.total,1200000);assert.equal(next.balance,900000);
   assert.throws(()=>revisionView(events,'drive_c1',{...original,brideName:'wrong'}));
 });
+test('recover safely seals an unclaimed attempt, but does not release a started attempt',()=>{
+  const props=new Map<string,string>(), ctx=vm.createContext({ContentService:{MimeType:{JSON:'json'},createTextOutput:(s:string)=>({setMimeType:()=>JSON.parse(s)})},LockService:{getScriptLock:()=>({waitLock(){},releaseLock(){}})}});
+  new vm.Script(readFileSync('google-apps-script/Code.gs','utf8')).runInContext(ctx);
+  const p={revisionId:'11111111-1111-1111-1111-111111111111'}, key='DM_REV_'+p.revisionId;
+  const adapter={getProperty:(k:string)=>props.get(k),setProperty:(k:string,v:string)=>props.set(k,v)};
+  assert.equal(ctx.dmRecoverRevision_(p,adapter).status,'aborted');assert.equal(JSON.parse(props.get(key)!).aborted,true);
+  assert.equal(ctx.dmRecoverRevision_(p,adapter).status,'aborted');
+  props.set(key,JSON.stringify({started:true}));assert.equal(ctx.dmRecoverRevision_(p,adapter).status,'uncertain');
+  props.set(key,JSON.stringify({result:{customerEmailSent:true}}));assert.equal(ctx.dmRecoverRevision_(p,adapter).status,'sent');
+});
+test('aborted revision releases pending state while restoring unsent draft without changing CRM',()=>{
+  const events=base(), changed={...data,productId:'album_plus'};
+  events.push(event('contract_revision_started',{contractId:'c1',revisionId:'r1',revision:1,finalData:changed}),event('contract_revision_aborted',{contractId:'c1',revisionId:'r1',revision:1,finalData:changed}));
+  const v=revisionView(events,'c1');assert.equal(v.pending,false);assert.equal(v.draft?.productId,'album_plus');assert.equal(v.data.productId,'standard');assert.equal(v.contract.total,1250000);assert.equal(validateRevision(v,changed).total,1450000);
+});

@@ -11,7 +11,10 @@ export function revisionView(history: Event[], id: string, importedData?: Contra
   if (!original && !contract.sentAt && !contract.driveFolderUrl) throw new Error('최초 발송이 완료된 계약만 수정할 수 있습니다.');
   const revisions = history.filter(e => e.type === 'contract_revision_completed' && e.data.contractId === id);
   const latest = revisions.at(-1);
-  const pending = history.find(e => e.type === 'contract_revision_started' && e.data.contractId === id && !revisions.some(r => r.data.revisionId === e.data.revisionId));
+  const aborted = history.filter(e => e.type === 'contract_revision_aborted' && e.data.contractId === id);
+  const pending = history.find(e => e.type === 'contract_revision_started' && e.data.contractId === id && !revisions.some(r => r.data.revisionId === e.data.revisionId) && !aborted.some(r => r.data.revisionId === e.data.revisionId));
+  const lastAborted = aborted.at(-1);
+  const draft = lastAborted && (!latest || lastAborted.data.revision > latest.data.revision) ? lastAborted.data.finalData as ContractFormData : undefined;
   const delivery = history.find(e => e.type === 'contract_delivery_started' && e.data.contractId === id);
   let data: ContractFormData | undefined = latest?.data.finalData || delivery?.data.finalData;
   if (!data && contract.reviewUrl) {
@@ -28,7 +31,7 @@ export function revisionView(history: Event[], id: string, importedData?: Contra
   const referral = Object.values(state.referrals).find(r => r.contractId === id && !r.cancelledAt);
   const benefitDeduction = Object.values(state.benefits).filter(b => b.contractId === id).reduce((n,b) => n + amounts(state,b).balance,0);
   const legacyPartnerDiscount = imported ? !!data.partnerDiscount && !referral : !!contract.legacyPartnerDiscount;
-  return { contract, data, folderUrl, referral: !!referral, legacyPartnerDiscount, benefitDeduction, revision: revisions.length, pending: !!pending,
+  return { contract, data, folderUrl, referral: !!referral, legacyPartnerDiscount, benefitDeduction, revision: revisions.length, pending: !!pending, pendingEvent: pending, draft,
     originalTotal: calculateContractPrice(data).contractTotal, balance: remainingBalance(state,id),
     revisions: revisions.map(e => ({ revision: e.data.revision, at: e.at, total: calculateContractPrice(e.data.finalData).contractTotal, result: e.data.result })) };
 }

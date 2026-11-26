@@ -36,8 +36,8 @@ export async function GET(req: NextRequest) {
     const contractId = id(req.nextUrl.searchParams.get('id'));
     const imported=await importedSource(contractId);
     const view = await referralStore().transaction(history => ({events:[],result:revisionView(history,contractId,imported)}));
-    const basePricing=calculateContractPrice(view.data);
-    return response({data:view.data, pricing:{...basePricing,depositAmount:view.contract.deposit,balanceAmount:Math.max(0,basePricing.contractTotal-view.contract.deposit)}, contractNumber:view.contract.number, paid:view.contract.paid, deposit:view.contract.deposit, balance:view.balance, benefitDeduction:view.benefitDeduction, legacyPartnerDiscount:view.legacyPartnerDiscount, revision:view.revision, pending:view.pending, revisions:view.revisions});
+    const basePricing=calculateContractPrice(view.draft || view.data);
+    return response({data:view.draft || view.data, pricing:{...basePricing,depositAmount:view.contract.deposit,balanceAmount:Math.max(0,basePricing.contractTotal-view.contract.deposit)}, contractNumber:view.contract.number, paid:view.contract.paid, deposit:view.contract.deposit, balance:view.balance, benefitDeduction:view.benefitDeduction, legacyPartnerDiscount:view.legacyPartnerDiscount, revision:view.revision, pending:view.pending, revisions:view.revisions});
   } catch (e) { return response({error:e instanceof Error ? e.message : '조회 실패'},400); }
 }
 export async function POST(req: NextRequest) {
@@ -45,7 +45,31 @@ export async function POST(req: NextRequest) {
   try {
     const user=actor(req); if (!user) return response({error:'관리자 로그인이 필요합니다.'},401);
     const body=await req.json(), contractId=id(body.contractId);
+    if(body.mode==='recover'){
+      const imported=await importedSource(contractId), store=referralStore();
+      const view=await store.transaction(history=>({events:[],result:revisionView(history,contractId,imported)}));
+      const pending=view.pendingEvent;if(!pending)return response({success:true,status:'clear'});
+      const {secret,url}=referralSettings();
+      const payload=JSON.stringify({operation:'recover',timestamp:Date.now(),revisionId:pending.data.revisionId});
+      const res=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'revise_contract',payload:{body:payload,signature:createHmac('sha256',secret).update(payload).digest('hex')}}),cache:'no-store',signal:AbortSignal.timeout(20000)});
+      const check=await res.json();
+      if(!res.ok||!check.success)throw new Error('이전 발송 기록을 확인하지 못했습니다.');
+      if(check.status==='uncertain')throw new Error('메일 발송 시작 기록이 있습니다. Gmail과 Drive를 직접 확인해야 합니다. 중복 발송하지 마세요.');
+      if(check.status!=='aborted'&&check.status!=='sent')throw new Error('이전 발송 상태 확인 필요');
+      const revisionId=pending.data.revisionId, at=new Date().toISOString(), requestId=randomUUID();
+      const make=(type:string,data:object):Event=>({id:requestId+':'+type,requestId,actor:user,at,type,data,reason:'관리자 수정 계약서 발송 결과 복구'});
+      await store.transaction(history=>{
+        const current=revisionView(history,contractId,imported);
+        if(current.pendingEvent?.data.revisionId!==revisionId)return {events:[],result:true};
+        const finalData=pending.data.finalData as ContractFormData;
+        if(check.status==='aborted')return {events:[make('contract_revision_aborted',{contractId,revisionId,revision:pending.data.revision,finalData})],result:true};
+        const c=current.contract, next=validateRevision({...current,pending:false},finalData);
+        return {events:[make('contract_updated',{id:contractId,patch:{total:next.total,legacyPartnerDiscount:current.legacyPartnerDiscount,sentAt:c.sentAt||at,crmData:{...c.crmData,productId:finalData.productId,optionIds:finalData.optionIds,groomPhone:finalData.groomPhone,bridePhone:finalData.bridePhone}}}),make('contract_revision_completed',{contractId,revisionId,revision:pending.data.revision,finalData,result:check.result})],result:true};
+      });
+      return response({success:true,status:check.status});
+    }
     if (typeof body.pdfBase64 !== 'string' || !body.pdfBase64 || typeof body.jpgBase64 !== 'string' || !body.jpgBase64 || body.pdfBase64.length+body.jpgBase64.length>4500000) throw new Error('PDF/JPG 생성 결과를 확인해 주세요.');
+    if (!body.jpgBase64.startsWith('data:image/jpeg;base64,') || !body.pdfBase64.includes('base64,')) throw new Error('PDF/JPG 파일 형식을 확인해 주세요. 다시 생성해 주세요.');
     const {secret,url}=referralSettings();
     // Check that the separately deployed GAS action is available before claiming any delivery.
     const probeBody=JSON.stringify({operation:'probe',timestamp:Date.now()});
@@ -66,7 +90,7 @@ export async function POST(req: NextRequest) {
     try {
       const res=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'revise_contract',payload:{body:payloadBody,signature:createHmac('sha256',secret).update(payloadBody).digest('hex')}}),cache:'no-store',signal:AbortSignal.timeout(50000)});
       result=await res.json();
-      if (!res.ok || !result.success || !result.customerEmailSent) throw new Error('발송 결과 확인 필요');
+      if (!res.ok || !result.success || !result.customerEmailSent) { console.error('Revision provider rejected', {status:res.status, error:typeof result.error==='string'?result.error.slice(0,200):'unknown'}); throw new Error('발송 결과 확인 필요'); }
     } catch { throw new Error('수정 계약서 발송 결과를 확인해야 합니다. 중복 발송하지 마세요.'); }
     try {
       await store.transaction(history=>{

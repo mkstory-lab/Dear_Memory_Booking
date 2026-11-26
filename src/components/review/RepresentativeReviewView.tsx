@@ -245,6 +245,13 @@ export const RepresentativeReviewView: React.FC<RepresentativeReviewViewProps> =
         const docResult = await exportContractToPdfAndJpg('review-contract-doc-preview', contractNumber);
         pdfBase64 = docResult.pdfBase64;
         jpgBase64 = docResult.jpgBase64 || '';
+        if (adminRevision !== undefined && jpgBase64.startsWith('data:image/png')) {
+          const img = new Image();
+          await new Promise<void>((resolve,reject)=>{img.onload=()=>resolve();img.onerror=()=>reject(new Error('JPG 변환 실패'));img.src=jpgBase64;});
+          const canvas=document.createElement('canvas'); canvas.width=img.naturalWidth; canvas.height=img.naturalHeight;
+          const ctx=canvas.getContext('2d'); if(!ctx)throw new Error('JPG 변환 실패'); ctx.fillStyle='#fff';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.drawImage(img,0,0);
+          jpgBase64=canvas.toDataURL('image/jpeg',0.95);
+        }
       } catch (docErr) {
         throw new Error('계약서 PDF를 생성하지 못했습니다. 새로고침한 뒤 다시 시도해 주세요.');
       }

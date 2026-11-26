@@ -808,6 +808,7 @@ function dmReviseContract_(request) {
   if(!Number.isSafeInteger(p.timestamp)||Math.abs(Date.now()-p.timestamp)>120000) throw new Error('수정 요청 만료');
   if(p.operation==='probe') return createJsonResponse({success:true,revisionReady:true});
   if(p.operation==='read_original') return createJsonResponse({success:true,rows:dmReadOriginalContractRows_(p)});
+  if(p.operation==='recover') return dmRecoverRevision_(p,props);
   if(p.operation!=='send'||!/^[a-zA-Z0-9_-]{1,100}$/.test(p.contractId||'')||!/^[0-9a-f-]{36}$/.test(p.revisionId||'')||
       !Number.isSafeInteger(p.revision)||p.revision<1||!/^DM-[A-Za-z0-9-]+$/.test(p.contractNumber||'')) throw new Error('수정 요청 형식 확인 필요');
   const d=p.data;
@@ -880,4 +881,17 @@ function dmReadOriginalContractRows_(p) {
   });
   if(result['계약번호']!==p.contractNumber)throw new Error('원본 계약번호 불일치');
   return result;
+}
+// Seal an unclaimed delivery atomically. A delayed request for that attempt
+// must see the seal and refuse to send. Never clear an uncertain started mail.
+function dmRecoverRevision_(p,props){
+  if(!/^[0-9a-f-]{36}$/.test(p.revisionId||''))throw new Error('수정 요청 ID 확인 필요');
+  const key='DM_REV_'+p.revisionId;
+  const lock=LockService.getScriptLock();lock.waitLock(20000);
+  try{
+    const old=props.getProperty(key);
+    if(old){const state=JSON.parse(old);if(state.result)return createJsonResponse({success:true,status:'sent',result:state.result});if(state.aborted)return createJsonResponse({success:true,status:'aborted'});return createJsonResponse({success:true,status:'uncertain'});}
+    props.setProperty(key,JSON.stringify({aborted:true}));
+    return createJsonResponse({success:true,status:'aborted'});
+  }finally{lock.releaseLock();}
 }
