@@ -11,6 +11,7 @@ export type AdminContract = {
   email: string; weddingDate: string; weddingTime: string; weddingVenue: string; weddingHall: string;
   productId: string; optionIds: string[]; total: number; deposit: number; paid: number; balance: number;
   deliveryDates: DeliveryDates;
+  bookingDate?: string;
   depositConfirmedAt?: string; balanceConfirmedAt?: string; sentAt?: string; createdAt: string; updatedAt: string;
   status: 'active' | 'completed' | 'cancelled'; stage: CustomerStage; memo: string; reviewUrl?: string;
   driveFolderUrl?: string; excelFileUrl?: string; calendarEventId?: string; calendarSaved: boolean;

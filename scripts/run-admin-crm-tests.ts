@@ -103,3 +103,15 @@ test('납품 체크 기록과 취소는 입금 및 기존 계약 정보와 독�
  const c=projectAdminCrm([base,sent,edit,undo]).contracts[0];
  assert.deepEqual(c.deliveryDates,{edited:'2026-11-23'});assert.equal(c.balance,900000);assert.equal(c.paid,300000);
 });
+
+import { monthlyBookings, bookingMonth } from '../src/lib/admin/bookingStats';
+test('월별 예약은 본식월과 최초 계약서 발송월을 구분하고 취소·테스트 제외',()=>{
+ const base={id:'live',status:'active',weddingDate:'2027-06-01',bookingDate:'2026-10-31',total:1300000,paid:300000,deposit:300000,balance:1000000};
+ const rows=[base,{...base,id:'other',bookingDate:'2026-11-01'},{...base,id:'cancelled',status:'cancelled'},{...base,id:'64bf7b68-4d75-499b-a216-e074cc5f245c'},{...base,id:'unknown',bookingDate:undefined}];
+ assert.equal(monthlyBookings(rows,'booked','2026')[9].total,1300000);
+ assert.equal(monthlyBookings(rows,'booked','2026')[10].count,1);
+ assert.equal(monthlyBookings(rows,'wedding','2027')[5].count,3);
+ assert.equal(bookingMonth(rows[4],'booked'),'');
+ const c=projectAdminCrm([event('import','contract_registered',{id:'drive_DM_20261219_V29X',number:'DM-20261219-V29X',coupleId:'test',groom:'A',bride:'B',weddingDate:'2026-12-19',status:'active',total:1300000,deposit:300000,paid:300000})]).contracts[0];
+ assert.equal(c.bookingDate,'2026-10-16');
+});

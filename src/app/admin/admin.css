@@ -134,3 +134,21 @@
   .admin-card.calendar-card { overflow-x: auto; padding: 10px; }
   .admin-toolbar input { min-width: 100%; width: 100%; }
 }
+
+/* Monthly booking summary: scoped to the payments page. */
+.booking-section { margin-top:18px; }
+.booking-year { padding:8px 12px; font-size:15px; border:1px solid var(--admin-line); border-radius:8px; background:white; }
+.booking-help { font-size:14px; color:#655d52; margin:12px 0; line-height:1.5; }
+.booking-total { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; margin:14px 0; }
+.booking-total > div { border:1px solid var(--admin-line); border-radius:10px; padding:14px; background:#faf8f4; }
+.booking-total span { display:block; color:#655d52; font-size:14px; }
+.booking-total strong { display:block; font-size:20px; margin-top:6px; }
+.booking-table { min-width:580px; font-size:16px; }
+.booking-table th { font-size:14px; color:#544b40; }
+.booking-table td { padding:12px 14px; }
+.booking-month-button { border:0; background:none; color:var(--admin-accent); font-size:16px; font-weight:750; cursor:pointer; padding:6px 12px; text-decoration:underline; }
+.booking-count { display:flex; align-items:center; gap:12px; min-width:110px; }
+.booking-count strong { min-width:38px; white-space:nowrap; }
+.booking-count .admin-monthly-track { flex:1; min-width:32px; height:10px; }
+.booking-selected { background:#fff5e9; }
+@media (max-width:760px) { .booking-total { grid-template-columns:repeat(2,minmax(0,1fr)); } .booking-total strong { font-size:17px; } }

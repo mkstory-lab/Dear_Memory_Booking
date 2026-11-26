@@ -3,7 +3,8 @@ import { amounts, project, remainingBalance, type Event, type State } from '@/li
 import { ownerTotals, projectBuddy } from '@/lib/buddy/ledger';
 import { projectStaff, publicStaff } from '@/lib/admin/staff';
 import type { ContractFormData } from '@/types/contract';
-import { DELIVERY_KEYS, type DeliveryDates } from './delivery';
+import { DELIVERY_KEYS, seoulDay, type DeliveryDates } from './delivery';
+import { legacyBookingDates } from './legacyBookingDates';
 
 export const CUSTOMER_STAGES = [
   '계약', '사전안내', '촬영', '촬영완료', '사진 셀렉', '보정', '수정요청', '앨범제작', '출고완료',
@@ -33,6 +34,7 @@ export type AdminContract = {
   balanceConfirmedAt?: string;
   deliveryDates: DeliveryDates;
   sentAt?: string;
+  bookingDate?: string;
   createdAt: string;
   updatedAt: string;
   status: 'active' | 'completed' | 'cancelled';
@@ -189,6 +191,7 @@ export function projectAdminCrm(events: Event[]): AdminCrmSnapshot {
       balanceConfirmedAt: balanceEvent?.at,
       deliveryDates,
       sentAt: contract.sentAt,
+      bookingDate: legacyBookingDates[contract.id]?.day || (!contract.id.startsWith('drive_') && contract.sentAt && Number.isFinite(Date.parse(contract.sentAt)) ? seoulDay(contract.sentAt) : undefined),
       createdAt: eventDate(registered),
       updatedAt: meta.updatedAt > eventDate(lastContractEvent) ? meta.updatedAt : eventDate(lastContractEvent),
       status: contract.status,
