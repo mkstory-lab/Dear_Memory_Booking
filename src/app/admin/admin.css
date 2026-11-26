@@ -101,13 +101,19 @@
 .delivery-tile small { display:block; margin-top:6px; color:var(--admin-muted); font-size:11px; }
 .delivery-tile .delivery-late { color:#a34539; font-weight:700; }
 .delivery-note { margin:12px 0; color:var(--admin-muted); font-size:12px; }
-.delivery-table td { vertical-align:top; min-width:145px; }
-.delivery-table td:first-child { min-width:190px; }
-.delivery-cell { display:grid; justify-items:start; gap:4px; }
-.delivery-cell .admin-button { min-height:28px; padding:0 9px; margin-top:4px; font-size:11px; }
+.delivery-table { font-size:16px; line-height:1.55; min-width:1010px; }
+.delivery-table th { font-size:16px; font-weight:750; color:#544b40; padding:16px 18px; }
+.delivery-table td { vertical-align:top; min-width:165px; padding:20px 18px; }
+.delivery-table td:first-child { min-width:230px; }
+.delivery-table td:first-child strong { font-size:18px; font-weight:750; }
+.delivery-table td small { font-size:15px; line-height:1.55; color:#655d52; margin-top:5px; }
+.delivery-table .admin-badge { font-size:15px; min-height:32px; padding:3px 12px; }
+.delivery-table td a { font-size:15px; }
+.delivery-cell { display:grid; justify-items:start; gap:7px; }
+.delivery-cell .admin-button { min-height:36px; padding:0 12px; margin-top:4px; font-size:14px; }
 .delivery-edit { display:flex; flex-wrap:wrap; gap:4px; }
-.delivery-edit input { font-size:12px; border:1px solid var(--admin-line); border-radius:6px; padding:4px; max-width:135px; }
-.delivery-undo { background:none; border:0; color:var(--admin-muted); font-size:11px; cursor:pointer; padding:3px 0; }
+.delivery-edit input { font-size:15px; border:1px solid var(--admin-line); border-radius:6px; padding:4px; max-width:160px; }
+.delivery-undo { background:none; border:0; color:#655d52; font-size:14px; cursor:pointer; padding:3px 0; }
 @media (max-width: 760px) { .delivery-summary { grid-template-columns:repeat(2,minmax(0,1fr)); } .delivery-tile { padding:12px; } }
 @media (max-width: 1180px) { .admin-stats { grid-template-columns: repeat(3, minmax(0,1fr)); } .admin-grid { grid-template-columns: 1fr; } }
 @media (max-width: 760px) {
