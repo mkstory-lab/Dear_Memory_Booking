@@ -1,4 +1,5 @@
-import { randomUUID } from 'node:crypto';
+import { createHmac, randomUUID } from 'node:crypto';
+import { recoverable, recoveryEvents, type OriginalRows } from '@/lib/admin/recoverMetadata';
 import { NextRequest, NextResponse } from 'next/server';
 import { CUSTOMER_STAGES, projectAdminCrm } from '@/lib/admin/crm';
 import { SESSION_COOKIE, sameOrigin, verifySession } from '@/lib/referrals/adminAuth';
@@ -7,6 +8,7 @@ import { projectStaff } from '@/lib/admin/staff';
 import { referralSettings, referralStore } from '@/lib/referrals/server';
 
 export const dynamic = 'force-dynamic';
+export const maxDuration = 60;
 
 const responseHeaders = { 'Cache-Control': 'no-store' };
 
@@ -55,6 +57,36 @@ export async function POST(request: NextRequest) {
     if (!command) throw new Error('작업 내용을 확인해 주세요.');
     const at = new Date().toISOString();
     const store = referralStore();
+
+    if (command.type === 'recover_imported_metadata') {
+      if (!Array.isArray(command.contractIds) || command.contractIds.length < 1 || command.contractIds.length > 4) throw new Error('복구 대상은 한 번에 1~4건으로 지정해 주세요.');
+      const ids = [...new Set(command.contractIds.map(contractId))];
+      const candidates = (await snapshot()).contracts.filter(c => ids.includes(c.id) && recoverable(c));
+      const {secret,url} = referralSettings();
+      const originals = await Promise.all(candidates.map(async c => {
+        try {
+          const body = JSON.stringify({operation:'read_original',timestamp:Date.now(),folderUrl:c.driveFolderUrl,contractNumber:c.number});
+          const res = await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'revise_contract',payload:{body,signature:createHmac('sha256',secret).update(body).digest('hex')}}),cache:'no-store',signal:AbortSignal.timeout(20000)});
+          const result = await res.json();
+          if (!res.ok || !result.success || !result.rows || typeof result.rows !== 'object') throw new Error('원본 엑셀 조회 실패');
+          return {contractId:c.id,number:c.number,rows:result.rows as OriginalRows};
+        } catch { return {contractId:c.id,number:c.number,error:'원본 엑셀 조회 실패'}; }
+      }));
+      const report = await store.transaction(history => {
+        const events: Event[] = [];
+        const result: Array<{number:string; fields:string[]; error?:string}> = [];
+        for (const source of originals) {
+          if (!source.rows) {result.push({number:source.number,fields:[],error:source.error});continue;}
+          try {
+            const next = recoveryEvents([...history,...events],source.contractId,source.rows,{requestId:id,actor:user,at});
+            events.push(...next);
+            result.push({number:source.number,fields:Object.keys(next.find(e=>e.type==='crm_import_metadata_recovered')?.data.patch || {})});
+          } catch (e) { result.push({number:source.number,fields:[],error:e instanceof Error ? e.message : '원본 대조 실패'}); }
+        }
+        return {events,result};
+      });
+      return NextResponse.json({...await snapshot(),recoveryReport:report},{headers:responseHeaders});
+    }
 
     await store.transaction(history => {
       if (command.type === 'create_manual_schedule') {

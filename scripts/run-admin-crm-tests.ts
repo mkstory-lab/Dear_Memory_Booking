@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { findBuddyOwners } from '../src/lib/admin/buddySearch';
+import { recoveryEvents } from '../src/lib/admin/recoverMetadata';
 import { projectAdminCrm } from '../src/lib/admin/crm';
 import type { Event } from '../src/lib/referrals/ledger';
 
@@ -54,4 +55,25 @@ test('registered buddy owner is searchable before any referrals exist', () => {
     assert.equal(findBuddyOwners(snapshot.buddyOwners, query)[0]?.id, 'owner1');
   }
   assert.equal(findBuddyOwners(snapshot.buddyOwners, '존재하지않음').length, 0);
+});
+
+test('Drive metadata repair fills blanks without changing money or existing manual values', () => {
+ const id='drive_DM_test', number='DM-test';
+ const history:Event[]=[
+  event('import','contract_registered',{id,coupleId:id,number,groom:'김신랑',bride:'이신부',weddingDate:'2027-05-01',status:'active',total:1200000,deposit:300000,paid:300000,driveFolderUrl:'https://drive.google.com/drive/folders/test',crmData:{weddingHall:'기존 홀'}}),
+  event('edit','crm_customer_updated',{contractId:id,stage:'사전안내',memo:'보존',weddingVenue:''}),
+ ];
+ const rows={'계약번호':number,'신랑 성명':'김신랑','신부 성명':'이신부','예식일':'2027-05-01','예식장':'원본 웨딩홀','홀':'다른 홀','예식시간':'12:30','신랑 연락처':'010-0000-0000','고객 이메일':'test@example.com','선택상품':'화보형','추가옵션':'2인 촬영'};
+ const ctx={requestId:'repair-test',actor:'test',at:'2026-11-26T00:00:00Z'};
+ const events=recoveryEvents(history,id,rows,ctx);
+ const result=projectAdminCrm([...history,...events]).contracts[0];
+ assert.equal(result.weddingVenue,'원본 웨딩홀');
+ assert.equal(result.weddingHall,'기존 홀');
+ assert.equal(result.weddingTime,'12:30');
+ assert.equal(result.productId,'album_plus');
+ assert.deepEqual(result.optionIds,['second_shooter']);
+ assert.equal(result.total,1200000);assert.equal(result.paid,300000);assert.equal(result.balance,900000);
+ assert.equal(result.memo,'보존');assert.equal(result.stage,'사전안내');
+ assert.equal(recoveryEvents([...history,...events],id,rows,ctx).length,0);
+ assert.throws(()=>recoveryEvents(history,id,{...rows,'신부 성명':'다름'},ctx));
 });

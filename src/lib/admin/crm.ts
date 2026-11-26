@@ -96,7 +96,17 @@ function contractData(events: Event[], state: State, contractId: string): Partia
 function crmMeta(events: Event[], contractId: string): CrmMeta {
   const meta: CrmMeta = { updatedAt: new Date(0).toISOString() };
   for (const event of events) {
-    if (event.type !== 'crm_customer_updated' || event.data?.contractId !== contractId) continue;
+    if (event.data?.contractId !== contractId) continue;
+    if (event.type === 'crm_import_metadata_recovered') {
+      // Restore a field masked by an earlier empty manual edit, without overriding existing values.
+      for (const field of ['groomPhone','bridePhone','weddingTime','weddingVenue','weddingHall'] as const) {
+        const value = event.data.patch?.[field];
+        if (meta[field] !== undefined && !meta[field]?.trim() && typeof value === 'string' && value.trim()) meta[field] = value;
+      }
+      meta.updatedAt = event.at;
+      continue;
+    }
+    if (event.type !== 'crm_customer_updated') continue;
     if (CUSTOMER_STAGES.includes(event.data.stage)) meta.stage = event.data.stage;
     if (typeof event.data.memo === 'string') meta.memo = event.data.memo;
     if (typeof event.data.groomPhone === 'string') meta.groomPhone = event.data.groomPhone;
@@ -158,13 +168,13 @@ export function projectAdminCrm(events: Event[]): AdminCrmSnapshot {
       number: contract.number,
       groom: contract.groom,
       bride: contract.bride,
-      groomPhone: meta.groomPhone ?? data.groomPhone ?? contract.crmData?.groomPhone ?? '',
-      bridePhone: meta.bridePhone ?? data.bridePhone ?? contract.crmData?.bridePhone ?? '',
+      groomPhone: meta.groomPhone ?? (data.groomPhone || contract.crmData?.groomPhone || ''),
+      bridePhone: meta.bridePhone ?? (data.bridePhone || contract.crmData?.bridePhone || ''),
       email: data.email || contract.crmData?.email || '',
       weddingDate: contract.weddingDate,
-      weddingTime: meta.weddingTime ?? data.weddingTime ?? contract.crmData?.weddingTime ?? '',
-      weddingVenue: meta.weddingVenue ?? data.weddingVenue ?? contract.crmData?.weddingVenue ?? '',
-      weddingHall: meta.weddingHall ?? data.weddingHall ?? contract.crmData?.weddingHall ?? '',
+      weddingTime: meta.weddingTime ?? (data.weddingTime || contract.crmData?.weddingTime || ''),
+      weddingVenue: meta.weddingVenue ?? (data.weddingVenue || contract.crmData?.weddingVenue || ''),
+      weddingHall: meta.weddingHall ?? (data.weddingHall || contract.crmData?.weddingHall || ''),
       productId: data.productId || contract.crmData?.productId || '',
       optionIds: data.optionIds || contract.crmData?.optionIds || [],
       total: contract.total,
