@@ -20,6 +20,8 @@ function doPost(e) {
       return createJsonResponse({ success: true, data: dmReferralJournal_(payload) });
     } else if (action === "submit_contract") {
       return handleSubmitContract(payload);
+    } else if (action === "revise_contract") {
+      return dmReviseContract_(payload);
     } else if (action === "approve_and_send") {
       return handleApproveAndSend(payload);
     } else if (action === "validate_partner_code") {
@@ -789,4 +791,68 @@ function dmVerifyCalendar_(event, spec) {
       event.getTitle() !== spec.title || event.getEmailReminders().length || event.getPopupReminders().length) {
     throw new Error('기존 일정의 날짜·제목·알림을 확인해 주세요. 임의 변경하지 않았습니다.');
   }
+}
+
+// Admin-only signed revision action; original submit/approve paths are unchanged.
+function dmReviseContract_(request) {
+  const props = PropertiesService.getScriptProperties();
+  const secret = props.getProperty('DM_REFERRAL_SECRET');
+  if (!secret || secret.length < 32 || !request || typeof request.body !== 'string' ||
+      request.body.length > 5500000 || !/^[a-f0-9]{64}$/.test(request.signature || '')) throw new Error('수정 요청 인증 실패');
+  const expected = Utilities.computeHmacSha256Signature(request.body, secret, Utilities.Charset.UTF_8)
+    .map(function(b){return ('0'+((b+256)%256).toString(16)).slice(-2);}).join('');
+  let mismatch=0;
+  for(let i=0;i<expected.length;i++) mismatch |= expected.charCodeAt(i)^request.signature.charCodeAt(i);
+  if(mismatch) throw new Error('수정 요청 인증 실패');
+  const p=JSON.parse(request.body);
+  if(!Number.isSafeInteger(p.timestamp)||Math.abs(Date.now()-p.timestamp)>120000) throw new Error('수정 요청 만료');
+  if(p.operation==='probe') return createJsonResponse({success:true,revisionReady:true});
+  if(p.operation!=='send'||!/^[a-zA-Z0-9_-]{1,100}$/.test(p.contractId||'')||!/^[0-9a-f-]{36}$/.test(p.revisionId||'')||
+      !Number.isSafeInteger(p.revision)||p.revision<1||!/^DM-[A-Za-z0-9-]+$/.test(p.contractNumber||'')) throw new Error('수정 요청 형식 확인 필요');
+  const d=p.data;
+  if(!d||!d.email||!d.groomName||!d.brideName||!d.weddingDate) throw new Error('계약 정보 확인 필요');
+  const match=String(p.folderUrl||'').match(/^https:\/\/drive\.google\.com\/.*\/folders\/([\w-]+)|^https:\/\/drive\.google\.com\/drive\/folders\/([\w-]+)/);
+  const folderId=match&&(match[1]||match[2]);
+  if(!folderId) throw new Error('기존 계약 폴더 확인 필요');
+  const folder=DriveApp.getFolderById(folderId);
+  if(folder.isTrashed()) throw new Error('원본 계약 폴더가 삭제되었습니다.');
+  const files=folder.getFiles(); let original=false;
+  while(files.hasNext()){const file=files.next();if(!file.isTrashed()&&file.getName().indexOf(p.contractNumber+'_')===0&&/\.pdf$/i.test(file.getName())){original=true;break;}}
+  if(!original) throw new Error('원본 PDF 확인 필요');
+  function decode(value,mime,name){
+    if(typeof value!=='string'||!value) throw new Error('첨부파일 누락');
+    const bytes=Utilities.base64Decode(value.substring(value.indexOf(',')+1).replace(/\s/g,''));
+    if(!bytes.length) throw new Error('첨부파일 누락');
+    if(mime==='application/pdf'&&(bytes[0]!==37||bytes[1]!==80||bytes[2]!==68||bytes[3]!==70)) throw new Error('PDF 형식 오류');
+    if(mime==='image/jpeg'&&((bytes[0]+256)%256!==255||(bytes[1]+256)%256!==216)) throw new Error('JPG 형식 오류');
+    return Utilities.newBlob(bytes,mime,name);
+  }
+  const name='수정'+p.revision+'차_'+p.contractNumber+'_촬영계약서';
+  const pdf=decode(p.pdfBase64,'application/pdf',name+'.pdf');
+  const jpg=decode(p.jpgBase64,'image/jpeg',name+'.jpg');
+  const rows=getContractExcelRows(d,p.contractNumber);
+  const total=rows.find(function(row){return row[0]==='최종 계약금액';})[1];
+  if(!Number.isSafeInteger(p.deposit)||p.deposit<0||p.deposit>total||!Number.isSafeInteger(p.paid)||p.paid<0||!Number.isSafeInteger(p.balance)||p.balance<0) throw new Error('수정 정산 정보 확인 필요');
+  rows.find(function(row){return row[0]==='계약금';})[1]=p.deposit;
+  rows.find(function(row){return row[0]==='잔금';})[1]=Math.max(0,total-p.deposit);
+  // Keep the existing editable workbook layout and add a version-specific filename.
+  const excel=createContractExcelFromRows(rows,name+'.xlsx',pdf);
+  const key='DM_REV_'+p.revisionId;
+  const lock=LockService.getScriptLock(); lock.waitLock(20000);
+  try {
+    const prior=props.getProperty(key);
+    if(prior){const state=JSON.parse(prior);if(state.result)return createJsonResponse(state.result);throw new Error('이전 발송 결과 확인 필요');}
+    props.setProperty(key,JSON.stringify({started:true}));
+  } finally {lock.releaseLock();}
+  // Originals are never replaced, and the existing calendar import ignores non-DM filenames.
+  const revised=folder.createFolder('수정계약서_'+p.revision+'차_'+p.revisionId.slice(0,8));
+  revised.createFile(pdf); revised.createFile(jpg); const excelFile=revised.createFile(excel);
+  const subject='[DEAR MEMORY] 수정 본식스냅 촬영 계약서 ('+d.groomName+' · '+d.brideName+' 고객님)';
+  const message=['안녕하세요, 디어메모리입니다.','협의된 변경 사항을 반영한 '+p.revision+'차 수정 계약서를 첨부드립니다.','계약번호: '+p.contractNumber,'기존 계약금 및 입금 내역은 유지됩니다. 이미 입금하신 계약금을 다시 입금하실 필요는 없습니다.','확인된 입금액: '+p.paid.toLocaleString('ko-KR')+'원 / 변경 후 정산 잔금: '+p.balance.toLocaleString('ko-KR')+'원','변경된 계약서 내용을 확인 부탁드립니다. 감사합니다.'].join('\n\n');
+  GmailApp.sendEmail(d.email,subject,message,{name:'DEAR MEMORY',attachments:[pdf]});
+  let repSent=false;
+  try {GmailApp.sendEmail(REP_EMAIL,subject,message,{name:'DEAR MEMORY',attachments:[pdf]});repSent=true;} catch(err){Logger.log('수정 대표 메일 확인 필요');}
+  const result={success:true,customerEmailSent:true,representativeEmailSent:repSent,contractNumber:p.contractNumber,driveSaved:true,excelSaved:true,revisionFolderUrl:revised.getUrl(),excelFileUrl:excelFile.getUrl()};
+  props.setProperty(key,JSON.stringify({result:result}));
+  return createJsonResponse(result);
 }

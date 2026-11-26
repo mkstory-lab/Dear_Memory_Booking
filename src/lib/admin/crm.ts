@@ -78,6 +78,8 @@ function latest(events: Event[], type: string, contractId: string) {
 }
 
 function contractData(events: Event[], state: State, contractId: string): Partial<ContractFormData> {
+  const revision = latest(events, 'contract_revision_completed', contractId);
+  if (revision?.data?.finalData) return revision.data.finalData as ContractFormData;
   const delivery = latest(events, 'contract_delivery_started', contractId);
   if (delivery?.data?.finalData) return delivery.data.finalData as ContractFormData;
   const contract = state.contracts[contractId];

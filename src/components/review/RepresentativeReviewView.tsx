@@ -20,6 +20,9 @@ import { ContractDocument } from '@/components/pdf/ContractDocument';
 import { exportContractToPdfAndJpg, triggerFileDownload } from '@/lib/pdfGenerator';
 
 interface RepresentativeReviewViewProps {
+  adminRevision?: number;
+  adminRevisionSettlement?: { paid: number; deposit: number; benefitDeduction: number; legacyPartnerDiscount: boolean };
+  onRevisionSent?: () => void;
   token: string;
   contractId: string;
   initialData: ContractFormData;
@@ -175,6 +178,9 @@ const ManualAdjustmentControl: React.FC<ManualAdjustmentControlProps> = ({
 export const RepresentativeReviewView: React.FC<RepresentativeReviewViewProps> = ({
   token,
   contractId,
+  adminRevision,
+  adminRevisionSettlement,
+  onRevisionSent,
   initialData,
   initialPricing,
   isAlreadySent: initialAlreadySent,
@@ -182,7 +188,7 @@ export const RepresentativeReviewView: React.FC<RepresentativeReviewViewProps> =
   contractNumber: initialContractNumber,
 }) => {
   const [formData, setFormData] = useState<ContractFormData>(initialData);
-  const [isEditing, setIsEditing] = useState(false);
+  const [isEditing, setIsEditing] = useState(adminRevision !== undefined);
   const [isAlreadySent, setIsAlreadySent] = useState(initialAlreadySent);
   const [sentAt, setSentAt] = useState(initialSentAt);
   const [contractNumber, setContractNumber] = useState(initialContractNumber || 'DM-TEMP');
@@ -220,12 +226,13 @@ export const RepresentativeReviewView: React.FC<RepresentativeReviewViewProps> =
             }
           : undefined,
     });
-    setPricing(updatedPricing);
-  }, [formData, manualAmount, manualReason]);
+    setPricing(adminRevisionSettlement ? { ...updatedPricing, depositAmount: adminRevisionSettlement.deposit, balanceAmount: Math.max(0, updatedPricing.contractTotal-adminRevisionSettlement.deposit) } : updatedPricing);
+  }, [formData, manualAmount, manualReason, adminRevisionSettlement]);
 
   // 최종 계약서 발송 핸들러 (POST /api/approve-and-send)
   const handleApproveAndSend = async () => {
     if (isAlreadySent || isSubmitting) return;
+    if (adminRevision !== undefined && !window.confirm('수정 계약서를 고객과 대표에게 발송하시겠습니까? 기존 계약서는 보존됩니다.')) return;
 
     setIsSubmitting(true);
     setErrorMessage(null);
@@ -243,11 +250,12 @@ export const RepresentativeReviewView: React.FC<RepresentativeReviewViewProps> =
       }
 
       // 2. 대표 최종 발송 API 호출 (POST)
-      const res = await fetch('/api/approve-and-send', {
+      const res = await fetch(adminRevision === undefined ? '/api/approve-and-send' : '/api/referrals/admin/contract-revision', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           token,
+          ...(adminRevision === undefined ? {} : { contractId, expectedRevision: adminRevision }),
           updatedData: {
             ...formData,
             manualAdjustment:
@@ -273,6 +281,7 @@ export const RepresentativeReviewView: React.FC<RepresentativeReviewViewProps> =
       setIsAlreadySent(true);
       setSentAt(new Date().toISOString());
       setSendSuccess(true);
+      if (adminRevision !== undefined) onRevisionSent?.();
       if (result.warning) setErrorMessage(result.warning);
     } catch (err: any) {
       setErrorMessage(err.message || '발송 처리 중 오류가 발생했습니다.');
@@ -317,10 +326,10 @@ export const RepresentativeReviewView: React.FC<RepresentativeReviewViewProps> =
               DEAR MEMORY
             </p>
             <h2 className="text-2xl font-serif font-bold text-[#322A1B] mt-1">
-              최종 계약서 발송 완료
+              {adminRevision === undefined ? '최종 계약서 발송 완료' : '수정 계약서 발송 완료'}
             </h2>
             <p className="text-xs sm:text-sm text-[#6E5C3D] mt-2">
-              고객(<strong className="text-[#322A1B]">{formData.email}</strong>) 및 대표 메일로 계약서 PDF가 정상 발송되었습니다.
+              고객(<strong className="text-[#322A1B]">{formData.email}</strong>){adminRevision === undefined ? ' 및 대표 메일로 계약서 PDF가 정상 발송되었습니다.' : '에게 수정 계약서 PDF가 발송되었습니다.'}
             </p>
           </div>
 
@@ -343,6 +352,7 @@ export const RepresentativeReviewView: React.FC<RepresentativeReviewViewProps> =
             </div>
           </div>
 
+          {adminRevision !== undefined && errorMessage && <p className="text-xs text-red-700">{errorMessage}</p>}
           <div className="pt-2">
             <button
               type="button"
@@ -426,6 +436,7 @@ export const RepresentativeReviewView: React.FC<RepresentativeReviewViewProps> =
                 <input
                   type="text"
                   value={formData.groomName}
+                  disabled={adminRevision !== undefined}
                   onChange={(e) => setFormData({ ...formData, groomName: e.target.value })}
                   className="w-full h-9 px-2.5 bg-white border border-[#DDD1BD] rounded-lg text-xs"
                 />
@@ -454,6 +465,7 @@ export const RepresentativeReviewView: React.FC<RepresentativeReviewViewProps> =
                 <input
                   type="text"
                   value={formData.brideName}
+                  disabled={adminRevision !== undefined}
                   onChange={(e) => setFormData({ ...formData, brideName: e.target.value })}
                   className="w-full h-9 px-2.5 bg-white border border-[#DDD1BD] rounded-lg text-xs"
                 />
@@ -482,6 +494,7 @@ export const RepresentativeReviewView: React.FC<RepresentativeReviewViewProps> =
                 <input
                   type="email"
                   value={formData.email}
+                  disabled={adminRevision !== undefined}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   className="w-full h-9 px-2.5 bg-white border border-[#DDD1BD] rounded-lg font-medium text-xs"
                 />
@@ -495,6 +508,7 @@ export const RepresentativeReviewView: React.FC<RepresentativeReviewViewProps> =
                 <input
                   type="date"
                   value={formData.weddingDate}
+                  disabled={adminRevision !== undefined}
                   onChange={(e) => setFormData({ ...formData, weddingDate: e.target.value })}
                   className="w-full h-9 px-2.5 bg-white border border-[#DDD1BD] rounded-lg text-xs"
                 />
@@ -504,6 +518,7 @@ export const RepresentativeReviewView: React.FC<RepresentativeReviewViewProps> =
                 <input
                   type="time"
                   value={formData.weddingTime}
+                  disabled={adminRevision !== undefined}
                   onChange={(e) => setFormData({ ...formData, weddingTime: e.target.value })}
                   className="w-full h-9 px-2.5 bg-white border border-[#DDD1BD] rounded-lg"
                 />
@@ -513,6 +528,7 @@ export const RepresentativeReviewView: React.FC<RepresentativeReviewViewProps> =
                 <input
                   type="text"
                   value={formData.weddingVenue}
+                  disabled={adminRevision !== undefined}
                   onChange={(e) => setFormData({ ...formData, weddingVenue: e.target.value })}
                   className="w-full h-9 px-2.5 bg-white border border-[#DDD1BD] rounded-lg"
                 />
@@ -522,6 +538,7 @@ export const RepresentativeReviewView: React.FC<RepresentativeReviewViewProps> =
                 <input
                   type="text"
                   value={formData.weddingHall}
+                  disabled={adminRevision !== undefined}
                   onChange={(e) => setFormData({ ...formData, weddingHall: e.target.value })}
                   className="w-full h-9 px-2.5 bg-white border border-[#DDD1BD] rounded-lg"
                 />
@@ -597,6 +614,7 @@ export const RepresentativeReviewView: React.FC<RepresentativeReviewViewProps> =
                 <input
                   type="checkbox"
                   checked={formData.partnerDiscount}
+                  disabled={adminRevision !== undefined}
                   onChange={(e) => setFormData({ ...formData, partnerDiscount: e.target.checked })}
                   className="rounded"
                 />
@@ -607,6 +625,7 @@ export const RepresentativeReviewView: React.FC<RepresentativeReviewViewProps> =
                   type="text"
                   placeholder="짝꿍 성함"
                   value={formData.partnerName}
+                  disabled={adminRevision !== undefined}
                   onChange={(e) => setFormData({ ...formData, partnerName: e.target.value })}
                   className="w-full h-8 px-2 bg-white border border-[#DDD1BD] rounded text-xs"
                 />
@@ -778,6 +797,13 @@ export const RepresentativeReviewView: React.FC<RepresentativeReviewViewProps> =
             </div>
           </div>
 
+          {adminRevisionSettlement && (
+            <div className="p-3 bg-[#F5F1EA] rounded-xl text-xs space-y-2">
+              <div className="flex justify-between"><span>기존 확인 입금액</span><strong>{formatKRW(adminRevisionSettlement.paid)}</strong></div>
+              <div className="flex justify-between"><span>변경 후 정산 잔금</span><strong>{formatKRW(Math.max(0, pricing.contractTotal + (formData.partnerDiscount && !adminRevisionSettlement.legacyPartnerDiscount ? 50000 : 0) - adminRevisionSettlement.paid - adminRevisionSettlement.benefitDeduction))}</strong></div>
+              <p>입금 기록과 기존 추천 혜택은 변경되지 않습니다.</p>
+            </div>
+          )}
           {/* 후기 이벤트 요약 */}
           {pricing.futureCashbackTotal > 0 && (
             <div className="p-3 bg-[#F5F1EA] border border-[#DDD1BD] rounded-xl text-xs flex justify-between items-center text-[#6E5C3D]">
@@ -884,7 +910,7 @@ export const RepresentativeReviewView: React.FC<RepresentativeReviewViewProps> =
             </div>
           ) : (
             <>
-              <span>최종 계약서 발송하기</span>
+              <span>{adminRevision === undefined ? '최종 계약서 발송하기' : '수정 계약서 재발송하기'}</span>
               <Send className="w-4 h-4" />
             </>
           )}
