@@ -807,6 +807,7 @@ function dmReviseContract_(request) {
   const p=JSON.parse(request.body);
   if(!Number.isSafeInteger(p.timestamp)||Math.abs(Date.now()-p.timestamp)>120000) throw new Error('수정 요청 만료');
   if(p.operation==='probe') return createJsonResponse({success:true,revisionReady:true});
+  if(p.operation==='read_original') return createJsonResponse({success:true,rows:dmReadOriginalContractRows_(p)});
   if(p.operation!=='send'||!/^[a-zA-Z0-9_-]{1,100}$/.test(p.contractId||'')||!/^[0-9a-f-]{36}$/.test(p.revisionId||'')||
       !Number.isSafeInteger(p.revision)||p.revision<1||!/^DM-[A-Za-z0-9-]+$/.test(p.contractNumber||'')) throw new Error('수정 요청 형식 확인 필요');
   const d=p.data;
@@ -855,4 +856,28 @@ function dmReviseContract_(request) {
   const result={success:true,customerEmailSent:true,representativeEmailSent:repSent,contractNumber:p.contractNumber,driveSaved:true,excelSaved:true,revisionFolderUrl:revised.getUrl(),excelFileUrl:excelFile.getUrl()};
   props.setProperty(key,JSON.stringify({result:result}));
   return createJsonResponse(result);
+}
+// Read only the original structured Excel in the registered contract folder.
+function dmReadOriginalContractRows_(p) {
+  if(!/^DM-[A-Za-z0-9-]+$/.test(p.contractNumber||''))throw new Error('계약번호 확인 필요');
+  const m=String(p.folderUrl||'').match(/^https:\/\/drive\.google\.com\/drive\/folders\/([\w-]+)/);
+  if(!m)throw new Error('원본 계약 폴더 확인 필요');
+  const folder=DriveApp.getFolderById(m[1]);
+  if(folder.isTrashed())throw new Error('원본 계약 폴더가 삭제되었습니다.');
+  const it=folder.getFiles(), candidates=[];
+  while(it.hasNext()){const f=it.next();if(!f.isTrashed()&&f.getName().indexOf(p.contractNumber+'_')===0&&/\.xlsx$/i.test(f.getName()))candidates.push(f);}
+  if(candidates.length!==1)throw new Error('원본 엑셀 계약서가 없거나 여러 개입니다. 원본 파일을 확인해 주세요.');
+  const xml=Utilities.unzip(candidates[0].getBlob().setContentType('application/zip')).find(function(b){return b.getName()==='xl/worksheets/sheet3.xml';});
+  if(!xml)throw new Error('원본 엑셀에 편집용 계약정보가 없습니다.');
+  const sheet=XmlService.parse(xml.getDataAsString()).getRootElement(), ns=sheet.getNamespace();
+  const result={};
+  function value(cell){if(!cell)return '';const inline=cell.getChild('is',ns);if(inline)return inline.getChildren('t',ns).map(function(t){return t.getText();}).join('');const v=cell.getChild('v',ns);if(!v)return '';if(cell.getAttribute('t')&&cell.getAttribute('t').getValue()==='s')throw new Error('원본 계약정보 형식 확인 필요');return v.getText();}
+  sheet.getChild('sheetData',ns).getChildren('row',ns).forEach(function(row){
+    const cells=row.getChildren('c',ns);
+    const a=cells.find(function(c){return /^A\d+$/.test(c.getAttribute('r').getValue());});
+    const b=cells.find(function(c){return /^B\d+$/.test(c.getAttribute('r').getValue());});
+    const key=value(a);if(key)result[key]=value(b);
+  });
+  if(result['계약번호']!==p.contractNumber)throw new Error('원본 계약번호 불일치');
+  return result;
 }

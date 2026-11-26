@@ -50,3 +50,15 @@ test('GAS revision authentication, versioned files, and idempotent delivery with
   const result=ctx.dmReviseContract_(request);assert.equal(result.customerEmailSent,true);assert.equal(result.representativeEmailSent,true);assert.equal(files.length,3);assert.ok(files.every(n=>n.startsWith('수정1차_')));assert.equal(mails.length,2);
   assert.equal(ctx.dmReviseContract_(request).customerEmailSent,true);assert.equal(folderCount,1);assert.equal(mails.length,2);
 });
+test('Drive-imported contract can be edited from structured original with existing discount and payment',async()=>{
+  const {dataFromContractRows}=await import('../src/lib/admin/importedContractRows');
+  const rows={'계약번호':number,'신랑 성명':data.groomName,'신부 성명':data.brideName,'신랑 연락처':data.groomPhone,'신부 연락처':data.bridePhone,'고객 이메일':data.email,'예식일':'2027-09-05','예식시간':'15:30','예식장':'테스트홀','홀':'A홀','선택상품':'실속형','추가옵션':'선택 없음','짝꿍 할인':'예','짝꿍 정보':'test','일요일 예식 할인':'예','사진 공개 동의':'예','약관 동의':'예','대표 조정금액':'0','최종 계약금액':'1000000'};
+  const original=dataFromContractRows(rows,number);
+  const events=[event('contract_registered',{id:'drive_c1',coupleId:'drive_c1',number,groom:data.groomName,bride:data.brideName,weddingDate:original.weddingDate,status:'active',total:1000000,deposit:300000,paid:300000,driveFolderUrl:folder})];
+  const v=revisionView(events,'drive_c1',original);
+  assert.equal(v.legacyPartnerDiscount,true);
+  assert.equal(v.balance,700000);
+  const next=validateRevision(v,{...v.data,productId:'album_plus'});
+  assert.equal(next.total,1200000);assert.equal(next.balance,900000);
+  assert.throws(()=>revisionView(events,'drive_c1',{...original,brideName:'wrong'}));
+});
